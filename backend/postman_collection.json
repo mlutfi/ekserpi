@@ -1,0 +1,1342 @@
+{
+	"info": {
+		"_postman_id": "hris-backend-api-collection",
+		"name": "HRIS Backend API",
+		"description": "API collection for HRIS Backend Application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "employee_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payroll_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the server is running"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth - HRIS",
+			"item": [
+				{
+					"name": "Login - HR Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"budi@hris.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as HR Admin"
+					},
+					"response": [
+						{
+							"name": "Login Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"budi@hris.com\",\n    \"password\": \"password123\"\n}"
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Login successful\",\n    \"data\": {\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"user\": {\n            \"id\": \"user-id-here\",\n            \"name\": \"Budi Santoso\",\n            \"email\": \"budi@hris.com\",\n            \"role\": \"HR_ADMIN\"\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login - Manager",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ani@hris.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as Manager"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Employee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"siti@hris.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as Employee"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get all employees with pagination"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": []
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Data retrieved successfully\",\n    \"data\": {\n        \"employees\": [\n            {\n                \"id\": \"emp-id-001\",\n                \"userId\": \"user-id-001\",\n                \"nip\": \"EMP001\",\n                \"name\": \"Budi Santoso\",\n                \"email\": \"budi@hris.com\",\n                \"phone\": \"081234567890\",\n                \"address\": \"Jakarta\",\n                \"departmentId\": \"dept-id-001\",\n                \"departmentName\": \"Human Resources\",\n                \"positionId\": \"pos-id-001\",\n                \"positionName\": \"HR Manager\",\n                \"joinDate\": \"2024-01-15\",\n                \"status\": \"ACTIVE\",\n                \"basicSalary\": 15000000,\n                \"allowance\": 3000000\n            }\n        ],\n        \"total\": 8\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/employees/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "employee-id-here"
+								}
+							]
+						},
+						"description": "Get employee by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Employee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"user-id-here\",\n    \"nip\": \"EMP009\",\n    \"name\": \"John Doe\",\n    \"email\": \"john@hris.com\",\n    \"phone\": \"081234567899\",\n    \"address\": \"Bandung\",\n    \"departmentId\": \"dept-id-001\",\n    \"positionId\": \"pos-id-002\",\n    \"joinDate\": \"2024-06-01\",\n    \"basicSalary\": 8000000,\n    \"allowance\": 1500000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/employees",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"employees"
+							]
+						},
+						"description": "Create new employee"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "Check In - WFO (Success)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"workType\": \"WFO\",\n    \"photo\": \"https://storage.example.com/photos/checkin_001.jpg\",\n    \"latitude\": -6.2088,\n    \"longitude\": 106.8456,\n    \"officeLat\": -6.2088,\n    \"officeLong\": 106.8456,\n    \"officeRadius\": 200\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/checkin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"checkin"
+							]
+						},
+						"description": "Employee checks in from office (WFO)"
+					},
+					"response": [
+						{
+							"name": "Check In Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-001\",\n    \"workType\": \"WFO\",\n    \"photo\": \"https://storage.example.com/photos/checkin_001.jpg\",\n    \"latitude\": -6.2088,\n    \"longitude\": 106.8456,\n    \"officeLat\": -6.2088,\n    \"officeLong\": 106.8456,\n    \"officeRadius\": 200\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Check in successful\",\n    \"data\": {\n        \"id\": \"att-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"employeeName\": \"Budi Santoso\",\n        \"date\": \"2026-03-01\",\n        \"checkinTime\": \"08:55:00\",\n        \"checkinPhoto\": \"https://storage.example.com/photos/checkin_001.jpg\",\n        \"checkinLat\": -6.2088,\n        \"checkinLong\": 106.8456,\n        \"workType\": \"WFO\",\n        \"status\": \"PRESENT\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Check In - Late",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"workType\": \"WFO\",\n    \"photo\": \"https://storage.example.com/photos/checkin_002.jpg\",\n    \"latitude\": -6.2088,\n    \"longitude\": 106.8456\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/checkin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"checkin"
+							]
+						},
+						"description": "Employee checks in late (after 09:15)"
+					},
+					"response": [
+						{
+							"name": "Check In Late",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-002\",\n    \"workType\": \"WFO\",\n    \"photo\": \"https://storage.example.com/photos/checkin_002.jpg\",\n    \"latitude\": -6.2088,\n    \"longitude\": 106.8456\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Check in successful\",\n    \"data\": {\n        \"id\": \"att-id-002\",\n        \"employeeId\": \"emp-id-002\",\n        \"employeeName\": \"Rudi Hermawan\",\n        \"date\": \"2026-03-01\",\n        \"checkinTime\": \"09:30:00\",\n        \"workType\": \"WFO\",\n        \"status\": \"LATE\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Check In - Outside Radius",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"workType\": \"WFO\",\n    \"photo\": \"https://storage.example.com/photos/checkin_003.jpg\",\n    \"latitude\": -6.3000,\n    \"longitude\": 106.9000,\n    \"officeLat\": -6.2088,\n    \"officeLong\": 106.8456,\n    \"officeRadius\": 200\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/checkin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"checkin"
+							]
+						},
+						"description": "Employee checks in from outside office radius (>200m)"
+					},
+					"response": [
+						{
+							"name": "Check In Outside Radius",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-003\",\n    \"workType\": \"WFO\",\n    \"photo\": \"https://storage.example.com/photos/checkin_003.jpg\",\n    \"latitude\": -6.3000,\n    \"longitude\": 106.9000,\n    \"officeLat\": -6.2088,\n    \"officeLong\": 106.8456,\n    \"officeRadius\": 200\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Check in successful\",\n    \"data\": {\n        \"id\": \"att-id-003\",\n        \"employeeId\": \"emp-id-003\",\n        \"employeeName\": \"Dewi Lestari\",\n        \"date\": \"2026-03-01\",\n        \"checkinTime\": \"08:50:00\",\n        \"checkinRadius\": 15000,\n        \"workType\": \"WFO\",\n        \"status\": \"OUTSIDE_RADIUS\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Check In - WFH",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"workType\": \"WFH\",\n    \"photo\": \"https://storage.example.com/photos/checkin_004.jpg\",\n    \"latitude\": -6.9000,\n    \"longitude\": 107.6000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/checkin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"checkin"
+							]
+						},
+						"description": "Employee works from home (WFH)"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"photo\": \"https://storage.example.com/photos/checkout_001.jpg\",\n    \"latitude\": -6.2088,\n    \"longitude\": 106.8456\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/checkout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"checkout"
+							]
+						},
+						"description": "Employee checks out"
+					},
+					"response": [
+						{
+							"name": "Check Out Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-001\",\n    \"photo\": \"https://storage.example.com/photos/checkout_001.jpg\",\n    \"latitude\": -6.2088,\n    \"longitude\": 106.8456\n}"
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Check out successful\",\n    \"data\": {\n        \"id\": \"att-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"date\": \"2026-03-01\",\n        \"checkinTime\": \"08:55:00\",\n        \"checkoutTime\": \"17:05:00\",\n        \"workType\": \"WFO\",\n        \"status\": \"PRESENT\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Today's Attendance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/today",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"today"
+							]
+						},
+						"description": "Get all attendance records for today"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Late Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/late",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"late"
+							]
+						},
+						"description": "Get list of employees who are late today"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/history?employeeId={{employee_id}}&startDate=2026-01-01&endDate=2026-03-01",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"history"
+							],
+							"query": [
+								{
+									"key": "employeeId",
+									"value": "{{employee_id}}"
+								},
+								{
+									"key": "startDate",
+									"value": "2026-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2026-03-01"
+								}
+							]
+						},
+						"description": "Get attendance history for an employee"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Leave Requests",
+			"item": [
+				{
+					"name": "Request Leave - Annual",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"leaveType\": \"ANNUAL\",\n    \"startDate\": \"2026-04-01\",\n    \"endDate\": \"2026-04-05\",\n    \"reason\": \"Family vacation to Bali\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"leave"
+							]
+						},
+						"description": "Employee requests annual leave"
+					},
+					"response": [
+						{
+							"name": "Leave Request Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-001\",\n    \"leaveType\": \"ANNUAL\",\n    \"startDate\": \"2026-04-01\",\n    \"endDate\": \"2026-04-05\",\n    \"reason\": \"Family vacation to Bali\"\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Leave request submitted successfully\",\n    \"data\": {\n        \"id\": \"leave-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"employeeName\": \"Budi Santoso\",\n        \"leaveType\": \"ANNUAL\",\n        \"startDate\": \"2026-04-01\",\n        \"endDate\": \"2026-04-05\",\n        \"reason\": \"Family vacation to Bali\",\n        \"status\": \"PENDING\",\n        \"createdAt\": \"2026-03-01 10:00:00\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Request Leave - Sick",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"leaveType\": \"SICK\",\n    \"startDate\": \"2026-03-02\",\n    \"endDate\": \"2026-03-02\",\n    \"reason\": \"Doctor appointment\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"leave"
+							]
+						},
+						"description": "Employee requests sick leave"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Leave Requests",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/leave/employee/:employeeId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"leave",
+								"employee",
+								":employeeId"
+							],
+							"variable": [
+								{
+									"key": "employeeId",
+									"value": "{{employee_id}}"
+								}
+							]
+						},
+						"description": "Get employee's leave requests"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Leave Requests (HR)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/leave/pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"leave",
+								"pending"
+							]
+						},
+						"description": "Get all pending leave requests (for HR/Manager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Leave Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"APPROVED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leave/:id/approve/:approvedBy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"leave",
+								":id",
+								"approve",
+								":approvedBy"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "leave-id-here"
+								},
+								{
+									"key": "approvedBy",
+									"value": "hr-user-id"
+								}
+							]
+						},
+						"description": "Manager/HR approves leave request"
+					},
+					"response": [
+						{
+							"name": "Leave Approved",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"APPROVED\"\n}"
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Leave request approved\",\n    \"data\": {\n        \"id\": \"leave-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"leaveType\": \"ANNUAL\",\n        \"startDate\": \"2026-04-01\",\n        \"endDate\": \"2026-04-05\",\n        \"reason\": \"Family vacation to Bali\",\n        \"status\": \"APPROVED\",\n        \"approvedBy\": \"hr-user-id\",\n        \"approvedByName\": \"Budi Santoso\",\n        \"approvedAt\": \"2026-03-01 11:00:00\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Reject Leave Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"REJECTED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/leave/:id/approve/:approvedBy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"leave",
+								":id",
+								"approve",
+								":approvedBy"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "leave-id-here"
+								},
+								{
+									"key": "approvedBy",
+									"value": "hr-user-id"
+								}
+							]
+						},
+						"description": "Manager/HR rejects leave request"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Daily Reports",
+			"item": [
+				{
+					"name": "Create Daily Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"date\": \"2026-03-01\",\n    \"notes\": \"Completed all tasks on time\",\n    \"items\": [\n        {\n            \"title\": \"API Development - Attendance Module\",\n            \"description\": \"Implement check-in and check-out endpoints\",\n            \"progress\": 100\n        },\n        {\n            \"title\": \"Code Review\",\n            \"description\": \"Review pull requests from team\",\n            \"progress\": 80\n        },\n        {\n            \"title\": \"Bug Fixing - Login Issue\",\n            \"description\": \"Fix session timeout bug\",\n            \"progress\": 50\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/daily-report",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"daily-report"
+							]
+						},
+						"description": "Employee creates daily work report"
+					},
+					"response": [
+						{
+							"name": "Daily Report Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-001\",\n    \"date\": \"2026-03-01\",\n    \"notes\": \"Completed all tasks on time\",\n    \"items\": [\n        {\n            \"title\": \"API Development - Attendance Module\",\n            \"description\": \"Implement check-in and check-out endpoints\",\n            \"progress\": 100\n        }\n    ]\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Daily report created successfully\",\n    \"data\": {\n        \"id\": \"report-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"employeeName\": \"Budi Santoso\",\n        \"date\": \"2026-03-01\",\n        \"notes\": \"Completed all tasks on time\",\n        \"status\": \"PENDING\",\n        \"items\": [\n            {\n                \"id\": \"item-id-001\",\n                \"title\": \"API Development - Attendance Module\",\n                \"description\": \"Implement check-in and check-out endpoints\",\n                \"progress\": 100,\n                \"status\": \"COMPLETED\"\n            },\n            {\n                \"id\": \"item-id-002\",\n                \"title\": \"Code Review\",\n                \"description\": \"Review pull requests from team\",\n                \"progress\": 80,\n                \"status\": \"ON_PROGRESS\"\n            }\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get My Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/daily-report/employee/:employeeId?startDate=2026-01-01&endDate=2026-03-01",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"daily-report",
+								"employee",
+								":employeeId"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2026-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2026-03-01"
+								}
+							],
+							"variable": [
+								{
+									"key": "employeeId",
+									"value": "{{employee_id}}"
+								}
+							]
+						},
+						"description": "Get employee's daily reports"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Team Reports (Manager)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/daily-report/team/:managerId?startDate=2026-01-01&endDate=2026-03-01",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"daily-report",
+								"team",
+								":managerId"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2026-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2026-03-01"
+								}
+							],
+							"variable": [
+								{
+									"key": "managerId",
+									"value": "manager-user-id"
+								}
+							]
+						},
+						"description": "Manager views team's daily reports"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Daily Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"APPROVED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/daily-report/:id/approve/:approvedBy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"daily-report",
+								":id",
+								"approve",
+								":approvedBy"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "report-id-here"
+								},
+								{
+									"key": "approvedBy",
+									"value": "manager-user-id"
+								}
+							]
+						},
+						"description": "Manager approves daily report"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payroll",
+			"item": [
+				{
+					"name": "Calculate Payroll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payroll/calculate/:employeeId?period=2026-02",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payroll",
+								"calculate",
+								":employeeId"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "2026-02"
+								}
+							],
+							"variable": [
+								{
+									"key": "employeeId",
+									"value": "{{employee_id}}"
+								}
+							]
+						},
+						"description": "Calculate payroll for an employee for a specific period"
+					},
+					"response": [
+						{
+							"name": "Calculate Payroll Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": []
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Payroll calculated successfully\",\n    \"data\": {\n        \"id\": \"payroll-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"employeeName\": \"Budi Santoso\",\n        \"period\": \"2026-02\",\n        \"basicSalary\": 15000000,\n        \"allowance\": 3000000,\n        \"bonus\": 0,\n        \"overtime\": 0,\n        \"totalIncome\": 18000000,\n        \"lateDeduction\": 0,\n        \"absentDeduction\": 0,\n        \"bpjs\": 300000,\n        \"tht\": 200000,\n        \"tax\": 0,\n        \"otherDeduction\": 0,\n        \"totalDeduction\": 500000,\n        \"netSalary\": 17500000,\n        \"workDays\": 22,\n        \"presentDays\": 22,\n        \"lateDays\": 0,\n        \"absentDays\": 0,\n        \"leaveDays\": 0,\n        \"isPaid\": false\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Payroll Manually",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": \"{{employee_id}}\",\n    \"period\": \"2026-02\",\n    \"bonus\": 2000000,\n    \"overtime\": 500000,\n    \"lateDeduction\": 100000,\n    \"absentDeduction\": 0,\n    \"bpjs\": 300000,\n    \"tht\": 200000,\n    \"tax\": 500000,\n    \"otherDeduction\": 0,\n    \"notes\": \"Monthly salary with performance bonus\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payroll",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payroll"
+							]
+						},
+						"description": "HR creates payroll manually with bonuses and deductions"
+					},
+					"response": [
+						{
+							"name": "Create Payroll Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employeeId\": \"emp-id-001\",\n    \"period\": \"2026-02\",\n    \"bonus\": 2000000,\n    \"overtime\": 500000,\n    \"lateDeduction\": 100000\n}"
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Payroll created successfully\",\n    \"data\": {\n        \"id\": \"payroll-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"employeeName\": \"Budi Santoso\",\n        \"period\": \"2026-02\",\n        \"basicSalary\": 15000000,\n        \"allowance\": 3000000,\n        \"bonus\": 2000000,\n        \"overtime\": 500000,\n        \"totalIncome\": 20500000,\n        \"lateDeduction\": 100000,\n        \"absentDeduction\": 0,\n        \"bpjs\": 300000,\n        \"tht\": 200000,\n        \"tax\": 500000,\n        \"otherDeduction\": 0,\n        \"totalDeduction\": 1100000,\n        \"netSalary\": 19400000,\n        \"workDays\": 22,\n        \"presentDays\": 20,\n        \"lateDays\": 2,\n        \"absentDays\": 0,\n        \"leaveDays\": 0,\n        \"isPaid\": false\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All Payroll (HR)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payroll?period=2026-02",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payroll"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "2026-02"
+								}
+							]
+						},
+						"description": "HR views all payroll for a period"
+					},
+					"response": [
+						{
+							"name": "Get All Payroll Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": []
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Data retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": \"payroll-id-001\",\n            \"employeeId\": \"emp-id-001\",\n            \"employeeName\": \"Budi Santoso\",\n            \"period\": \"2026-02\",\n            \"basicSalary\": 15000000,\n            \"totalIncome\": 18000000,\n            \"totalDeduction\": 500000,\n            \"netSalary\": 17500000,\n            \"isPaid\": false\n        },\n        {\n            \"id\": \"payroll-id-002\",\n            \"employeeId\": \"emp-id-002\",\n            \"employeeName\": \"Rudi Hermawan\",\n            \"period\": \"2026-02\",\n            \"basicSalary\": 18000000,\n            \"totalIncome\": 21500000,\n            \"totalDeduction\": 600000,\n            \"netSalary\": 20900000,\n            \"isPaid\": true\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get My Payroll (Employee)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payroll/employee/:employeeId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payroll",
+								"employee",
+								":employeeId"
+							],
+							"variable": [
+								{
+									"key": "employeeId",
+									"value": "{{employee_id}}"
+								}
+							]
+						},
+						"description": "Employee views their payroll history"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Payroll by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payroll/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payroll",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{payroll_id}}"
+								}
+							]
+						},
+						"description": "Get payroll detail by ID"
+					},
+					"response": [
+						{
+							"name": "Get Payroll Detail",
+							"originalRequest": {
+								"method": "GET",
+								"header": []
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Data retrieved successfully\",\n    \"data\": {\n        \"id\": \"payroll-id-001\",\n        \"employeeId\": \"emp-id-001\",\n        \"employeeName\": \"Budi Santoso\",\n        \"period\": \"2026-02\",\n        \"basicSalary\": 15000000,\n        \"allowance\": 3000000,\n        \"bonus\": 0,\n        \"overtime\": 0,\n        \"lateDeduction\": 0,\n        \"absentDeduction\": 0,\n        \"bpjs\": 300000,\n        \"tht\": 200000,\n        \"tax\": 0,\n        \"otherDeduction\": 0,\n        \"totalIncome\": 18000000,\n        \"totalDeduction\": 500000,\n        \"netSalary\": 17500000,\n        \"workDays\": 22,\n        \"presentDays\": 22,\n        \"lateDays\": 0,\n        \"absentDays\": 0,\n        \"leaveDays\": 0,\n        \"isPaid\": false,\n        \"createdAt\": \"2026-03-01 09:00:00\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Mark as Paid",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/payroll/:id/mark-paid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payroll",
+								":id",
+								"mark-paid"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{payroll_id}}"
+								}
+							]
+						},
+						"description": "HR marks payroll as paid"
+					},
+					"response": [
+						{
+							"name": "Mark as Paid Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": []
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"success\": true,\n    \"message\": \"Marked as paid\",\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,91 @@
+package entity
+
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type Role string
+
+const (
+	RoleOwner   Role = "OWNER"
+	RoleOps     Role = "OPS"
+	RoleCashier Role = "CASHIER"
+	// HRIS Roles
+	RoleHRAdmin    Role = "HR_ADMIN"
+	RoleManager    Role = "MANAGER"
+	RoleTeamLeader Role = "TEAM_LEADER"
+	RoleEmployee   Role = "EMPLOYEE"
+	RoleStaff      Role = "STAFF"
+	// Technical Roles
+	RoleBackend  Role = "BACKEND"
+	RoleFrontend Role = "FRONTEND"
+)
+
+func (Role) GormDataType() string {
+	return "varchar(20)"
+}
+
+type EmployeeStatus string
+
+const (
+	EmployeeStatusActive   EmployeeStatus = "ACTIVE"
+	EmployeeStatusInactive EmployeeStatus = "INACTIVE"
+	EmployeeStatusResigned EmployeeStatus = "RESIGNED"
+)
+
+type EmployeeType string
+
+const (
+	EmployeeTypePKWTT     EmployeeType = "PKWTT"        // Pegawai Tetap
+	EmployeeTypePKWT      EmployeeType = "PKWT"         // Pegawai Kontrak
+	EmployeeTypeProbation EmployeeType = "PROBATION"    // Masa Percobaan
+	EmployeeTypeHarian    EmployeeType = "HARIAN_LEPAS" // Casual Leased
+)
+
+func (EmployeeStatus) GormDataType() string {
+	return "varchar(20)"
+}
+
+func (EmployeeType) GormDataType() string {
+	return "varchar(20)"
+}
+
+type User struct {
+	ID                 string         `gorm:"column:id;primaryKey;type:varchar(255);default:gen_random_uuid()" json:"id"`
+	Name               string         `gorm:"column:name;type:varchar(255);not null" json:"name"`
+	Email              string         `gorm:"column:email;type:varchar(255);uniqueIndex;not null" json:"email"`
+	PasswordHash       *string        `gorm:"column:password_hash;type:varchar(255)" json:"-"`
+	Role               Role           `gorm:"column:role;type:varchar(20);default:'CASHIER'" json:"role"`
+	MustChangePassword bool           `gorm:"column:must_change_password;default:false" json:"mustChangePassword"`
+	TeamLeaderID       *string        `gorm:"column:team_leader_id;type:varchar(255)" json:"teamLeaderId"`
+	CreatedAt          time.Time      `gorm:"column:created_at;autoCreateTime" json:"createdAt"`
+	UpdatedAt          time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updatedAt"`
+	DeletedAt          gorm.DeletedAt `gorm:"column:deleted_at;index" json:"-"`
+
+	// HRIS Employee Fields
+	NIP          *string        `gorm:"column:nip;type:varchar(50);uniqueIndex" json:"nip"`
+	Phone        string         `gorm:"column:phone;type:varchar(20)" json:"phone"`
+	Address      string         `gorm:"column:address;type:text" json:"address"`
+	DepartmentID *string        `gorm:"column:department_id;type:varchar(255)" json:"departmentId"`
+	PositionID   *string        `gorm:"column:position_id;type:varchar(255)" json:"positionId"`
+	JoinDate     *time.Time     `gorm:"column:join_date;type:date" json:"joinDate"`
+	EmployeeType EmployeeType   `gorm:"column:employee_type;type:varchar(20);default:'PKWTT'" json:"employeeType"`
+	Status       EmployeeStatus `gorm:"column:status;type:varchar(20);default:'ACTIVE'" json:"status"`
+	Photo        string         `gorm:"column:photo;type:varchar(500)" json:"photo"`
+	ManagerID    *string        `gorm:"column:manager_id;type:varchar(255)" json:"managerId"`
+	BasicSalary  float64        `gorm:"column:basic_salary;type:decimal(15,2);default:0" json:"basicSalary"`
+	Allowance    float64        `gorm:"column:allowance;type:decimal(15,2);default:0" json:"allowance"`
+
+	// Relations
+	Sales      []Sale      `gorm:"foreignKey:CashierID;constraint:OnDelete:Restrict" json:"sales,omitempty"`
+	TeamLeader *User       `gorm:"foreignKey:TeamLeaderID" json:"teamLeader,omitempty"`
+	Department *Department `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
+	Position   *Position   `gorm:"foreignKey:PositionID" json:"position,omitempty"`
+	Manager    *User       `gorm:"foreignKey:ManagerID" json:"manager,omitempty"`
+}
+
+func (User) TableName() string {
+	return "users"
+}
