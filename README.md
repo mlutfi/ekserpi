@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./public/xrp_logo_org.png" alt="XRP Logo" width="200"/>
+  <img src="./xrp_logo_org.png" alt="XRP Logo" width="200"/>
   <p>Community Based System.</p>
 </div>
 
