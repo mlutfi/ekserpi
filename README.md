@@ -1,68 +1,10 @@
 # EKS-ER-PI Application
 
-A comprehensive Human Resources Information System (HRIS) and Point of Sales (POS) application with separated backend and frontend architecture.
+A comprehensive Human Resources Information System (HRIS) and Point of Sales (POS) application with separated backend and frontend architecture. (in development)
 
-## Project Structure
+## Screenshot
 
-```
-/
-├── backend/                 # Go (Fiber + GORM) Backend API
-│   ├── app/                 # Application modules
-│   │   ├── auth/           # Authentication
-│   │   ├── employee/       # Employee management
-│   │   ├── department/     # Department management
-│   │   ├── position/       # Position management
-│   │   ├── attendance/     # Attendance tracking
-│   │   ├── leave/          # Leave request management
-│   │   ├── payroll/         # Payroll management
-│   │   ├── dailyreport/    # Daily report management
-│   │   ├── product/        # Product management (POS)
-│   │   ├── category/       # Category management (POS)
-│   │   ├── sale/           # Sale management (POS)
-│   │   ├── stock/          # Stock management (POS)
-│   │   ├── report/         # Report generation (POS)
-│   │   └── user/           # User management
-│   ├── config/             # Configuration files
-│   ├── entity/              # Database entities
-│   ├── helper/              # Helper functions
-│   ├── middleware/         # HTTP middlewares
-│   ├── route/              # API routes
-│   ├── cmd/migrate/        # Database migrations
-│   └── main.go             # Entry point
-│
-└── src/                    # Next.js Frontend (App Router)
-    ├── app/                # Next.js pages
-    │   ├── (admin)/        # Admin pages (protected)
-    │   │   └── admin/
-    │   │       ├── products/     # Product management
-    │   │       ├── categories/  # Category management
-    │   │       ├── stock/       # Stock management
-    │   │       ├── reports/     # Report viewing
-    │   │       └── users/       # User management
-    │   ├── (auth)/         # Auth pages
-    │   │   └── login/      # Login page
-    │   ├── (hris)/         # HRIS pages (protected)
-    │   │   └── hris/
-    │   │       ├── employees/   # Employee management
-    │   │       ├── attendance/  # Attendance tracking
-    │   │       ├── leave/       # Leave requests
-    │   │       ├── payroll/     # Payroll management
-    │   │       └── daily-report/# Daily reports
-    │   ├── (pos)/          # POS pages (protected)
-    │   │   └── pos/
-    │   │       ├── page.tsx    # POS/Sales
-    │   │       └── report/     # Sales reports
-    │   ├── layout.tsx      # Root layout
-    │   ├── page.tsx        # Home page
-    │   └── globals.css     # Global styles
-    ├── components/         # React components
-    │   ├── admin/          # Admin components
-    │   ├── hris/           # HRIS components
-    │   ├── pos/            # POS components
-    │   └── ui/             # UI components (shadcn)
-    ├── hooks/              # Custom React hooks
-    └── lib/                # Utilities and API client
-```
+![Screenshot](screenshot.png)
 
 ## Tech Stack
 
@@ -72,13 +14,22 @@ A comprehensive Human Resources Information System (HRIS) and Point of Sales (PO
 - **GORM** - ORM
 - **PostgreSQL** - Database
 - **JWT** - Authentication
+- **Viper** - Configuration management
+- **Logrus** - Logging
 
 ### Frontend
-- **Next.js 14** - React framework
+- **Next.js 16** - React framework
+- **React 19** - UI library
 - **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **shadcn/ui** - UI components
+- **Tailwind CSS 4** - Styling
+- **shadcn/ui** - UI components (built on Radix UI)
+- **Radix UI** - Headless UI components
+- **Zustand** - State management
 - **Axios** - HTTP client
+- **Recharts** - Charts and visualizations
+- **Lucide React** - Icons
+- **date-fns** - Date utilities
+- **Sonner** - Toast notifications
 
 ## Features
 
