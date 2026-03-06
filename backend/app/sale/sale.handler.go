@@ -12,6 +12,8 @@ type SaleHandler interface {
 	GetByID(ctx *fiber.Ctx) error
 	PayCash(ctx *fiber.Ctx) error
 	PayQRIS(ctx *fiber.Ctx) error
+	PayQRISStatic(ctx *fiber.Ctx) error
+	PayTransfer(ctx *fiber.Ctx) error
 	GetQRISStatus(ctx *fiber.Ctx) error
 	GetDailyReport(ctx *fiber.Ctx) error
 	MidtransNotification(ctx *fiber.Ctx) error
@@ -66,6 +68,29 @@ func (h *saleHandler) PayCash(ctx *fiber.Ctx) error {
 func (h *saleHandler) PayQRIS(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	sale, err := h.UseCase.PayQRIS(ctx.Context(), id)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+	return helper.SuccessResponse(ctx, sale)
+}
+
+func (h *saleHandler) PayQRISStatic(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	sale, err := h.UseCase.PayQRISStatic(ctx.Context(), id)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+	return helper.SuccessResponse(ctx, sale)
+}
+
+func (h *saleHandler) PayTransfer(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	request := new(PayTransferRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return helper.BadRequestResponse(ctx, "Invalid request body")
+	}
+
+	sale, err := h.UseCase.PayTransfer(ctx.Context(), id, request)
 	if err != nil {
 		return helper.BadRequestResponse(ctx, err.Error())
 	}

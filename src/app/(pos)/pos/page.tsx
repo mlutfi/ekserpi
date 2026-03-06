@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { ProductSearch } from "@/components/pos/ProductSearch"
 import { Cart } from "@/components/pos/Cart"
 import { PaymentPanel } from "@/components/pos/PaymentPanel"
@@ -23,6 +23,30 @@ export default function PosPage() {
   const [customerName, setCustomerName] = useState("")
   const [refreshKey, setRefreshKey] = useState(0)
   const [mobileCartOpen, setMobileCartOpen] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("ekserpi_pos_cart")
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.cartItems) setCartItems(parsed.cartItems)
+        if (parsed.customerName) setCustomerName(parsed.customerName)
+        if (parsed.sale) setSale(parsed.sale)
+      } catch (e) {
+        console.error("Failed to parse local cart:", e)
+      }
+    }
+    setIsLoaded(true)
+  }, [])
+
+  // Save to localStorage on state change
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem("ekserpi_pos_cart", JSON.stringify({ cartItems, customerName, sale }))
+    }
+  }, [cartItems, customerName, sale, isLoaded])
 
   function addToCart(product: Product) {
     setCartItems((prev) => {
@@ -52,6 +76,7 @@ export default function PosPage() {
     setSale(null)
     setCustomerName("")
     setMobileCartOpen(false)
+    localStorage.removeItem("ekserpi_pos_cart")
   }
 
   const total = useMemo(() => cartItems.reduce((sum, it) => sum + it.price * it.qty, 0), [cartItems])

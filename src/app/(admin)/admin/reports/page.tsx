@@ -266,6 +266,7 @@ export default function ReportsAdminPage() {
                                 <SelectItem value="ALL">Semua Metode</SelectItem>
                                 <SelectItem value="CASH">Tunai (Cash)</SelectItem>
                                 <SelectItem value="QRIS">QRIS</SelectItem>
+                                <SelectItem value="TRANSFER">Transfer Bank</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -279,7 +280,7 @@ export default function ReportsAdminPage() {
             ) : activeTab === "SALES" && summary ? (
                 <>
                     {/* Summary Cards */}
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="rounded-lg bg-green-100 p-2">
@@ -321,6 +322,17 @@ export default function ReportsAdminPage() {
                                 <div>
                                     <p className="text-sm font-medium text-slate-500">Pendapatan QRIS</p>
                                     <p className="text-xl font-bold text-slate-900">{formatPrice(summary.qrisRevenue)}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-lg bg-emerald-100 p-2">
+                                    <CreditCard className="h-5 w-5 text-emerald-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-slate-500">Pendapatan Transfer</p>
+                                    <p className="text-xl font-bold text-slate-900">{formatPrice(summary.transferRevenue)}</p>
                                 </div>
                             </div>
                         </div>
@@ -420,6 +432,17 @@ export default function ReportsAdminPage() {
                                             style={{ width: `${summary.totalTransactions ? (summary.qrisTransactions / summary.totalTransactions) * 100 : 0}%` }}
                                         ></div>
                                     </div>
+
+                                    <div className="mt-4 mb-2 flex items-center justify-between text-sm">
+                                        <span className="text-slate-500">Transfer</span>
+                                        <span className="font-medium text-slate-900">{summary.transferTransactions} TRX</span>
+                                    </div>
+                                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                        <div
+                                            className="h-full bg-emerald-500"
+                                            style={{ width: `${summary.totalTransactions ? (summary.transferTransactions / summary.totalTransactions) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -464,10 +487,15 @@ export default function ReportsAdminPage() {
                                                         ? 'bg-green-100 text-green-700'
                                                         : sale.paymentMethod === 'QRIS'
                                                             ? 'bg-purple-100 text-purple-700'
-                                                            : 'bg-slate-100 text-slate-700'
+                                                            : sale.paymentMethod === 'TRANSFER'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : 'bg-slate-100 text-slate-700'
                                                         }`}>
                                                         {sale.paymentMethod}
                                                     </span>
+                                                    {sale.providerRef && sale.paymentMethod === 'TRANSFER' && (
+                                                        <span className="block text-[10px] text-slate-400 mt-1 max-w-[150px] truncate" title={sale.providerRef}>{sale.providerRef}</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-5 py-3 text-slate-600">
                                                     {sale.itemCount}
@@ -511,9 +539,14 @@ export default function ReportsAdminPage() {
                                                 <p className="text-xs font-medium text-slate-500 mb-1">Kasir</p>
                                                 <p className="text-sm font-semibold text-slate-900">{selectedSale.cashierName}</p>
                                             </div>
-                                            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                                            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 flex flex-col justify-center">
                                                 <p className="text-xs font-medium text-slate-500 mb-1">Metode</p>
-                                                <p className="text-sm font-semibold text-slate-900">{selectedSale.paymentMethod}</p>
+                                                <p className="text-sm font-semibold text-slate-900 flex flex-col">
+                                                    {selectedSale.paymentMethod}
+                                                    {selectedSale.paymentMethod === 'TRANSFER' && selectedSale.providerRef && (
+                                                        <span className="text-[10px] text-slate-500 font-normal mt-0.5 leading-tight">{selectedSale.providerRef}</span>
+                                                    )}
+                                                </p>
                                             </div>
                                             <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
                                                 <p className="text-xs font-medium text-slate-500 mb-1">Total Item</p>

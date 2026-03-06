@@ -244,6 +244,14 @@ export const salesApi = {
     return response.data.data
   },
 
+  payQRISStatic: async (id: string): Promise<void> => {
+    await api.post(`/sales/${id}/pay-qris-static`)
+  },
+
+  payTransfer: async (id: string, bankDetails: string): Promise<void> => {
+    await api.post(`/sales/${id}/pay-transfer`, { bankDetails })
+  },
+
   generateSnapToken: async (id: string): Promise<{ token: string; redirectUrl: string }> => {
     const response = await api.post(`/sales/${id}/snap`)
     return response.data.data
@@ -360,6 +368,22 @@ export interface Setting {
   value: string
 }
 
+export interface BankAccount {
+  id: string
+  bankName: string
+  accountNumber: string
+  accountName: string
+}
+
+export interface PosPaymentSettings {
+  cash: boolean
+  qrisMidtrans: boolean
+  qrisStatic: boolean
+  qrisStaticImage: string
+  bankTransfer: boolean
+  bankAccounts: BankAccount[]
+}
+
 export const settingsApi = {
   getModules: async (): Promise<Setting> => {
     const response = await api.get('/settings/modules')
@@ -368,6 +392,22 @@ export const settingsApi = {
   updateModules: async (modules: string[]): Promise<Setting> => {
     const response = await api.put('/settings/modules', { value: JSON.stringify(modules) })
     return response.data.data
+  },
+  getPosPayment: async (): Promise<PosPaymentSettings> => {
+    const response = await api.get('/settings/pos-payment')
+    return JSON.parse(response.data.data.value)
+  },
+  updatePosPayment: async (data: PosPaymentSettings): Promise<Setting> => {
+    const response = await api.put('/settings/pos-payment', { value: JSON.stringify(data) })
+    return response.data.data
+  },
+  uploadQrisImage: async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await api.post('/settings/upload-qris', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data.data.imageUrl
   },
 }
 

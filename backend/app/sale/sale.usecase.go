@@ -20,6 +20,8 @@ type SaleUseCase interface {
 	GetByID(ctx context.Context, id string) (*SaleResponse, error)
 	PayCash(ctx context.Context, id string, request *PayCashRequest) (*PaymentResponse, error)
 	PayQRIS(ctx context.Context, id string) (*PaymentResponse, error)
+	PayQRISStatic(ctx context.Context, id string) (*PaymentResponse, error)
+	PayTransfer(ctx context.Context, id string, request *PayTransferRequest) (*PaymentResponse, error)
 	GetQRISStatus(ctx context.Context, saleId string) (*QRISStatusResponse, error)
 	GetDailyReport(ctx context.Context, date string) (*DailyReportResponse, error)
 	MidtransNotification(ctx context.Context, payload map[string]interface{}) error
@@ -276,6 +278,112 @@ func (u *saleUseCase) PayQRIS(ctx context.Context, id string) (*PaymentResponse,
 	}, nil
 }
 
+func (u *saleUseCase) PayQRISStatic(ctx context.Context, id string) (*PaymentResponse, error) {
+	sale, err := u.Repository.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if sale.Status != entity.SaleStatusPending {
+		return nil, errors.New("sale is not pending")
+	}
+
+	payment := &entity.Payment{
+		SaleID:   sale.ID,
+		Method:   entity.PaymentMethodQRIS,
+		Provider: entity.PaymentProviderNone,
+		Amount:   sale.Total,
+		Status:   entity.PaymentStatusPaid,
+	}
+
+	err = u.Repository.CreatePayment(ctx, payment)
+	if err != nil {
+		return nil, err
+	}
+
+	sale.Status = entity.SaleStatusPaid
+	err = u.Repository.Update(ctx, sale)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range sale.Items {
+		u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
+
+		movement := &entity.StockMovement{
+			ProductID: item.ProductID,
+			Type:      entity.StockMovementTypeSale,
+			QtyDelta:  -item.Qty,
+			RefSaleID: &sale.ID,
+		}
+		u.DB.Create(movement)
+	}
+
+	return &PaymentResponse{
+		ID:        payment.ID,
+		SaleID:    payment.SaleID,
+		Method:    string(payment.Method),
+		Provider:  string(payment.Provider),
+		Amount:    payment.Amount,
+		Status:    string(payment.Status),
+		CreatedAt: payment.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+func (u *saleUseCase) PayTransfer(ctx context.Context, id string, request *PayTransferRequest) (*PaymentResponse, error) {
+	sale, err := u.Repository.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if sale.Status != entity.SaleStatusPending {
+		return nil, errors.New("sale is not pending")
+	}
+
+	payment := &entity.Payment{
+		SaleID:      sale.ID,
+		Method:      entity.PaymentMethodTransfer,
+		Provider:    entity.PaymentProviderNone,
+		ProviderRef: &request.BankDetails,
+		Amount:      sale.Total,
+		Status:      entity.PaymentStatusPaid,
+	}
+
+	err = u.Repository.CreatePayment(ctx, payment)
+	if err != nil {
+		return nil, err
+	}
+
+	sale.Status = entity.SaleStatusPaid
+	err = u.Repository.Update(ctx, sale)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range sale.Items {
+		u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
+
+		movement := &entity.StockMovement{
+			ProductID: item.ProductID,
+			Type:      entity.StockMovementTypeSale,
+			QtyDelta:  -item.Qty,
+			RefSaleID: &sale.ID,
+		}
+		u.DB.Create(movement)
+	}
+
+	return &PaymentResponse{
+		ID:          payment.ID,
+		SaleID:      payment.SaleID,
+		Method:      string(payment.Method),
+		Provider:    string(payment.Provider),
+		ProviderRef: payment.ProviderRef,
+		Amount:      payment.Amount,
+		Status:      string(payment.Status),
+		CreatedAt:   payment.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
 func (u *saleUseCase) newSnapClient() snap.Client {
 	serverKey := u.Config.GetString("midtrans.server_key")
 	midtransEnv := u.Config.GetString("midtrans.env")
@@ -481,6 +589,8 @@ func (u *saleUseCase) GetDailyReport(ctx context.Context, date string) (*DailyRe
 				report.CashSales++
 			} else if payment.Method == entity.PaymentMethodQRIS && payment.Status == entity.PaymentStatusPaid {
 				report.QRISSales++
+			} else if payment.Method == entity.PaymentMethodTransfer && payment.Status == entity.PaymentStatusPaid {
+				report.TransferSales++
 			}
 		}
 	}

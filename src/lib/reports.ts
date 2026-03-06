@@ -29,6 +29,8 @@ export interface ReportSummary {
     cashTransactions: number
     qrisRevenue: number
     qrisTransactions: number
+    transferRevenue: number
+    transferTransactions: number
 }
 
 export interface SaleItemDetail {
@@ -44,6 +46,7 @@ export interface SaleDetail {
     customerName?: string
     total: number
     paymentMethod: string
+    providerRef?: string
     itemCount: number
     items: SaleItemDetail[]
     createdAt: string

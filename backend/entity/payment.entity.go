@@ -8,8 +8,9 @@ import (
 type PaymentMethod string
 
 const (
-	PaymentMethodCash PaymentMethod = "CASH"
-	PaymentMethodQRIS PaymentMethod = "QRIS"
+	PaymentMethodCash     PaymentMethod = "CASH"
+	PaymentMethodQRIS     PaymentMethod = "QRIS"
+	PaymentMethodTransfer PaymentMethod = "TRANSFER"
 )
 
 func (PaymentMethod) GormDataType() string {

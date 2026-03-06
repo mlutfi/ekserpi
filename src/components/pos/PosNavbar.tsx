@@ -116,18 +116,6 @@ export function PosNavbar() {
                 <BarChart3 className="h-4 w-4" />
                 Laporan
               </button>
-              {isAdminUser && (
-                <button
-                  onClick={() => router.push("/admin")}
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${pathname?.startsWith("/admin")
-                    ? "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 shadow-sm border border-emerald-200/60"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                    }`}
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </button>
-              )}
             </div>
 
             {/* User Menu */}

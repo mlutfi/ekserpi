@@ -53,6 +53,9 @@ func (u *reportUseCase) GetSummary(ctx context.Context, filter *ReportFilter) (*
 				} else if payment.Method == entity.PaymentMethodQRIS {
 					summary.QRISRevenue += payment.Amount
 					summary.QRISTransactions++
+				} else if payment.Method == entity.PaymentMethodTransfer {
+					summary.TransferRevenue += payment.Amount
+					summary.TransferTransactions++
 				}
 			}
 		}
@@ -83,9 +86,11 @@ func (u *reportUseCase) GetSalesDetail(ctx context.Context, filter *ReportFilter
 		}
 
 		paymentMethod := "-"
+		var providerRef *string
 		for _, p := range sale.Payments {
 			if p.Status == entity.PaymentStatusPaid {
 				paymentMethod = string(p.Method)
+				providerRef = p.ProviderRef
 				break
 			}
 		}
@@ -110,6 +115,7 @@ func (u *reportUseCase) GetSalesDetail(ctx context.Context, filter *ReportFilter
 			CustomerName:  sale.CustomerName,
 			Total:         sale.Total,
 			PaymentMethod: paymentMethod,
+			ProviderRef:   providerRef,
 			ItemCount:     len(sale.Items),
 			Items:         saleItems,
 			CreatedAt:     sale.CreatedAt.Format(time.RFC3339),
@@ -167,7 +173,7 @@ func (u *reportUseCase) ExportExcel(ctx context.Context, filter *ReportFilter) (
 	})
 
 	// Set headers
-	headers := []string{"No", "ID Transaksi", "Kasir", "Pelanggan", "Jumlah Item", "Total", "Metode Bayar", "Tanggal"}
+	headers := []string{"No", "ID Transaksi", "Kasir", "Pelanggan", "Jumlah Item", "Total", "Metode Bayar", "Detail Bank", "Tanggal"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
@@ -175,7 +181,7 @@ func (u *reportUseCase) ExportExcel(ctx context.Context, filter *ReportFilter) (
 	}
 
 	// Set column widths
-	widths := []float64{6, 20, 18, 18, 12, 18, 14, 22}
+	widths := []float64{6, 20, 18, 18, 12, 18, 14, 25, 22}
 	for i, w := range widths {
 		col, _ := excelize.ColumnNumberToName(i + 1)
 		f.SetColWidth(sheet, col, col, w)
@@ -193,9 +199,13 @@ func (u *reportUseCase) ExportExcel(ctx context.Context, filter *ReportFilter) (
 			customerName = *sale.CustomerName
 		}
 		paymentMethod := "-"
+		providerRef := "-"
 		for _, p := range sale.Payments {
 			if p.Status == entity.PaymentStatusPaid {
 				paymentMethod = string(p.Method)
+				if p.ProviderRef != nil {
+					providerRef = *p.ProviderRef
+				}
 				break
 			}
 		}
@@ -208,6 +218,7 @@ func (u *reportUseCase) ExportExcel(ctx context.Context, filter *ReportFilter) (
 			len(sale.Items),
 			sale.Total,
 			paymentMethod,
+			providerRef,
 			sale.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 

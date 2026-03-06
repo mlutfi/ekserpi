@@ -136,6 +136,8 @@ func (c *RouteConfig) SaleRoutes(router fiber.Router) {
 	saleGroup.Get("/:id", c.SaleHandler.GetByID)
 	saleGroup.Post("/:id/pay-cash", c.SaleHandler.PayCash)
 	saleGroup.Post("/:id/pay-qris", c.SaleHandler.PayQRIS)
+	saleGroup.Post("/:id/pay-qris-static", c.SaleHandler.PayQRISStatic)
+	saleGroup.Post("/:id/pay-transfer", c.SaleHandler.PayTransfer)
 	saleGroup.Post("/:id/snap", c.SaleHandler.GenerateSnapToken)
 	saleGroup.Get("/:id/qris-status", c.SaleHandler.GetQRISStatus)
 }
@@ -144,6 +146,9 @@ func (c *RouteConfig) SettingRoutes(router fiber.Router) {
 	settingGroup := router.Group("/settings")
 	settingGroup.Get("/modules", c.SettingHandler.GetModules)
 	settingGroup.Put("/modules", middleware.RequireRole("OWNER"), c.SettingHandler.UpdateModules)
+	settingGroup.Get("/pos-payment", c.SettingHandler.GetPosPayment)
+	settingGroup.Put("/pos-payment", middleware.RequireRole("OWNER"), c.SettingHandler.UpdatePosPayment)
+	settingGroup.Post("/upload-qris", middleware.RequireRole("OWNER"), c.SettingHandler.UploadQrisImage)
 }
 
 func (c *RouteConfig) UserRoutes(router fiber.Router) {

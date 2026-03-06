@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
-import { salesApi, Sale } from "@/lib/api"
+import { salesApi, Sale, settingsApi, PosPaymentSettings, BankAccount } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
-import { Banknote, QrCode, Loader2, CheckCircle, XCircle, Sparkles, ArrowRight, Printer, RefreshCw, AlertCircle, Clock, ChevronDown, ChevronUp, Info } from "lucide-react"
+import { Banknote, QrCode, Loader2, CheckCircle, XCircle, Sparkles, ArrowRight, Printer, RefreshCw, AlertCircle, Clock, ChevronDown, ChevronUp, Info, CreditCard } from "lucide-react"
 import { createPortal } from "react-dom"
 import { ReceiptModal } from "./ReceiptModal"
 import QRCode from "qrcode"
@@ -37,11 +37,18 @@ export function PaymentPanel({
 }: PaymentPanelProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "qris" | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "qris" | "qris_static" | "transfer" | null>(null)
   const [cashAmount, setCashAmount] = useState("")
   const [showSuccess, setShowSuccess] = useState(false)
   const [showReceipt, setShowReceipt] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  const [posSettings, setPosSettings] = useState<PosPaymentSettings | null>(null)
+  const [selectedBank, setSelectedBank] = useState<BankAccount | null>(null)
+
+  useEffect(() => {
+    settingsApi.getPosPayment().then(setPosSettings).catch(console.error)
+  }, [])
 
   // QRIS state
   const [qrisData, setQrisData] = useState<{
@@ -106,6 +113,14 @@ export function PaymentPanel({
       console.error("Failed to generate QR code:", err)
     }
   }, [])
+
+  const getQrisImageUrl = (path: string | undefined | null) => {
+    if (!path) return ""
+    if (path.startsWith("http")) return path
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4002/api"
+    const hostUrl = baseUrl.replace(/\/api$/, "")
+    return `${hostUrl}${path.startsWith("/") ? "" : "/"}${path}`
+  }
 
   /** Format seconds into MM:SS */
   const formatCountdown = useMemo(() => (seconds: number) => {
@@ -321,7 +336,7 @@ export function PaymentPanel({
     }
   }
 
-  const handleStartPayment = async (method: "cash" | "qris") => {
+  const handleStartPayment = async (method: "cash" | "qris" | "qris_static" | "transfer") => {
     setPaymentMethod(method)
     const currentSale = sale || (await handleCreateSale())
     if (!currentSale) {
@@ -331,6 +346,37 @@ export function PaymentPanel({
 
     if (method === "qris") {
       await handleQRISPayment(currentSale)
+    }
+  }
+
+  const handleQRISStaticPayment = async () => {
+    if (!sale) return
+    setLoading(true)
+    try {
+      await salesApi.payQRISStatic(sale.id)
+      setShowSuccess(true)
+      toast({ title: "Berhasil", description: "Pembayaran QRIS Statis berhasil" })
+      onPaidSuccess()
+    } catch (error: any) {
+      toast({ title: "Error", description: error.response?.data?.message || "Gagal memproses", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleTransferPayment = async () => {
+    if (!sale || !selectedBank) return
+    setLoading(true)
+    try {
+      const bankDetails = `${selectedBank.bankName} - ${selectedBank.accountNumber} a/n ${selectedBank.accountName}`
+      await salesApi.payTransfer(sale.id, bankDetails)
+      setShowSuccess(true)
+      toast({ title: "Berhasil", description: "Pembayaran Transfer Bank berhasil" })
+      onPaidSuccess()
+    } catch (error: any) {
+      toast({ title: "Error", description: error.response?.data?.message || "Gagal memproses", variant: "destructive" })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -345,6 +391,7 @@ export function PaymentPanel({
     setQrisStatus("PENDING")
     setQrisCountdown(null)
     setShowMidtransInfo(false)
+    setSelectedBank(null)
     onClear()
   }
 
@@ -371,7 +418,7 @@ export function PaymentPanel({
       total,
       cashAmount: parseInt(cashAmount) || total,
       change: Math.max(0, (parseInt(cashAmount) || total) - total),
-      paymentMethod: paymentMethod as "cash" | "qris",
+      paymentMethod: (paymentMethod === "cash" ? "cash" : "qris") as "cash" | "qris",
       cashierName: sale?.cashierName || "",
       customerName: customerName || "",
       createdAt: sale?.createdAt || new Date().toISOString(),
@@ -417,7 +464,12 @@ export function PaymentPanel({
               </div>
               <div className="flex justify-between">
                 <span>Metode Bayar</span>
-                <span className="font-semibold capitalize">{paymentMethod === 'cash' ? 'Tunai' : 'QRIS'}</span>
+                <span className="font-semibold capitalize text-right">
+                  {paymentMethod === 'cash' ? 'Tunai' : paymentMethod === 'qris' ? 'QRIS Midtrans' : paymentMethod === 'qris_static' ? 'QRIS Statis' : 'Transfer Bank'}
+                  {paymentMethod === 'transfer' && selectedBank && (
+                    <span className="block text-[10px] text-slate-400 font-normal">{selectedBank.bankName}</span>
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -735,32 +787,164 @@ export function PaymentPanel({
     document.body
   ) : null
 
+  // ===== QRIS Static Modal (portal, full screen) =====
+  const qrisStaticModal = paymentMethod === "qris_static" && mounted ? createPortal(
+    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 animate-fade-in">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={handleReset} />
+      <div className="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-scale-in">
+        <div className="bg-gradient-to-r from-violet-600 to-purple-700 px-5 py-4 flex items-center justify-between sticky top-0 z-10 shrink-0">
+          <div className="flex items-center gap-2">
+            <QrCode className="h-5 w-5 text-white" />
+            <h3 className="text-base font-bold text-white">Pembayaran QRIS Statis</h3>
+          </div>
+          <button onClick={handleReset} className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors">
+            <XCircle className="h-5 w-5" />
+          </button>
+        </div>
+        <ScrollArea className="flex-1 p-5 overflow-y-auto">
+          <div className="flex flex-col items-center space-y-6">
+            <div className="rounded-2xl bg-violet-50 px-6 py-4 text-center border border-violet-100 w-full">
+              <p className="text-sm text-violet-600 font-semibold mb-1">Total Tagihan</p>
+              <p className="text-3xl font-black text-violet-800">{formatPrice(total)}</p>
+            </div>
+
+            {posSettings?.qrisStaticImage ? (
+              <div className="w-full flex flex-col items-center relative group cursor-pointer" onClick={(e) => {
+                const img = e.currentTarget.querySelector('img');
+                if (img) img.classList.toggle('scale-[1.8]');
+              }}>
+                <div className="rounded-2xl overflow-hidden border-4 border-violet-100 shadow-xl shadow-violet-200/50 p-2 bg-white max-w-sm w-full transition-transform duration-300">
+                  <img src={getQrisImageUrl(posSettings.qrisStaticImage)} alt="QRIS Static" className="w-full h-auto object-contain rounded-xl transition-transform duration-300 ease-in-out origin-center hover:scale-105" />
+                </div>
+                <div className="mt-4 inline-flex items-center justify-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
+                  <span>🔍</span> Klik gambar untuk memperbesar
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-48 w-full items-center justify-center rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 text-sm text-slate-400">
+                Gambar QRIS belum dikonfigurasi di Pengaturan
+              </div>
+            )}
+
+            <p className="text-xs text-slate-500 text-center px-4">Pastikan dana telah masuk ke rekening sebelum menekan tombol Proses Pembayaran.</p>
+          </div>
+        </ScrollArea>
+        <div className="p-5 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
+          <button onClick={handleReset} className="flex-1 rounded-xl bg-white border border-slate-200 py-3 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-100 active:scale-95">
+            Batalkan
+          </button>
+          <button
+            onClick={handleQRISStaticPayment}
+            disabled={loading || !posSettings?.qrisStaticImage}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 py-3 text-sm font-bold text-white shadow-lg shadow-violet-200/50 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex-[2]"
+          >
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
+            Proses Pembayaran
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null
+
   // ===== Payment Method Selection =====
   return (
     <div className="space-y-3 animate-fade-in">
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => handleStartPayment("cash")}
-          className="group flex flex-col items-center justify-center gap-3 rounded-2xl bg-white border border-slate-100 py-5 transition-all duration-200 hover:bg-orange-50 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-100/40 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-200/40 transition-transform group-hover:scale-110">
-            <Banknote className="h-6 w-6 text-white" />
+      {qrisModal}
+      {qrisStaticModal}
+
+      {paymentMethod === "transfer" && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 animate-fade-in space-y-4">
+          <h3 className="text-sm font-bold text-slate-800 text-center">Pembayaran Transfer</h3>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-500">Pilih Rekening Tujuan</label>
+            {posSettings?.bankAccounts.map(bank => (
+              <button
+                key={bank.id}
+                onClick={() => setSelectedBank(bank)}
+                className={`w-full text-left p-3 rounded-xl border flex flex-col gap-1 transition-all ${selectedBank?.id === bank.id ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600'}`}
+              >
+                <span className="text-sm font-bold flex items-center justify-between">
+                  {bank.bankName}
+                  {selectedBank?.id === bank.id && <CheckCircle className="h-4 w-4 text-emerald-500" />}
+                </span>
+                <span className="text-xs font-mono">{bank.accountNumber} a/n {bank.accountName}</span>
+              </button>
+            ))}
           </div>
-          <span className="text-sm font-bold text-slate-600 group-hover:text-orange-700">Tunai</span>
-        </button>
-        <button
-          onClick={() => handleStartPayment("qris")}
-          className="group flex flex-col items-center justify-center gap-3 rounded-2xl bg-white border border-slate-100 py-5 transition-all duration-200 hover:bg-violet-50 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/40 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg shadow-violet-200/40 transition-transform group-hover:scale-110">
-            <QrCode className="h-6 w-6 text-white" />
-          </div>
-          <span className="text-sm font-bold text-slate-600 group-hover:text-violet-700">QRIS</span>
-        </button>
-      </div>
+
+          <button
+            onClick={handleTransferPayment}
+            disabled={loading || !selectedBank}
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-emerald-700 disabled:opacity-50 flex justify-center items-center gap-2"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+            Konfirmasi Transfer Diterima
+          </button>
+          <button
+            onClick={() => setPaymentMethod(null)}
+            className="w-full rounded-xl bg-white border border-slate-200 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50"
+          >
+            Kembali
+          </button>
+        </div>
+      )}
+
+      {!paymentMethod && (
+        <div className="grid grid-cols-1 gap-3">
+          {(!posSettings || posSettings.cash) && (
+            <button
+              onClick={() => handleStartPayment("cash")}
+              className="group flex flex-row items-center justify-start gap-4 rounded-2xl bg-white border border-slate-100 p-4 transition-all duration-200 hover:bg-orange-50 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-100/40 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-200/40 transition-transform group-hover:scale-110">
+                <Banknote className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-base font-bold text-slate-600 group-hover:text-orange-700">Tunai</span>
+            </button>
+          )}
+
+          {posSettings?.qrisMidtrans && (
+            <button
+              onClick={() => handleStartPayment("qris")}
+              className="group flex flex-row items-center justify-start gap-4 rounded-2xl bg-white border border-slate-100 p-4 transition-all duration-200 hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100/40 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-blue-500 shadow-lg shadow-indigo-200/40 transition-transform group-hover:scale-110">
+                <QrCode className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-base font-bold text-slate-600 group-hover:text-indigo-700">QRIS Midtrans</span>
+            </button>
+          )}
+
+          {posSettings?.qrisStatic && (
+            <button
+              onClick={() => handleStartPayment("qris_static")}
+              className="group flex flex-row items-center justify-start gap-4 rounded-2xl bg-white border border-slate-100 p-4 transition-all duration-200 hover:bg-violet-50 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/40 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg shadow-violet-200/40 transition-transform group-hover:scale-110">
+                <QrCode className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-base font-bold text-slate-600 group-hover:text-violet-700">QRIS Statis</span>
+            </button>
+          )}
+
+          {posSettings?.bankTransfer && (
+            <button
+              onClick={() => handleStartPayment("transfer")}
+              className="group flex flex-row items-center justify-start gap-4 rounded-2xl bg-white border border-slate-100 p-4 transition-all duration-200 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/40 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-200/40 transition-transform group-hover:scale-110">
+                <CreditCard className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-base font-bold text-slate-600 group-hover:text-emerald-700">Transfer Bank</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <button
-        onClick={onClear}
+        onClick={handleReset}
         className="w-full rounded-xl bg-white border border-slate-200 py-2.5 text-sm font-semibold text-slate-400 transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-[0.98]"
       >
         Batalkan Transaksi

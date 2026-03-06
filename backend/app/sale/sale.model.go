@@ -14,6 +14,10 @@ type PayCashRequest struct {
 	Amount int `json:"amount" validate:"required,gt=0"`
 }
 
+type PayTransferRequest struct {
+	BankDetails string `json:"bankDetails" validate:"required"`
+}
+
 type SaleItemResponse struct {
 	ID          string `json:"id"`
 	ProductID   string `json:"productId"`
@@ -54,12 +58,13 @@ type QRISStatusResponse struct {
 }
 
 type DailyReportResponse struct {
-	Date         string `json:"date"`
-	TotalSales   int    `json:"totalSales"`
-	TotalRevenue int    `json:"totalRevenue"`
-	TotalItems   int    `json:"totalItems"`
-	CashSales    int    `json:"cashSales"`
-	QRISSales    int    `json:"qrisSales"`
+	Date          string `json:"date"`
+	TotalSales    int    `json:"totalSales"`
+	TotalRevenue  int    `json:"totalRevenue"`
+	TotalItems    int    `json:"totalItems"`
+	CashSales     int    `json:"cashSales"`
+	QRISSales     int    `json:"qrisSales"`
+	TransferSales int    `json:"transferSales"`
 }
 
 type SnapTokenResponse struct {

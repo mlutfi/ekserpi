@@ -10,14 +10,16 @@ type ReportFilter struct {
 
 // ReportSummaryResponse holds aggregated summary stats
 type ReportSummaryResponse struct {
-	TotalRevenue      int     `json:"totalRevenue"`
-	TotalTransactions int     `json:"totalTransactions"`
-	TotalItems        int     `json:"totalItems"`
-	AverageOrder      float64 `json:"averageOrder"`
-	CashRevenue       int     `json:"cashRevenue"`
-	CashTransactions  int     `json:"cashTransactions"`
-	QRISRevenue       int     `json:"qrisRevenue"`
-	QRISTransactions  int     `json:"qrisTransactions"`
+	TotalRevenue         int     `json:"totalRevenue"`
+	TotalTransactions    int     `json:"totalTransactions"`
+	TotalItems           int     `json:"totalItems"`
+	AverageOrder         float64 `json:"averageOrder"`
+	CashRevenue          int     `json:"cashRevenue"`
+	CashTransactions     int     `json:"cashTransactions"`
+	QRISRevenue          int     `json:"qrisRevenue"`
+	QRISTransactions     int     `json:"qrisTransactions"`
+	TransferRevenue      int     `json:"transferRevenue"`
+	TransferTransactions int     `json:"transferTransactions"`
 }
 
 // DailyChartPoint represents one day of revenue data for chart display
@@ -42,6 +44,7 @@ type SaleDetailResponse struct {
 	CustomerName  *string            `json:"customerName"`
 	Total         int                `json:"total"`
 	PaymentMethod string             `json:"paymentMethod"`
+	ProviderRef   *string            `json:"providerRef"`
 	ItemCount     int                `json:"itemCount"`
 	Items         []SaleItemResponse `json:"items"`
 	CreatedAt     string             `json:"createdAt"`

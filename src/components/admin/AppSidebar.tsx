@@ -18,6 +18,7 @@ import {
     Package,
     Sparkles,
     LayoutGrid,
+    Settings,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -108,6 +109,19 @@ const navItems = [
         activeBg: "bg-cyan-50",
         activeBorder: "bg-cyan-500",
         activeText: "text-cyan-700",
+        badge: null,
+        requiredRole: "OWNER",
+    },
+    {
+        href: "/admin/settings/pos",
+        label: "Pengaturan POS",
+        icon: Settings,
+        iconBg: "bg-slate-50",
+        iconColor: "text-slate-500",
+        activeIconBg: "bg-slate-500",
+        activeBg: "bg-slate-50",
+        activeBorder: "bg-slate-500",
+        activeText: "text-slate-700",
         badge: null,
         requiredRole: "OWNER",
     },
