@@ -19,6 +19,7 @@ import {
     Sparkles,
     LayoutGrid,
     Settings,
+    ChevronsDownUp,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -31,7 +32,7 @@ const navItems = [
         href: "/admin",
         label: "Dashboard",
         icon: LayoutDashboard,
-        iconBg: "bg-sky-50",
+        iconBg: "bg-sky-90",
         iconColor: "text-sky-500",
         activeIconBg: "bg-sky-500",
         activeBg: "bg-sky-50",
@@ -175,9 +176,9 @@ export function AppSidebar() {
                     /* Collapsed: show only current app icon */
                     <button
                         onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
-                        className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-200/50 transition-transform hover:scale-105"
+                        className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-500 to-gray-900 shadow-lg shadow-gray-400/500 shadow-lg transition-transform hover:scale-105"
                     >
-                        <LayoutGrid className="h-5 w-5 text-white" />
+                        <ChevronsDownUp className="h-6 w-6 text-white" />
                     </button>
                 ) : (
                     /* Expanded: show app switcher button */
@@ -185,11 +186,11 @@ export function AppSidebar() {
                         onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
                         className="flex w-full items-center gap-3 rounded-xl px-2 py-2 transition-all hover:bg-slate-50"
                     >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-200/50">
-                            <LayoutGrid className="h-5 w-5 text-white" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-500 to-gray-900 shadow-lg shadow-gray-400/50">
+                            <ChevronsDownUp className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1 text-left min-w-0">
-                            <span className="text-sm font-bold text-slate-800 block truncate">{currentApp.label}</span>
+                            <span className="text-base font-bold text-slate-800 block truncate">{currentApp.label}</span>
                             <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase truncate">{currentApp.description}</p>
                         </div>
                         <ChevronDown className={cn(
@@ -233,7 +234,7 @@ export function AppSidebar() {
                                         <span className="block text-[10px] text-slate-400 truncate">{app.description}</span>
                                     </div>
                                     {isCurrent && (
-                                        <span className="flex h-1.5 w-1.5 rounded-full bg-orange-400" />
+                                        <span className="flex h-1.5 w-1.5 rounded-full bg-gray-500" />
                                     )}
                                 </button>
                             )

@@ -10,6 +10,9 @@ const nextConfig = {
       },
     ],
   },
+  devIndicators: {
+    position: 'bottom-right', // Choices: 'bottom-left', 'bottom-right', 'top-right', 'top-left'
+  },
   async rewrites() {
     return [
       {

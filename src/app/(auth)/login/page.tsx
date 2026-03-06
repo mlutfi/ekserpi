@@ -48,45 +48,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4 py-8 text-slate-900 md:px-10">
-      <div className="mx-auto grid w-full max-w-6xl items-center justify-center overflow-hidden">
-        <section className="flex flex-col w-[500px] items-center justify-center gap-6 p-8 md:p-12 rounded-[28px] border border-slate-200 bg-white text-center shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)]">
-          <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-900">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-gradient-to-br from-amber-500 to-orange-600">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="h-5 w-5 text-white"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                />
-              </svg>
+    <div className="w-full px-4 py-8 text-zinc-900 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[400px]">
+        <section className="flex flex-col gap-6 rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm">
+              <Image
+                src="/xrp_logo.png"
+                alt="Logo"
+                width={48}
+                height={48}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <span className="leading-none">Simple POS</span>
+            <div className="text-center">
+              <h2 className="text-xl font-semibold tracking-tight">Selamat Datang</h2>
+              <p className="mt-1.5 text-sm text-zinc-500">
+                Silakan login untuk melanjutkan
+              </p>
+            </div>
           </div>
 
-          <div>
-            <h2 className="text-2xl font-semibold">Selamat Datang</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Silakan login ke sistem POS Anda
-            </p>
-          </div>
-
-          <div className="w-full max-w-sm space-y-4 text-left">
+          <div className="space-y-4">
             <div className="space-y-3">
-              <div>
-                <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
+              <div className="space-y-1.5">
+                <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
                   Email
                 </label>
                 <input
                   id="email"
                   type="email"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:bg-white focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus:border-black focus:ring-1 focus:ring-black"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -94,15 +86,15 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="mb-1 block text-xs font-medium text-slate-700">
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
                   Password
                 </label>
-                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200">
+                <div className="relative">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    className="w-full bg-transparent text-sm outline-none"
+                    className="w-full rounded-md border border-zinc-200 bg-transparent px-3 py-2 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus:border-black focus:ring-1 focus:ring-black"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
@@ -114,10 +106,10 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="ml-3 inline-flex h-6 w-6 items-center justify-center text-slate-400 transition hover:text-slate-600"
+                    className="absolute right-0 top-0 flex h-full w-10 items-center justify-center text-zinc-400 transition-colors hover:text-zinc-600"
                     aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -127,11 +119,11 @@ export default function LoginPage() {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="w-full rounded-xl border border-[#0e0a07] bg-[#0e0a07] py-2.5 text-sm font-semibold text-white transition hover:bg-[#16110d] disabled:opacity-60"
+              className="flex w-full items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50"
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                <>
+                  <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
                     <circle
                       className="opacity-25"
                       cx="12"
@@ -148,17 +140,17 @@ export default function LoginPage() {
                     />
                   </svg>
                   Logging in...
-                </span>
+                </>
               ) : (
                 "Masuk"
               )}
             </button>
-
-            <p className="text-center text-xs text-slate-500">
-              Demo: owner@pos.com / password123
-            </p>
           </div>
         </section>
+
+        <p className="mt-6 text-center text-xs text-zinc-500">
+          XRP - Community Based System
+        </p>
       </div>
     </div>
   )

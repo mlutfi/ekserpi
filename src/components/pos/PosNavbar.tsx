@@ -43,7 +43,7 @@ export function PosNavbar() {
                   <ShoppingCart className="h-5 w-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <span className="text-lg font-bold text-slate-800">Simple POS</span>
+                  <span className="text-base font-bold text-slate-800">POS</span>
                   <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Point of Sale</p>
                 </div>
                 {accessibleApps.length > 1 && (

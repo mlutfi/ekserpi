@@ -1,4 +1,4 @@
-import { ShoppingCart, Building2, LayoutGrid } from "lucide-react"
+import { ShoppingCart, Building2, LayoutGrid, ChevronsDownUp } from "lucide-react"
 
 export interface AppSwitcherItem {
     key: string
@@ -42,9 +42,9 @@ export const appSwitcherItems: AppSwitcherItem[] = [
         label: "Admin",
         description: "Management Panel",
         href: "/admin",
-        icon: LayoutGrid,
-        gradient: "from-amber-400 to-orange-500",
-        shadowColor: "shadow-amber-200/50",
+        icon: ChevronsDownUp,
+        gradient: "from-gray-500 to-gray-900",
+        shadowColor: "shadow-gray-400/50",
         allowedRoles: ["OWNER", "OPS", "BACKEND", "FRONTEND"],
     },
 ]

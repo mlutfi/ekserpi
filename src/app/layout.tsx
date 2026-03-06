@@ -6,8 +6,14 @@ import { Toaster } from "@/components/ui/sonner"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Simple POS - Point of Sales System",
-  description: "Sistem Point of Sales yang membantu Anda mengelola transaksi, inventori, dan laporan penjualan dalam satu platform.",
+  title: {
+    template: "%s",
+    default: "XRP - Community Based System",
+  },
+  description: "Integrated web app for community based system.",
+  icons: {
+    icon: "/xrp_logo.png",
+  },
 }
 
 export default function RootLayout({

@@ -1,4 +1,10 @@
-# EKS-ER-PI Application
+<div align="center">
+  <img src="./public/xrp_logo_org.png" alt="XRP Logo" width="200"/>
+  <p>Community Based System.</p>
+</div>
+
+
+# XRP - Community Based System
 
 A comprehensive Human Resources Information System (HRIS) and Point of Sales (POS) application with separated backend and frontend architecture. (in development)
 

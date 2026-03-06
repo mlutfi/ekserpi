@@ -552,7 +552,7 @@ export function HRISSidebar() {
                             <Building2 className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1 text-left min-w-0">
-                            <span className="text-sm font-bold text-slate-800 block truncate">{currentApp.label}</span>
+                            <span className="text-base font-bold text-slate-800 block truncate">{currentApp.label}</span>
                             <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase truncate">{currentApp.description}</p>
                         </div>
                         <ChevronDown className={cn(
