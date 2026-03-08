@@ -15,6 +15,7 @@ import {
     User as UserIcon,
     KeyRound,
     LogOut,
+    Shield,
 } from "lucide-react"
 import { useSidebarState } from "@/lib/useSidebarState"
 import { useAuthStore } from "@/lib/store"
@@ -28,6 +29,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal"
+import { TwoFactorSetupModal } from "@/components/auth/TwoFactorSetupModal"
+import { authApi } from "@/lib/api"
 
 const breadcrumbMap: Record<string, { label: string; icon: React.ElementType }> = {
     "/admin": { label: "Dashboard", icon: LayoutDashboard },
@@ -43,8 +46,9 @@ export function AdminHeader() {
     const pathname = usePathname()
     const router = useRouter()
     const { collapsed, toggleCollapsed } = useSidebarState()
-    const { user, logout } = useAuthStore()
+    const { user, logout, setAuth } = useAuthStore()
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
+    const [is2faOpen, setIs2faOpen] = useState(false)
 
     const currentPage = Object.entries(breadcrumbMap).find(([path]) => {
         if (path === "/admin") return pathname === "/admin"
@@ -62,6 +66,16 @@ export function AdminHeader() {
     const getInitials = (name?: string) => {
         if (!name) return "U"
         return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    }
+
+    const refreshUser = async () => {
+        try {
+            const data = await authApi.getMe()
+            const token = localStorage.getItem('token')
+            if (token) setAuth(data, token)
+        } catch (error) {
+            console.error("Failed to refresh user:", error)
+        }
     }
 
     return (
@@ -121,6 +135,10 @@ export function AdminHeader() {
                                 <KeyRound className="mr-2 h-4 w-4 text-slate-500" />
                                 <span>Ganti Password</span>
                             </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => setIs2faOpen(true)}>
+                                <Shield className="mr-2 h-4 w-4 text-slate-500" />
+                                <span>2FA Authentication</span>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50" onClick={handleLogout}>
                                 <LogOut className="mr-2 h-4 w-4" />
@@ -135,6 +153,15 @@ export function AdminHeader() {
                 open={isChangePasswordOpen}
                 onOpenChange={setIsChangePasswordOpen}
             />
+
+            {user && (
+                <TwoFactorSetupModal
+                    open={is2faOpen}
+                    onOpenChange={setIs2faOpen}
+                    user={{ twoFactorEnabled: user.twoFactorEnabled }}
+                    onSuccess={refreshUser}
+                />
+            )}
         </>
     )
 }

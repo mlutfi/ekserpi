@@ -6,9 +6,11 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token    string            `json:"token"`
-	User     UserResponse      `json:"user"`
-	Employee *EmployeeResponse `json:"employee,omitempty"` // nil if not HRIS role
+	Token             string            `json:"token,omitempty"`
+	TwoFactorRequired bool              `json:"twoFactorRequired"`
+	TwoFactorToken    string            `json:"twoFactorToken,omitempty"`
+	User              UserResponse      `json:"user"`
+	Employee          *EmployeeResponse `json:"employee,omitempty"` // nil if not HRIS role
 }
 
 type UserResponse struct {
@@ -17,6 +19,21 @@ type UserResponse struct {
 	Email              string `json:"email"`
 	Role               string `json:"role"`
 	MustChangePassword bool   `json:"mustChangePassword"`
+	TwoFactorEnabled   bool   `json:"twoFactorEnabled"`
+}
+
+type Setup2FAResponse struct {
+	Secret string `json:"secret"`
+	QRURL  string `json:"qrUrl"`
+}
+
+type Verify2FARequest struct {
+	Code string `json:"code" validate:"required,len=6"`
+}
+
+type Verify2FALoginRequest struct {
+	Code           string `json:"code" validate:"required,len=6"`
+	TwoFactorToken string `json:"twoFactorToken" validate:"required"`
 }
 
 // EmployeeResponse - simplified employee data for auth response

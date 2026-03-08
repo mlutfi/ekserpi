@@ -1,8 +1,18 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState, useRef, useEffect } from "react"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 interface CartItem {
   productId: string
@@ -19,8 +29,45 @@ interface CartProps {
 }
 
 export function Cart({ items, total, onSetQty, onRemove }: CartProps) {
+  const [editingItem, setEditingItem] = useState<CartItem | null>(null)
+  const [editQty, setEditQty] = useState<string>("")
+  const inputRef = useRef<HTMLInputElement>(null)
+
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(price)
+
+  const handleOpenEdit = (item: CartItem) => {
+    setEditingItem(item)
+    setEditQty(item.qty.toString())
+  }
+
+  const handleSaveQty = () => {
+    if (editingItem) {
+      const newQty = parseInt(editQty)
+      if (!isNaN(newQty) && newQty >= 0) {
+        onSetQty(editingItem.productId, newQty)
+      }
+      setEditingItem(null)
+    }
+  }
+
+  const handleDeleteItem = () => {
+    if (editingItem) {
+      onRemove(editingItem.productId)
+      setEditingItem(null)
+    }
+  }
+
+  useEffect(() => {
+    if (editingItem && inputRef.current) {
+      // Small timeout to ensure the element is rendered and interactive
+      const timer = setTimeout(() => {
+        inputRef.current?.focus()
+        inputRef.current?.select()
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [editingItem])
 
   const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.qty, 0), [items])
 
@@ -47,12 +94,18 @@ export function Cart({ items, total, onSetQty, onRemove }: CartProps) {
               className="group/item flex items-center gap-3 rounded-xl border border-zinc-100 bg-white p-3 transition-all hover:border-zinc-200 hover:shadow-sm"
             >
               {/* Index or dot */}
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-zinc-50 text-[10px] font-bold text-zinc-400 group-hover/item:bg-zinc-900 group-hover/item:text-white transition-colors">
+              <div
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-zinc-50 text-[10px] font-bold text-zinc-400 group-hover/item:bg-zinc-900 group-hover/item:text-white transition-colors cursor-pointer"
+                onClick={() => handleOpenEdit(item)}
+              >
                 {items.indexOf(item) + 1}
               </div>
 
-              <div className="flex-1 min-w-0">
-                <p className="truncate text-[13px] font-semibold text-zinc-900">{item.name}</p>
+              <div
+                className="flex-1 min-w-0 cursor-pointer group/title"
+                onClick={() => handleOpenEdit(item)}
+              >
+                <p className="truncate text-[13px] font-semibold text-zinc-900 group-hover/title:text-blue-600 transition-colors">{item.name}</p>
                 <p className="text-[11px] text-zinc-500">{formatPrice(item.price)}</p>
               </div>
 
@@ -103,6 +156,50 @@ export function Cart({ items, total, onSetQty, onRemove }: CartProps) {
           </span>
         </div>
       </div>
+
+      {/* Edit Item Dialog */}
+      <Dialog open={!!editingItem} onOpenChange={(open) => !open && setEditingItem(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{editingItem?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="quantity" className="text-sm font-medium text-zinc-500">
+                Jumlah Pesanan
+              </label>
+              <Input
+                id="quantity"
+                type="number"
+                ref={inputRef}
+                value={editQty}
+                onChange={(e) => setEditQty(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveQty()
+                }}
+                className="text-lg font-bold py-6"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:gap-0">
+            <Button
+              variant="destructive"
+              onClick={handleDeleteItem}
+              className="px-6"
+            >
+              Hapus Item
+            </Button>
+            <div className="flex gap-2">
+              <DialogClose asChild>
+                <Button variant="ghost">Batal</Button>
+              </DialogClose>
+              <Button onClick={handleSaveQty} className="px-8">
+                Simpan
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -65,18 +65,20 @@ type User struct {
 	DeletedAt          gorm.DeletedAt `gorm:"column:deleted_at;index" json:"-"`
 
 	// HRIS Employee Fields
-	NIP          *string        `gorm:"column:nip;type:varchar(50);uniqueIndex" json:"nip"`
-	Phone        string         `gorm:"column:phone;type:varchar(20)" json:"phone"`
-	Address      string         `gorm:"column:address;type:text" json:"address"`
-	DepartmentID *string        `gorm:"column:department_id;type:varchar(255)" json:"departmentId"`
-	PositionID   *string        `gorm:"column:position_id;type:varchar(255)" json:"positionId"`
-	JoinDate     *time.Time     `gorm:"column:join_date;type:date" json:"joinDate"`
-	EmployeeType EmployeeType   `gorm:"column:employee_type;type:varchar(20);default:'PKWTT'" json:"employeeType"`
-	Status       EmployeeStatus `gorm:"column:status;type:varchar(20);default:'ACTIVE'" json:"status"`
-	Photo        string         `gorm:"column:photo;type:varchar(500)" json:"photo"`
-	ManagerID    *string        `gorm:"column:manager_id;type:varchar(255)" json:"managerId"`
-	BasicSalary  float64        `gorm:"column:basic_salary;type:decimal(15,2);default:0" json:"basicSalary"`
-	Allowance    float64        `gorm:"column:allowance;type:decimal(15,2);default:0" json:"allowance"`
+	NIP              *string        `gorm:"column:nip;type:varchar(50);uniqueIndex" json:"nip"`
+	Phone            string         `gorm:"column:phone;type:varchar(20)" json:"phone"`
+	Address          string         `gorm:"column:address;type:text" json:"address"`
+	DepartmentID     *string        `gorm:"column:department_id;type:varchar(255)" json:"departmentId"`
+	PositionID       *string        `gorm:"column:position_id;type:varchar(255)" json:"positionId"`
+	JoinDate         *time.Time     `gorm:"column:join_date;type:date" json:"joinDate"`
+	EmployeeType     EmployeeType   `gorm:"column:employee_type;type:varchar(20);default:'PKWTT'" json:"employeeType"`
+	Status           EmployeeStatus `gorm:"column:status;type:varchar(20);default:'ACTIVE'" json:"status"`
+	Photo            string         `gorm:"column:photo;type:varchar(500)" json:"photo"`
+	ManagerID        *string        `gorm:"column:manager_id;type:varchar(255)" json:"managerId"`
+	BasicSalary      float64        `gorm:"column:basic_salary;type:decimal(15,2);default:0" json:"basicSalary"`
+	Allowance        float64        `gorm:"column:allowance;type:decimal(15,2);default:0" json:"allowance"`
+	TwoFactorSecret  string         `gorm:"column:two_factor_secret;type:varchar(255)" json:"-"`
+	TwoFactorEnabled bool           `gorm:"column:two_factor_enabled;default:false" json:"twoFactorEnabled"`
 
 	// Relations
 	Sales      []Sale      `gorm:"foreignKey:CashierID;constraint:OnDelete:Restrict" json:"sales,omitempty"`

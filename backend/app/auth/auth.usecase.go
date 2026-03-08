@@ -9,6 +9,7 @@ import (
 	"hris_backend/middleware"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/pquerna/otp/totp"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -16,8 +17,12 @@ import (
 
 type AuthUseCase interface {
 	Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error)
+	Verify2FALogin(ctx context.Context, request *Verify2FALoginRequest) (*LoginResponse, error)
 	GetMe(ctx context.Context, userId string) (*UserResponse, error)
 	ChangePassword(ctx context.Context, userId string, request *ChangePasswordRequest) error
+	Generate2FASetup(ctx context.Context, userId string) (*Setup2FAResponse, error)
+	Enable2FA(ctx context.Context, userId string, request *Verify2FARequest) error
+	Disable2FA(ctx context.Context, userId string) error
 }
 
 type authUseCase struct {
@@ -59,7 +64,26 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 		return nil, errors.New("invalid email or password")
 	}
 
-	token, err := u.generateToken(user)
+	if user.TwoFactorEnabled {
+		token, err := u.generateToken(user, true)
+		if err != nil {
+			return nil, errors.New("failed to generate 2fa token")
+		}
+		return &LoginResponse{
+			TwoFactorRequired: true,
+			TwoFactorToken:    token,
+			User: UserResponse{
+				ID:                 user.ID,
+				Name:               user.Name,
+				Email:              user.Email,
+				Role:               string(user.Role),
+				MustChangePassword: user.MustChangePassword,
+				TwoFactorEnabled:   user.TwoFactorEnabled,
+			},
+		}, nil
+	}
+
+	token, err := u.generateToken(user, false)
 	if err != nil {
 		return nil, errors.New("failed to generate token")
 	}
@@ -72,6 +96,7 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 			Email:              user.Email,
 			Role:               string(user.Role),
 			MustChangePassword: user.MustChangePassword,
+			TwoFactorEnabled:   user.TwoFactorEnabled,
 		},
 	}
 
@@ -107,6 +132,96 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 	return response, nil
 }
 
+func (u *authUseCase) Verify2FALogin(ctx context.Context, request *Verify2FALoginRequest) (*LoginResponse, error) {
+	secret := u.Config.GetString("jwt.secret")
+	token, err := jwt.ParseWithClaims(request.TwoFactorToken, &middleware.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid or expired 2fa token")
+	}
+
+	claims, ok := token.Claims.(*middleware.JWTClaims)
+	if !ok || !claims.Is2FAPending {
+		return nil, errors.New("invalid token claims")
+	}
+
+	user, err := u.Repository.FindByID(ctx, claims.UserID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	if !totp.Validate(request.Code, user.TwoFactorSecret) {
+		return nil, errors.New("invalid 2fa code")
+	}
+
+	newToken, err := u.generateToken(user, false)
+	if err != nil {
+		return nil, errors.New("failed to generate token")
+	}
+
+	return &LoginResponse{
+		Token: newToken,
+		User: UserResponse{
+			ID:                 user.ID,
+			Name:               user.Name,
+			Email:              user.Email,
+			Role:               string(user.Role),
+			MustChangePassword: user.MustChangePassword,
+			TwoFactorEnabled:   user.TwoFactorEnabled,
+		},
+	}, nil
+}
+
+func (u *authUseCase) Generate2FASetup(ctx context.Context, userId string) (*Setup2FAResponse, error) {
+	user, err := u.Repository.FindByID(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "XRP System",
+		AccountName: user.Email,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Store secret temporarily or just return to user to store when enabling
+	// Actually we should store it and mark as disabled
+	err = u.Repository.Update2FASecret(ctx, userId, key.Secret())
+	if err != nil {
+		return nil, err
+	}
+
+	return &Setup2FAResponse{
+		Secret: key.Secret(),
+		QRURL:  key.URL(),
+	}, nil
+}
+
+func (u *authUseCase) Enable2FA(ctx context.Context, userId string, request *Verify2FARequest) error {
+	user, err := u.Repository.FindByID(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	if user.TwoFactorSecret == "" {
+		return errors.New("2fa setup not initiated")
+	}
+
+	if !totp.Validate(request.Code, user.TwoFactorSecret) {
+		return errors.New("invalid verification code")
+	}
+
+	return u.Repository.Set2FAEnabled(ctx, userId, true)
+}
+
+func (u *authUseCase) Disable2FA(ctx context.Context, userId string) error {
+	return u.Repository.Set2FAEnabled(ctx, userId, false)
+}
+
 func (u *authUseCase) GetMe(ctx context.Context, userId string) (*UserResponse, error) {
 	user, err := u.Repository.FindByID(ctx, userId)
 	if err != nil {
@@ -119,6 +234,7 @@ func (u *authUseCase) GetMe(ctx context.Context, userId string) (*UserResponse, 
 		Email:              user.Email,
 		Role:               string(user.Role),
 		MustChangePassword: user.MustChangePassword,
+		TwoFactorEnabled:   user.TwoFactorEnabled,
 	}, nil
 }
 
@@ -145,15 +261,20 @@ func (u *authUseCase) ChangePassword(ctx context.Context, userId string, request
 	return u.Repository.UpdatePassword(ctx, userId, string(hashedPassword))
 }
 
-func (u *authUseCase) generateToken(user *entity.User) (string, error) {
+func (u *authUseCase) generateToken(user *entity.User, is2faPending bool) (string, error) {
 	secret := u.Config.GetString("jwt.secret")
 	expiration := u.Config.GetInt("jwt.expiration")
 
+	if is2faPending {
+		expiration = 1 // 1 hour for 2fa pending token
+	}
+
 	claims := &middleware.JWTClaims{
-		UserID: user.ID,
-		Email:  user.Email,
-		Role:   string(user.Role),
-		Name:   user.Name,
+		UserID:       user.ID,
+		Email:        user.Email,
+		Role:         string(user.Role),
+		Name:         user.Name,
+		Is2FAPending: is2faPending,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiration) * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

@@ -10,9 +10,13 @@ import (
 
 type AuthHandler interface {
 	Login(ctx *fiber.Ctx) error
+	Verify2FALogin(ctx *fiber.Ctx) error
 	Logout(ctx *fiber.Ctx) error
 	Me(ctx *fiber.Ctx) error
 	ChangePassword(ctx *fiber.Ctx) error
+	Generate2FASetup(ctx *fiber.Ctx) error
+	Enable2FA(ctx *fiber.Ctx) error
+	Disable2FA(ctx *fiber.Ctx) error
 }
 
 type authHandler struct {
@@ -95,6 +99,55 @@ func (h *authHandler) ChangePassword(ctx *fiber.Ctx) error {
 	}
 
 	return helper.SuccessResponseWithMessage(ctx, "Password changed successfully", nil)
+}
+
+func (h *authHandler) Verify2FALogin(ctx *fiber.Ctx) error {
+	request := new(Verify2FALoginRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return helper.BadRequestResponse(ctx, "Invalid request body")
+	}
+
+	response, err := h.UseCase.Verify2FALogin(ctx.Context(), request)
+	if err != nil {
+		return helper.ErrorResponse(ctx, fiber.StatusUnauthorized, err.Error())
+	}
+
+	return helper.SuccessResponse(ctx, response)
+}
+
+func (h *authHandler) Generate2FASetup(ctx *fiber.Ctx) error {
+	userId := ctx.Locals("userId").(string)
+	response, err := h.UseCase.Generate2FASetup(ctx.Context(), userId)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+
+	return helper.SuccessResponse(ctx, response)
+}
+
+func (h *authHandler) Enable2FA(ctx *fiber.Ctx) error {
+	userId := ctx.Locals("userId").(string)
+	request := new(Verify2FARequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return helper.BadRequestResponse(ctx, "Invalid request body")
+	}
+
+	err := h.UseCase.Enable2FA(ctx.Context(), userId, request)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+
+	return helper.SuccessResponseWithMessage(ctx, "2FA enabled successfully", nil)
+}
+
+func (h *authHandler) Disable2FA(ctx *fiber.Ctx) error {
+	userId := ctx.Locals("userId").(string)
+	err := h.UseCase.Disable2FA(ctx.Context(), userId)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+
+	return helper.SuccessResponseWithMessage(ctx, "2FA disabled successfully", nil)
 }
 
 // Helper function to convert *string to string

@@ -10,10 +10,11 @@ import (
 )
 
 type JWTClaims struct {
-	UserID string `json:"userId"`
-	Email  string `json:"email"`
-	Role   string `json:"role"`
-	Name   string `json:"name"`
+	UserID       string `json:"userId"`
+	Email        string `json:"email"`
+	Role         string `json:"role"`
+	Name         string `json:"name"`
+	Is2FAPending bool   `json:"is2faPending"`
 	jwt.RegisteredClaims
 }
 

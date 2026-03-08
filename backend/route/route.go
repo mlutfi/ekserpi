@@ -103,9 +103,15 @@ func (c *RouteConfig) Setup() {
 func (c *RouteConfig) AuthRoutes(router fiber.Router) {
 	authGroup := router.Group("/auth")
 	authGroup.Post("/login", c.AuthHandler.Login)
+	authGroup.Post("/verify-2fa", c.AuthHandler.Verify2FALogin)
 	authGroup.Post("/logout", c.AuthHandler.Logout)
 	authGroup.Get("/me", c.AuthMiddleware, c.AuthHandler.Me)
 	authGroup.Post("/change-password", c.AuthMiddleware, c.AuthHandler.ChangePassword)
+
+	// 2FA Routes
+	authGroup.Post("/2fa/setup", c.AuthMiddleware, c.AuthHandler.Generate2FASetup)
+	authGroup.Post("/2fa/enable", c.AuthMiddleware, c.AuthHandler.Enable2FA)
+	authGroup.Post("/2fa/disable", c.AuthMiddleware, c.AuthHandler.Disable2FA)
 }
 
 func (c *RouteConfig) ProductRoutes(router fiber.Router) {
