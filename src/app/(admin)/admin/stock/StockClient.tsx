@@ -147,8 +147,8 @@ export default function StockManagementPage() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Manajemen Stok</h1>
-                    <p className="text-slate-500 mt-1">Kelola stok masuk, stok keluar, dan inventori produk</p>
+                    <h1 className="text-2xl font-bold text-zinc-900">Manajemen Stok</h1>
+                    <p className="text-zinc-500 mt-1">Kelola stok masuk, stok keluar, dan inventori produk</p>
                 </div>
             </div>
 
@@ -167,12 +167,12 @@ export default function StockManagementPage() {
             )}
 
             {/* Tabs */}
-            <div className="flex px-1 space-x-1 bg-slate-100/50 p-1 rounded-xl w-fit">
+            <div className="flex px-1 space-x-1 bg-zinc-100/50 p-1 rounded-md w-fit">
                 <button
                     onClick={() => setActiveTab('INVENTORY')}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${activeTab === 'INVENTORY'
-                        ? 'bg-white text-emerald-600 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'INVENTORY'
+                        ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
                         }`}
                 >
                     <Package className="w-4 h-4" />
@@ -180,9 +180,9 @@ export default function StockManagementPage() {
                 </button>
                 <button
                     onClick={() => setActiveTab('STOCK_IN')}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${activeTab === 'STOCK_IN'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'STOCK_IN'
+                        ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
                         }`}
                 >
                     <ArrowDown className="w-4 h-4" />
@@ -190,9 +190,9 @@ export default function StockManagementPage() {
                 </button>
                 <button
                     onClick={() => setActiveTab('STOCK_OUT')}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${activeTab === 'STOCK_OUT'
-                        ? 'bg-white text-rose-600 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'STOCK_OUT'
+                        ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
                         }`}
                 >
                     <ArrowUp className="w-4 h-4" />
@@ -201,10 +201,10 @@ export default function StockManagementPage() {
             </div>
 
             {/* Content Area */}
-            <div className="bg-white border rounded-2xl shadow-sm overflow-hidden min-h-[400px]">
+            <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden min-h-[400px]">
                 {isLoading ? (
                     <div className="p-8 flex justify-center items-center h-[400px]">
-                        <div className="w-8 h-8 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+                        <div className="w-8 h-8 rounded-full border-4 border-zinc-200 border-t-zinc-900 animate-spin"></div>
                     </div>
                 ) : (
                     <>
@@ -212,7 +212,7 @@ export default function StockManagementPage() {
                         {activeTab === 'INVENTORY' && (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-sm">
-                                    <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
+                                    <thead className="bg-zinc-50/50 border-b border-zinc-200 text-zinc-500">
                                         <tr>
                                             <th className="px-6 py-4 font-medium">SKU / Code</th>
                                             <th className="px-6 py-4 font-medium">Nama Produk</th>
@@ -221,31 +221,29 @@ export default function StockManagementPage() {
                                             <th className="px-6 py-4 font-medium">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
+                                    <tbody className="divide-y divide-zinc-100">
                                         {inventory.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                                                <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
                                                     Data inventaris kosong
                                                 </td>
                                             </tr>
                                         ) : (
                                             inventory.map((item) => (
-                                                <tr key={item.productId} className="hover:bg-slate-50/50">
-                                                    <td className="px-6 py-4 text-slate-600">{item.sku || '-'}</td>
-                                                    <td className="px-6 py-4 font-medium text-slate-900">{item.productName}</td>
-                                                    <td className="px-6 py-4 text-slate-600">{item.category || '-'}</td>
+                                                <tr key={item.productId} className="hover:bg-zinc-50/50">
+                                                    <td className="px-6 py-4 text-zinc-600">{item.sku || '-'}</td>
+                                                    <td className="px-6 py-4 font-medium text-zinc-900">{item.productName}</td>
+                                                    <td className="px-6 py-4 text-zinc-600">{item.category || '-'}</td>
                                                     <td className="px-6 py-4">
-                                                        <span className="font-semibold text-slate-900">{item.qtyOnHand}</span>
+                                                        <span className="font-semibold text-zinc-900">{item.qtyOnHand}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         {item.qtyOnHand <= 5 ? (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-600">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-md border border-red-200 bg-red-50 text-[10px] font-semibold tracking-wide uppercase text-red-600">
                                                                 Stok Rendah
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-md border border-zinc-200 bg-white text-[10px] font-semibold tracking-wide uppercase text-zinc-700">
                                                                 Stok Aman
                                                             </span>
                                                         )}
@@ -260,13 +258,13 @@ export default function StockManagementPage() {
 
                         {/* STOCK IN TAB */}
                         {activeTab === 'STOCK_IN' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-zinc-100">
                                 {/* Form */}
-                                <div className="p-6 bg-slate-50/30">
-                                    <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-5">Input Stok Masuk</h3>
+                                <div className="p-6 bg-zinc-50/30">
+                                    <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-5">Input Stok Masuk</h3>
                                     <form onSubmit={handleStockInSubmit} className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Pilih Produk *</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Pilih Produk *</label>
                                             <Select
                                                 value={selectedProduct}
                                                 onValueChange={setSelectedProduct}
@@ -286,37 +284,37 @@ export default function StockManagementPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Jumlah Masuk (Qty) *</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Jumlah Masuk (Qty) *</label>
                                             <input
                                                 type="number"
                                                 min="1"
                                                 value={qty}
                                                 onChange={(e) => setQty(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all text-zinc-900"
                                                 placeholder="Contoh: 50"
                                                 required
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Harga Beli Per Item (Rp) *</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Harga Beli Per Item (Rp) *</label>
                                             <input
                                                 type="number"
                                                 min="0"
                                                 value={costPerUnit}
                                                 onChange={(e) => setCostPerUnit(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all text-zinc-900"
                                                 placeholder="Harga modal"
                                                 required
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Catatan</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Catatan</label>
                                             <textarea
                                                 value={note}
                                                 onChange={(e) => setNote(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none h-24"
+                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all resize-none h-24 text-zinc-900"
                                                 placeholder="Catatan dari supplier/gudang..."
                                             />
                                         </div>
@@ -324,22 +322,22 @@ export default function StockManagementPage() {
                                         <Button
                                             type="submit"
                                             loading={isSubmitLoading}
-                                            className="w-full bg-blue-600 hover:bg-blue-700"
+                                            className="w-full"
                                         >
                                             Simpan Stok Masuk
-                                            {!isSubmitLoading && <Plus className="w-4 h-4" />}
+                                            {!isSubmitLoading && <Plus className="w-4 h-4 ml-2" />}
                                         </Button>
                                     </form>
                                 </div>
 
                                 {/* History */}
                                 <div className="lg:col-span-2">
-                                    <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                                        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Riwayat Terakhir</h3>
+                                    <div className="p-6 border-b border-zinc-100 flex justify-between items-center">
+                                        <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Riwayat Terakhir</h3>
                                     </div>
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left text-sm">
-                                            <thead className="bg-slate-50 text-slate-500">
+                                            <thead className="bg-zinc-50/50 text-zinc-500">
                                                 <tr>
                                                     <th className="px-6 py-3 font-medium">Tanggal</th>
                                                     <th className="px-6 py-3 font-medium">Produk</th>
@@ -348,24 +346,24 @@ export default function StockManagementPage() {
                                                     <th className="px-6 py-3 font-medium">Oleh</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-slate-100">
+                                            <tbody className="divide-y divide-zinc-100">
                                                 {stockIns.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                                                        <td colSpan={5} className="px-6 py-8 text-center text-zinc-500">
                                                             Belum ada riwayat stok masuk
                                                         </td>
                                                     </tr>
                                                 ) : (
                                                     stockIns.map((item) => (
-                                                        <tr key={item.id} className="hover:bg-slate-50/50">
-                                                            <td className="px-6 py-3 text-slate-500">{item.createdAt.split(' ')[0]}</td>
-                                                            <td className="px-6 py-3 font-medium text-slate-900">
+                                                        <tr key={item.id} className="hover:bg-zinc-50/50">
+                                                            <td className="px-6 py-3 text-zinc-500">{item.createdAt.split(' ')[0]}</td>
+                                                            <td className="px-6 py-3 font-medium text-zinc-900">
                                                                 {item.productName}
-                                                                {item.note && <p className="text-xs text-slate-400 font-normal mt-0.5">{item.note}</p>}
+                                                                {item.note && <p className="text-xs text-zinc-400 font-normal mt-0.5">{item.note}</p>}
                                                             </td>
-                                                            <td className="px-6 py-3 text-blue-600 font-semibold">+{item.qty}</td>
-                                                            <td className="px-6 py-3 text-slate-600">Rp {item.costPerUnit.toLocaleString('id-ID')}</td>
-                                                            <td className="px-6 py-3 text-slate-600">{item.createdBy}</td>
+                                                            <td className="px-6 py-3 text-zinc-900 font-semibold">+{item.qty}</td>
+                                                            <td className="px-6 py-3 text-zinc-600">Rp {item.costPerUnit.toLocaleString('id-ID')}</td>
+                                                            <td className="px-6 py-3 text-zinc-600">{item.createdBy}</td>
                                                         </tr>
                                                     ))
                                                 )}
@@ -378,13 +376,13 @@ export default function StockManagementPage() {
 
                         {/* STOCK OUT TAB */}
                         {activeTab === 'STOCK_OUT' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-zinc-100">
                                 {/* Form */}
-                                <div className="p-6 bg-slate-50/30">
-                                    <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-5">Input Stok Keluar</h3>
+                                <div className="p-6 bg-zinc-50/30">
+                                    <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-5">Input Stok Keluar</h3>
                                     <form onSubmit={handleStockOutSubmit} className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Pilih Produk *</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Pilih Produk *</label>
                                             <Select
                                                 value={selectedProduct}
                                                 onValueChange={setSelectedProduct}
@@ -408,20 +406,20 @@ export default function StockManagementPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Jumlah Keluar (Qty) *</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Jumlah Keluar (Qty) *</label>
                                             <input
                                                 type="number"
                                                 min="1"
                                                 value={qty}
                                                 onChange={(e) => setQty(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all text-zinc-900"
                                                 placeholder="Contoh: 2"
                                                 required
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Alasan Pengeluaran *</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Alasan Pengeluaran *</label>
                                             <Select
                                                 value={reason}
                                                 onValueChange={setReason}
@@ -440,11 +438,11 @@ export default function StockManagementPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Catatan Tambahan</label>
+                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Catatan Tambahan</label>
                                             <textarea
                                                 value={note}
                                                 onChange={(e) => setNote(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none h-24"
+                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all resize-none h-24 text-zinc-900"
                                                 placeholder="Catatan penyebab rusak/expired..."
                                             />
                                         </div>
@@ -452,22 +450,23 @@ export default function StockManagementPage() {
                                         <Button
                                             type="submit"
                                             loading={isSubmitLoading}
-                                            className="w-full bg-rose-600 hover:bg-rose-700"
+                                            variant="outline"
+                                            className="w-full border-zinc-200"
                                         >
                                             Simpan Stok Keluar
-                                            {!isSubmitLoading && <PackageMinus className="w-4 h-4" />}
+                                            {!isSubmitLoading && <PackageMinus className="w-4 h-4 ml-2" />}
                                         </Button>
                                     </form>
                                 </div>
 
                                 {/* History */}
                                 <div className="lg:col-span-2">
-                                    <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                                        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Riwayat Terakhir</h3>
+                                    <div className="p-6 border-b border-zinc-100 flex justify-between items-center">
+                                        <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Riwayat Terakhir</h3>
                                     </div>
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left text-sm">
-                                            <thead className="bg-slate-50 text-slate-500">
+                                            <thead className="bg-zinc-50/50 text-zinc-500">
                                                 <tr>
                                                     <th className="px-6 py-3 font-medium">Tanggal</th>
                                                     <th className="px-6 py-3 font-medium">Produk</th>
@@ -476,32 +475,28 @@ export default function StockManagementPage() {
                                                     <th className="px-6 py-3 font-medium">Oleh</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-slate-100">
+                                            <tbody className="divide-y divide-zinc-100">
                                                 {stockOuts.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                                                        <td colSpan={5} className="px-6 py-8 text-center text-zinc-500">
                                                             Belum ada riwayat stok keluar (di luar nota penjualan)
                                                         </td>
                                                     </tr>
                                                 ) : (
                                                     stockOuts.map((item) => (
-                                                        <tr key={item.id} className="hover:bg-slate-50/50">
-                                                            <td className="px-6 py-3 text-slate-500">{item.createdAt.split(' ')[0]}</td>
-                                                            <td className="px-6 py-3 font-medium text-slate-900">
+                                                        <tr key={item.id} className="hover:bg-zinc-50/50">
+                                                            <td className="px-6 py-3 text-zinc-500">{item.createdAt.split(' ')[0]}</td>
+                                                            <td className="px-6 py-3 font-medium text-zinc-900">
                                                                 {item.productName}
-                                                                {item.note && <p className="text-xs text-slate-400 font-normal mt-0.5">{item.note}</p>}
+                                                                {item.note && <p className="text-xs text-zinc-400 font-normal mt-0.5">{item.note}</p>}
                                                             </td>
-                                                            <td className="px-6 py-3 text-rose-600 font-semibold">-{item.qty}</td>
+                                                            <td className="px-6 py-3 text-zinc-900 font-semibold">-{item.qty}</td>
                                                             <td className="px-6 py-3">
-                                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${item.reason === 'REFUND' ? 'bg-amber-100 text-amber-700' :
-                                                                    item.reason === 'EXPIRED' ? 'bg-rose-100 text-rose-700' :
-                                                                        item.reason === 'DAMAGED' ? 'bg-orange-100 text-orange-700' :
-                                                                            'bg-slate-100 text-slate-700'
-                                                                    }`}>
+                                                                <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide uppercase border bg-white text-zinc-700 border-zinc-200`}>
                                                                     {item.reason}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-6 py-3 text-slate-600">{item.createdBy}</td>
+                                                            <td className="px-6 py-3 text-zinc-600">{item.createdBy}</td>
                                                         </tr>
                                                     ))
                                                 )}

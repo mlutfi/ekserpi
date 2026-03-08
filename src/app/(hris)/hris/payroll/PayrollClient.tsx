@@ -320,27 +320,27 @@ export default function PayrollClient() {
 
     // HR Admin / Manager View - Manage payroll
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Payroll</h1>
-                    <p className="text-slate-500">Kelola dan hitung gaji karyawan</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Payroll</h1>
+                    <p className="text-sm text-zinc-500 mt-1">Kelola dan hitung gaji karyawan</p>
                 </div>
             </div>
 
             {/* Calculate Payroll */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Calculator className="h-5 w-5" />
+            <Card className="border border-zinc-200 shadow-sm rounded-lg">
+                <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-zinc-900">
+                        <Calculator className="h-4 w-4 text-zinc-500" />
                         Hitung Payroll
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex gap-4">
+                <CardContent className="p-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-1">
                             <Select value={period} onValueChange={setPeriod}>
-                                <SelectTrigger>
+                                <SelectTrigger className="border-zinc-200 h-10 w-full sm:max-w-xs">
                                     <SelectValue placeholder="Pilih Periode" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -357,7 +357,11 @@ export default function PayrollClient() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button onClick={handleCalculate} disabled={calculating || !period}>
+                        <Button
+                            onClick={handleCalculate}
+                            disabled={calculating || !period}
+                            className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm h-10"
+                        >
                             {calculating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                             Hitung Gaji
                         </Button>
@@ -367,29 +371,29 @@ export default function PayrollClient() {
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center">
-                                <FileText className="h-6 w-6 text-blue-500" />
+                            <div className="h-12 w-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-zinc-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Total Payroll</p>
-                                <p className="text-2xl font-bold text-slate-900">{payrolls.length}</p>
+                                <p className="text-sm font-medium text-zinc-500">Total Payroll</p>
+                                <p className="text-2xl font-bold text-zinc-900">{payrolls.length}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center">
-                                <Clock className="h-6 w-6 text-amber-500" />
+                            <div className="h-12 w-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center">
+                                <Clock className="h-5 w-5 text-amber-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Belum Dibayar</p>
-                                <p className="text-2xl font-bold text-slate-900">
+                                <p className="text-sm font-medium text-zinc-500">Belum Dibayar</p>
+                                <p className="text-2xl font-bold text-zinc-900">
                                     {payrolls.filter(p => p.status !== "paid").length}
                                 </p>
                             </div>
@@ -397,15 +401,15 @@ export default function PayrollClient() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center">
-                                <CheckCircle className="h-6 w-6 text-emerald-500" />
+                            <div className="h-12 w-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                                <CheckCircle className="h-5 w-5 text-emerald-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Total Gaji</p>
-                                <p className="text-2xl font-bold text-slate-900">
+                                <p className="text-sm font-medium text-zinc-500">Total Gaji</p>
+                                <p className="text-2xl font-bold text-zinc-900">
                                     {formatCurrency(payrolls.reduce((sum, p) => sum + p.netSalary, 0))}
                                 </p>
                             </div>
@@ -415,22 +419,22 @@ export default function PayrollClient() {
             </div>
 
             {/* Payroll Table */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Daftar Payroll</CardTitle>
+            <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden">
+                <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
+                    <CardTitle className="text-base font-semibold text-zinc-900">Daftar Payroll</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Pegawai</TableHead>
-                                <TableHead>Periode</TableHead>
-                                <TableHead>Gaji Pokok</TableHead>
-                                <TableHead>Tunjangan</TableHead>
-                                <TableHead>Potongan</TableHead>
-                                <TableHead>Gaji Bersih</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Aksi</TableHead>
+                            <TableRow className="bg-zinc-50/50 hover:bg-zinc-50/50">
+                                <TableHead className="font-semibold text-zinc-900">Pegawai</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Periode</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Gaji Pokok</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Tunjangan</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Potongan</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Gaji Bersih</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Status</TableHead>
+                                <TableHead className="text-right font-semibold text-zinc-900">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

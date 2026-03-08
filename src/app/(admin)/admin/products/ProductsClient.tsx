@@ -231,7 +231,7 @@ export default function ProductsAdminPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
       </div>
     );
   }
@@ -241,8 +241,8 @@ export default function ProductsAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Produk</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-zinc-900">Produk</h1>
+          <p className="text-sm text-zinc-500">
             Kelola produk dan inventori Anda
           </p>
         </div>
@@ -256,48 +256,48 @@ export default function ProductsAdminPage() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
         <input
           type="text"
           placeholder="Cari produk..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+          className="w-full rounded-md border border-zinc-200 bg-white py-2 pl-10 pr-4 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
         />
       </div>
 
       {/* Products Table */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-zinc-200 bg-zinc-50/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Produk
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Kategori
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Harga
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Stok
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Status
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-right text-xs font-semibold text-zinc-500">
                   Aksi
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {filteredProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-slate-50">
+                <tr key={product.id} className="hover:bg-zinc-50/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 overflow-hidden">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-zinc-100 border border-zinc-200 overflow-hidden">
                         {product.imageUrl ? (
                           <img
                             src={getImageUrl(product.imageUrl)}
@@ -305,33 +305,33 @@ export default function ProductsAdminPage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <Package className="h-5 w-5 text-slate-400" />
+                          <Package className="h-4 w-4 text-zinc-400" />
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-900">
+                        <p className="text-sm font-medium text-zinc-900">
                           {product.name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-zinc-500">
                           {product.sku || product.barcode || "-"}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-4 py-3 text-sm text-zinc-600">
                     {product.category || "-"}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                  <td className="px-4 py-3 text-sm font-medium text-zinc-900">
                     {formatPrice(product.price)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">
+                  <td className="px-4 py-3 text-sm text-zinc-600">
                     {product.qtyOnHand ?? 0}
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${product.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                      className={`inline-flex items-center border rounded-md px-2 py-1 text-[10px] font-semibold tracking-wide uppercase ${product.isActive
+                        ? "border-zinc-200 bg-white text-zinc-700"
+                        : "border-zinc-200 bg-zinc-100 text-zinc-500"
                         }`}
                     >
                       {product.isActive ? "Aktif" : "Nonaktif"}
@@ -350,7 +350,7 @@ export default function ProductsAdminPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(product)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -364,8 +364,8 @@ export default function ProductsAdminPage() {
 
         {filteredProducts.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12">
-            <Package className="h-12 w-12 text-slate-300" />
-            <p className="mt-2 text-sm text-slate-500">Tidak ada produk</p>
+            <Package className="h-10 w-10 text-zinc-300" />
+            <p className="mt-2 text-sm text-zinc-500">Tidak ada produk</p>
           </div>
         )}
       </div>
@@ -387,10 +387,10 @@ export default function ProductsAdminPage() {
               {/* Image Upload Column */}
               <div className="w-1/3 space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                  <label className="mb-2 block text-sm font-medium text-zinc-700">
                     Gambar Produk
                   </label>
-                  <div className="relative aspect-square w-full flex-col flex items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 transition-colors hover:border-slate-400 hover:bg-slate-100 group">
+                  <div className="relative aspect-square w-full flex-col flex items-center justify-center overflow-hidden rounded-md border border-dashed border-zinc-300 bg-zinc-50 transition-colors hover:border-zinc-400 hover:bg-zinc-100 group">
                     {imagePreview ? (
                       <>
                         <img
@@ -404,13 +404,13 @@ export default function ProductsAdminPage() {
                       </>
                     ) : (
                       <div className="flex flex-col items-center justify-center p-4 text-center">
-                        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-200">
-                          <ImageIcon className="h-5 w-5 text-slate-500" />
+                        <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md bg-zinc-200">
+                          <ImageIcon className="h-4 w-4 text-zinc-500" />
                         </div>
-                        <span className="text-xs font-medium text-slate-600">
+                        <span className="text-xs font-medium text-zinc-600">
                           Pilih atau tarik gambar ke sini
                         </span>
-                        <span className="mt-1 text-[10px] text-slate-400">
+                        <span className="mt-1 text-[10px] text-zinc-400">
                           JPG, PNG, WEBP (Max 5MB)
                         </span>
                       </div>
@@ -428,7 +428,7 @@ export default function ProductsAdminPage() {
               {/* Form Fields Column */}
               <div className="w-2/3 space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                  <label className="mb-1 block text-sm font-medium text-zinc-700">
                     Nama Produk *
                   </label>
                   <input
@@ -438,13 +438,13 @@ export default function ProductsAdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
                       Harga *
                     </label>
                     <input
@@ -455,11 +455,11 @@ export default function ProductsAdminPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, price: e.target.value })
                       }
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
                       Harga Modal
                     </label>
                     <input
@@ -469,13 +469,13 @@ export default function ProductsAdminPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, cost: e.target.value })
                       }
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                  <label className="mb-1 block text-sm font-medium text-zinc-700">
                     Kategori
                   </label>
                   <Select
@@ -499,7 +499,7 @@ export default function ProductsAdminPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
                       SKU
                     </label>
                     <input
@@ -508,11 +508,11 @@ export default function ProductsAdminPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, sku: e.target.value })
                       }
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
                       Barcode
                     </label>
                     <input
@@ -521,13 +521,13 @@ export default function ProductsAdminPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, barcode: e.target.value })
                       }
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                  <label className="mb-1 block text-sm font-medium text-zinc-700">
                     Stok Awal
                   </label>
                   <input
@@ -537,7 +537,7 @@ export default function ProductsAdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, qtyOnHand: e.target.value })
                     }
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                   />
                 </div>
 
@@ -549,16 +549,16 @@ export default function ProductsAdminPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, isActive: e.target.checked })
                     }
-                    className="h-4 w-4 rounded border-slate-300"
+                    className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
                   />
-                  <label htmlFor="isActive" className="text-sm text-slate-700">
+                  <label htmlFor="isActive" className="text-sm text-zinc-700">
                     Produk Aktif
                   </label>
                 </div>
               </div> {/* End Fields Column */}
             </div> {/* End Flex Container */}
 
-            <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <div className="flex gap-3 pt-4 border-t border-zinc-100">
               <Button
                 type="button"
                 variant="outline"

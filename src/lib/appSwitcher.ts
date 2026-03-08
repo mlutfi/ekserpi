@@ -21,8 +21,8 @@ export const appSwitcherItems: AppSwitcherItem[] = [
         description: "Point of Sale",
         href: "/pos",
         icon: ShoppingCart,
-        gradient: "from-emerald-400 to-teal-500",
-        shadowColor: "shadow-emerald-200/50",
+        gradient: "from-zinc-800 to-zinc-900",
+        shadowColor: "shadow-zinc-800/50",
         allowedRoles: ["OWNER", "OPS", "CASHIER", "BACKEND", "FRONTEND"],
         requiredModule: "POS",
     },
@@ -32,8 +32,8 @@ export const appSwitcherItems: AppSwitcherItem[] = [
         description: "HR Management",
         href: "/hris",
         icon: Building2,
-        gradient: "from-blue-400 to-indigo-600",
-        shadowColor: "shadow-blue-200/50",
+        gradient: "from-zinc-800 to-zinc-900",
+        shadowColor: "shadow-zinc-800/50",
         allowedRoles: ["OWNER", "HR_ADMIN", "MANAGER", "TEAM_LEADER", "EMPLOYEE", "STAFF"],
         requiredModule: "HRIS",
     },
@@ -43,8 +43,8 @@ export const appSwitcherItems: AppSwitcherItem[] = [
         description: "Management Panel",
         href: "/admin",
         icon: ChevronsDownUp,
-        gradient: "from-gray-500 to-gray-900",
-        shadowColor: "shadow-gray-400/50",
+        gradient: "from-zinc-800 to-zinc-900",
+        shadowColor: "shadow-zinc-800/50",
         allowedRoles: ["OWNER", "OPS", "BACKEND", "FRONTEND"],
     },
 ]
@@ -65,4 +65,11 @@ export function getAccessibleApps(
         if (app.requiredModule && !activeModules.includes(app.requiredModule)) return false
         return true
     })
+}
+
+/**
+ * Get a specific app by its key.
+ */
+export function getCurrentApp(key: string): AppSwitcherItem | undefined {
+    return appSwitcherItems.find((app) => app.key === key)
 }

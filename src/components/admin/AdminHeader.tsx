@@ -29,14 +29,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal"
 
-const breadcrumbMap: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-    "/admin": { label: "Dashboard", icon: LayoutDashboard, color: "text-sky-500" },
-    "/admin/products": { label: "Produk", icon: Box, color: "text-violet-500" },
-    "/admin/categories": { label: "Kategori", icon: Layers, color: "text-indigo-500" },
-    "/admin/stock": { label: "Stok", icon: Package, color: "text-emerald-500" },
-    "/admin/users": { label: "Pengguna", icon: Users, color: "text-amber-500" },
-    "/admin/reports": { label: "Laporan", icon: TrendingUp, color: "text-rose-500" },
-    "/admin/modules": { label: "Modul", icon: Sparkles, color: "text-cyan-500" },
+const breadcrumbMap: Record<string, { label: string; icon: React.ElementType }> = {
+    "/admin": { label: "Dashboard", icon: LayoutDashboard },
+    "/admin/products": { label: "Produk", icon: Box },
+    "/admin/categories": { label: "Kategori", icon: Layers },
+    "/admin/stock": { label: "Stok", icon: Package },
+    "/admin/users": { label: "Pengguna", icon: Users },
+    "/admin/reports": { label: "Laporan", icon: TrendingUp },
+    "/admin/modules": { label: "Modul", icon: Sparkles },
 }
 
 export function AdminHeader() {
@@ -53,7 +53,6 @@ export function AdminHeader() {
 
     const Icon = currentPage?.[1].icon
     const label = currentPage?.[1].label || "Admin"
-    const color = currentPage?.[1].color || "text-slate-500"
 
     const handleLogout = () => {
         logout()
@@ -88,12 +87,12 @@ export function AdminHeader() {
                     {/* Page Name */}
                     <div className="flex items-center gap-2.5">
                         {Icon && (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
-                                <Icon className={`h-4 w-4 ${color}`} />
+                            <div className="flex h-7 w-7 items-center justify-center text-zinc-500">
+                                <Icon className="h-4 w-4" />
                             </div>
                         )}
                         <div>
-                            <h1 className="text-sm font-semibold text-slate-800">{label}</h1>
+                            <h1 className="text-sm font-medium text-zinc-900">{label}</h1>
                         </div>
                     </div>
                 </div>
@@ -101,9 +100,9 @@ export function AdminHeader() {
                 {/* Profile Dropdown */}
                 <div className="flex items-center">
                     <DropdownMenu>
-                        <DropdownMenuTrigger className="outline-none focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 rounded-full">
-                            <Avatar className="h-8 w-8 transition-transform hover:scale-105 border border-slate-200 shadow-sm cursor-pointer">
-                                <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-600 text-white text-xs font-semibold">
+                        <DropdownMenuTrigger className="outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-2 rounded-md">
+                            <Avatar className="h-8 w-8 rounded-md transition-transform hover:scale-105 border border-zinc-200 shadow-sm cursor-pointer">
+                                <AvatarFallback className="bg-zinc-100 rounded-md text-zinc-600 text-xs font-medium">
                                     {getInitials(user?.name)}
                                 </AvatarFallback>
                             </Avatar>

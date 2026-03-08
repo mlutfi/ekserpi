@@ -97,7 +97,7 @@ export default function CategoriesAdminPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
       </div>
     )
   }
@@ -107,8 +107,8 @@ export default function CategoriesAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kategori</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-zinc-900">Kategori</h1>
+          <p className="text-sm text-zinc-500">
             Kelola kategori produk Anda
           </p>
         </div>
@@ -125,18 +125,18 @@ export default function CategoriesAdminPage() {
         {categories.map((category) => (
           <div
             key={category.id}
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+            className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition hover:shadow-md"
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
-                  <FolderTree className="h-5 w-5 text-amber-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-zinc-100 border border-zinc-200">
+                  <FolderTree className="h-4 w-4 text-zinc-600" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900">
+                  <h3 className="text-sm font-semibold text-zinc-900">
                     {category.name}
                   </h3>
-                  <p className="text-xs text-slate-500">ID: {category.id.slice(0, 8)}...</p>
+                  <p className="text-xs text-zinc-500">ID: {category.id.slice(0, 8)}...</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -151,7 +151,7 @@ export default function CategoriesAdminPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(category)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -162,13 +162,13 @@ export default function CategoriesAdminPage() {
       </div>
 
       {categories.length === 0 && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-12">
-          <FolderTree className="h-12 w-12 text-slate-300" />
-          <p className="mt-2 text-sm text-slate-500">Tidak ada kategori</p>
+        <div className="flex flex-col items-center justify-center rounded-lg border border-zinc-200 bg-white py-12">
+          <FolderTree className="h-10 w-10 text-zinc-300" />
+          <p className="mt-2 text-sm text-zinc-500">Tidak ada kategori</p>
           <Button
             variant="link"
             onClick={openCreateModal}
-            className="mt-4 text-amber-600 hover:text-amber-700"
+            className="mt-4 text-zinc-900 font-medium hover:text-zinc-700 hover:bg-zinc-100 px-4 rounded-md no-underline"
           >
             Tambah kategori pertama
           </Button>
@@ -189,7 +189,7 @@ export default function CategoriesAdminPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Nama Kategori *
               </label>
               <input
@@ -199,7 +199,7 @@ export default function CategoriesAdminPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                 placeholder="Contoh: Makanan"
               />
             </div>

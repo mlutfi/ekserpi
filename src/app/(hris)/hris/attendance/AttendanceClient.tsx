@@ -414,51 +414,46 @@ export default function AttendanceClient() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-white">
             {/* ── Header Section ── */}
-            <div className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 text-white px-5 pt-6 pb-28 md:px-8 md:pt-8 md:pb-32 relative overflow-hidden">
-                {/* Decorative circles */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
-                <div className="absolute top-1/2 right-10 w-24 h-24 bg-white/5 rounded-full" />
-
-                <div className="relative z-10 max-w-2xl mx-auto">
-                    {/* Greeting */}
-                    <div className="flex items-center gap-2 mb-1">
-                        <GreetingIcon className="h-4 w-4 text-emerald-200" />
-                        <span className="text-emerald-100 text-sm font-medium">{greeting.text}</span>
+            <div className="bg-white border-b border-zinc-200 px-5 py-6 md:px-8 md:py-8">
+                <div className="max-w-2xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        {/* Greeting */}
+                        <div className="flex items-center gap-2 mb-1">
+                            <GreetingIcon className="h-4 w-4 text-zinc-500" />
+                            <span className="text-zinc-500 text-sm font-medium">{greeting.text}</span>
+                        </div>
+                        <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{user?.name || "User"} 👋</h1>
+                        <p className="text-zinc-500 text-sm">
+                            {currentTime.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                        </p>
                     </div>
-                    <h1 className="text-xl md:text-2xl font-bold mb-1">{user?.name || "User"} 👋</h1>
-                    <p className="text-emerald-100 text-sm">
-                        {currentTime.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                    </p>
 
                     {/* Live Clock */}
-                    <div className="mt-4 flex items-center gap-3">
-                        <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-5 py-3 flex items-center gap-3">
-                            <Clock className="h-5 w-5 text-emerald-200" />
-                            <span className="text-2xl md:text-3xl font-bold tracking-tight font-mono">
-                                {currentTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                            </span>
-                        </div>
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-3 flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-zinc-500" />
+                        <span className="text-xl md:text-2xl font-bold tracking-tight font-mono text-zinc-900">
+                            {currentTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                        </span>
                     </div>
                 </div>
             </div>
 
-            {/* ── Main Content (overlaps green header) ── */}
-            <div className="px-4 md:px-8 -mt-20 md:-mt-24 relative z-10 max-w-2xl mx-auto space-y-4 pb-8">
+            {/* ── Main Content ── */}
+            <div className="px-4 md:px-8 py-6 max-w-2xl mx-auto space-y-6 pb-8">
 
                 {/* ── Today Status Card ── */}
-                <Card className="border-0 shadow-xl shadow-emerald-900/10 rounded-2xl overflow-hidden bg-white">
+                <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden bg-white">
                     <CardContent className="p-0">
                         {todayAttendance ? (
                             <div className="p-5">
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className="text-sm font-semibold text-slate-800">Status Hari Ini</span>
+                                    <span className="text-sm font-semibold text-zinc-900">Status Hari Ini</span>
                                     {(() => {
                                         const si = getStatusInfo(todayAttendance.status)
                                         return (
-                                            <Badge className={cn("border text-xs font-medium", si.bg, si.color, si.border)}>
+                                            <Badge variant="outline" className={cn("rounded-md text-xs font-medium", si.color, si.border)}>
                                                 {si.label}
                                             </Badge>
                                         )
@@ -467,35 +462,35 @@ export default function AttendanceClient() {
 
                                 <div className="grid grid-cols-3 gap-3">
                                     {/* Check In */}
-                                    <div className="bg-emerald-50 rounded-xl p-3 text-center">
-                                        <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-2">
-                                            <LogIn className="h-4 w-4 text-emerald-600" />
+                                    <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3 text-center">
+                                        <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-2">
+                                            <LogIn className="h-4 w-4 text-zinc-500" />
                                         </div>
-                                        <p className="text-[10px] text-slate-500 mb-0.5">Masuk</p>
-                                        <p className="text-sm font-bold text-emerald-700">{todayAttendance.checkinTime || "-"}</p>
+                                        <p className="text-[10px] text-zinc-500 mb-0.5 uppercase tracking-wider font-semibold">Masuk</p>
+                                        <p className="text-sm font-bold text-zinc-900">{todayAttendance.checkinTime || "-"}</p>
                                     </div>
 
                                     {/* Check Out */}
-                                    <div className="bg-rose-50 rounded-xl p-3 text-center">
-                                        <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-2">
-                                            <LogOut className="h-4 w-4 text-rose-600" />
+                                    <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3 text-center">
+                                        <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-2">
+                                            <LogOut className="h-4 w-4 text-zinc-500" />
                                         </div>
-                                        <p className="text-[10px] text-slate-500 mb-0.5">Pulang</p>
-                                        <p className="text-sm font-bold text-rose-700">{todayAttendance.checkoutTime || "-"}</p>
+                                        <p className="text-[10px] text-zinc-500 mb-0.5 uppercase tracking-wider font-semibold">Pulang</p>
+                                        <p className="text-sm font-bold text-zinc-900">{todayAttendance.checkoutTime || "-"}</p>
                                     </div>
 
                                     {/* Work Mode */}
-                                    <div className={cn("rounded-xl p-3 text-center", getWorkTypeInfo(todayAttendance.workType).bg)}>
+                                    <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3 text-center">
                                         {(() => {
                                             const wti = getWorkTypeInfo(todayAttendance.workType)
                                             const WtIcon = wti.icon
                                             return (
                                                 <>
-                                                    <div className="h-8 w-8 rounded-full bg-white/60 flex items-center justify-center mx-auto mb-2">
-                                                        <WtIcon className={cn("h-4 w-4", wti.color)} />
+                                                    <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-2">
+                                                        <WtIcon className="h-4 w-4 text-zinc-500" />
                                                     </div>
-                                                    <p className="text-[10px] text-slate-500 mb-0.5">Mode</p>
-                                                    <p className={cn("text-sm font-bold", wti.color)}>{wti.label}</p>
+                                                    <p className="text-[10px] text-zinc-500 mb-0.5 uppercase tracking-wider font-semibold">Mode</p>
+                                                    <p className="text-sm font-bold text-zinc-900">{wti.label}</p>
                                                 </>
                                             )
                                         })()}
@@ -503,15 +498,12 @@ export default function AttendanceClient() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-6 text-center">
-                                <div className="relative mx-auto mb-4 w-16 h-16">
-                                    <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-20" />
-                                    <div className="relative h-16 w-16 rounded-full bg-emerald-50 flex items-center justify-center">
-                                        <Fingerprint className="h-8 w-8 text-emerald-400" />
-                                    </div>
+                            <div className="p-8 text-center border-b border-zinc-100 bg-zinc-50/50">
+                                <div className="mx-auto mb-4 h-12 w-12 rounded-full border border-zinc-200 bg-white shadow-sm flex items-center justify-center">
+                                    <Fingerprint className="h-6 w-6 text-zinc-400" />
                                 </div>
-                                <p className="font-semibold text-slate-800 mb-1">Belum Check-in</p>
-                                <p className="text-sm text-slate-500">Silakan check-in untuk mencatat kehadiran hari ini</p>
+                                <p className="font-semibold text-zinc-900 mb-1">Belum Check-in</p>
+                                <p className="text-sm text-zinc-500">Silakan check-in untuk mencatat kehadiran hari ini</p>
                             </div>
                         )}
                     </CardContent>
@@ -523,44 +515,44 @@ export default function AttendanceClient() {
                         {!todayAttendance?.checkinTime ? (
                             <button
                                 onClick={openCheckInModal}
-                                className="w-full relative overflow-hidden group bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-emerald-200/50 transition-all duration-300 active:scale-[0.98]"
+                                className="w-full group bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl p-4 flex items-center justify-between shadow-sm transition-all duration-300 active:scale-[0.98]"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-                                        <LogIn className="h-6 w-6" />
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                                        <LogIn className="h-5 w-5 text-white" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="font-bold text-lg">Check In</p>
-                                        <p className="text-emerald-100 text-xs">Mulai hari kerja Anda</p>
+                                        <p className="font-bold text-base">Check In</p>
+                                        <p className="text-zinc-400 text-xs mt-0.5">Mulai hari kerja Anda</p>
                                     </div>
                                 </div>
-                                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                                <ArrowRight className="h-5 w-5 text-zinc-400 transition-transform group-hover:translate-x-1" />
                             </button>
                         ) : !todayAttendance?.checkoutTime ? (
                             <button
                                 onClick={openCheckOutModal}
-                                className="w-full relative overflow-hidden group bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-2xl p-4 flex items-center justify-between shadow-lg shadow-rose-200/50 transition-all duration-300 active:scale-[0.98]"
+                                className="w-full group bg-white border border-zinc-200 hover:bg-zinc-50 rounded-xl p-4 flex items-center justify-between shadow-sm transition-all duration-300 active:scale-[0.98]"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-                                        <LogOut className="h-6 w-6" />
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                                        <LogOut className="h-5 w-5 text-zinc-900" />
                                     </div>
                                     <div className="text-left">
-                                        <p className="font-bold text-lg">Check Out</p>
-                                        <p className="text-rose-100 text-xs">Akhiri hari kerja Anda</p>
+                                        <p className="font-bold text-base text-zinc-900">Check Out</p>
+                                        <p className="text-zinc-500 text-xs mt-0.5">Akhiri hari kerja Anda</p>
                                     </div>
                                 </div>
-                                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                                <ArrowRight className="h-5 w-5 text-zinc-400 transition-transform group-hover:translate-x-1" />
                             </button>
                         ) : (
-                            <Card className="border-0 shadow-md rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-50 to-teal-50">
+                            <Card className="border border-zinc-200 shadow-sm rounded-xl overflow-hidden bg-zinc-50">
                                 <CardContent className="p-4 flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                                        <CheckCircle className="h-6 w-6 text-emerald-600" />
+                                    <div className="h-12 w-12 rounded-lg bg-white border border-zinc-200 flex items-center justify-center shrink-0">
+                                        <CheckCircle className="h-5 w-5 text-zinc-900" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-emerald-800">Absensi Selesai! ✨</p>
-                                        <p className="text-xs text-emerald-600">
+                                        <p className="font-semibold text-zinc-900">Absensi Selesai! ✨</p>
+                                        <p className="text-xs text-zinc-500 mt-1">
                                             {todayAttendance.checkinTime} — {todayAttendance.checkoutTime}
                                         </p>
                                     </div>
@@ -571,12 +563,12 @@ export default function AttendanceClient() {
                 )}
 
                 {/* ── History Section ── */}
-                <div>
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-base font-semibold text-slate-800">Riwayat Absensi</h2>
+                <div className="pt-2">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-base font-semibold text-zinc-900">Riwayat Absensi</h2>
                         <button
                             onClick={() => router.push("/hris/reports/attendance")}
-                            className="text-xs text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-1"
+                            className="text-xs text-zinc-500 font-medium hover:text-zinc-900 flex items-center gap-1 transition-colors"
                         >
                             Lihat Semua
                             <ChevronRight className="h-3 w-3" />
@@ -584,42 +576,42 @@ export default function AttendanceClient() {
                     </div>
 
                     {history.length > 0 ? (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {history.map((att) => {
                                 const si = getStatusInfo(att.status)
                                 const wti = getWorkTypeInfo(att.workType)
                                 const WtIcon = wti.icon
                                 const dateObj = new Date(att.date)
                                 return (
-                                    <Card key={att.id} className="border-0 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                                        <CardContent className="p-3.5 flex items-center gap-3">
+                                    <Card key={att.id} className="border border-zinc-200 shadow-none rounded-xl overflow-hidden hover:border-zinc-300 transition-colors">
+                                        <CardContent className="p-4 flex items-center gap-4">
                                             {/* Date */}
-                                            <div className="h-11 w-11 rounded-xl bg-slate-100 flex flex-col items-center justify-center shrink-0">
-                                                <span className="text-[10px] font-medium text-slate-400 leading-none uppercase">
+                                            <div className="h-12 w-12 rounded-lg bg-zinc-50 border border-zinc-100 flex flex-col items-center justify-center shrink-0">
+                                                <span className="text-[10px] font-medium text-zinc-500 leading-none uppercase mb-1">
                                                     {dateObj.toLocaleDateString("id-ID", { weekday: "short" })}
                                                 </span>
-                                                <span className="text-base font-bold text-slate-700 leading-tight">
+                                                <span className="text-base font-bold text-zinc-900 leading-none">
                                                     {dateObj.getDate()}
                                                 </span>
                                             </div>
 
                                             {/* Times */}
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-sm font-semibold text-slate-800">
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <span className="text-sm font-semibold text-zinc-900">
                                                         {att.checkinTime || "--:--"}
                                                     </span>
-                                                    <span className="text-slate-300">→</span>
-                                                    <span className="text-sm font-semibold text-slate-800">
+                                                    <span className="text-zinc-300">→</span>
+                                                    <span className="text-sm font-semibold text-zinc-900">
                                                         {att.checkoutTime || "--:--"}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border", si.bg, si.color, si.border)}>
+                                                    <Badge variant="outline" className={cn("text-[10px] px-2 py-0 h-5 font-medium rounded-md", si.color, si.border)}>
                                                         {si.label}
                                                     </Badge>
-                                                    <span className={cn("text-[10px] flex items-center gap-0.5 font-medium", wti.color)}>
-                                                        <WtIcon className="h-2.5 w-2.5" />
+                                                    <span className="text-[10px] flex items-center gap-1 font-medium text-zinc-500">
+                                                        <WtIcon className="h-3 w-3" />
                                                         {wti.label}
                                                     </span>
                                                 </div>
@@ -630,10 +622,12 @@ export default function AttendanceClient() {
                             })}
                         </div>
                     ) : (
-                        <Card className="border-0 shadow-sm rounded-xl">
-                            <CardContent className="p-8 text-center">
-                                <Calendar className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                                <p className="text-sm text-slate-500">Belum ada riwayat absensi</p>
+                        <Card className="border border-zinc-200 shadow-none rounded-xl">
+                            <CardContent className="p-8 text-center bg-zinc-50/50">
+                                <div className="h-12 w-12 rounded-full border border-zinc-200 bg-white shadow-sm flex items-center justify-center mx-auto mb-3">
+                                    <Calendar className="h-5 w-5 text-zinc-400" />
+                                </div>
+                                <p className="text-sm font-medium text-zinc-900">Belum ada riwayat absensi</p>
                             </CardContent>
                         </Card>
                     )}
@@ -643,16 +637,16 @@ export default function AttendanceClient() {
             {/* ════════════ CHECK-IN MODAL ════════════ */}
             {showCheckInModal && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center">
-                    <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300">
+                    <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 border border-zinc-200 shadow-xl">
                         {/* Header */}
-                        <div className="px-5 py-4 flex items-center justify-between shrink-0">
+                        <div className="px-5 py-4 flex items-center justify-between shrink-0 border-b border-zinc-100 mb-2">
                             <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                                    <LogIn className="h-5 w-5 text-emerald-600" />
+                                <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center border border-zinc-200">
+                                    <LogIn className="h-5 w-5 text-zinc-900" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800">Check In</h3>
-                                    <p className="text-xs text-slate-500">
+                                    <h3 className="font-bold text-zinc-900">Check In</h3>
+                                    <p className="text-xs text-zinc-500">
                                         {checkInStep === 'work-type' && 'Pilih mode kerja'}
                                         {checkInStep === 'camera' && 'Ambil foto selfie'}
                                         {checkInStep === 'location' && 'Verifikasi lokasi'}
@@ -662,7 +656,7 @@ export default function AttendanceClient() {
                             </div>
                             <button
                                 onClick={closeCheckInModal}
-                                className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+                                className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors"
                             >
                                 <X className="h-4 w-4" />
                             </button>
@@ -678,7 +672,7 @@ export default function AttendanceClient() {
                                             key={step}
                                             className={cn(
                                                 "h-1 flex-1 rounded-full transition-all duration-300",
-                                                idx <= stepIdx ? "bg-emerald-500" : "bg-slate-200"
+                                                idx <= stepIdx ? "bg-zinc-900" : "bg-zinc-200"
                                             )}
                                         />
                                     )
@@ -704,31 +698,21 @@ export default function AttendanceClient() {
                                                     key={opt.type}
                                                     onClick={() => setWorkType(opt.type)}
                                                     className={cn(
-                                                        "flex items-center gap-3.5 p-3.5 rounded-2xl border-2 transition-all text-left",
+                                                        "flex items-center gap-3.5 p-3.5 rounded-xl border transition-all text-left",
                                                         selected
-                                                            ? "border-emerald-400 bg-emerald-50 shadow-sm"
-                                                            : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"
+                                                            ? "border-zinc-900 bg-zinc-50 shadow-sm ring-1 ring-zinc-900"
+                                                            : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
                                                     )}
                                                 >
-                                                    <div className={cn(
-                                                        "h-11 w-11 rounded-xl flex items-center justify-center shrink-0",
-                                                        opt.color === "blue" && "bg-blue-100",
-                                                        opt.color === "purple" && "bg-purple-100",
-                                                        opt.color === "orange" && "bg-orange-100",
-                                                    )}>
-                                                        <OptIcon className={cn(
-                                                            "h-5 w-5",
-                                                            opt.color === "blue" && "text-blue-600",
-                                                            opt.color === "purple" && "text-purple-600",
-                                                            opt.color === "orange" && "text-orange-600",
-                                                        )} />
+                                                    <div className="h-11 w-11 rounded-lg flex items-center justify-center shrink-0 bg-white border border-zinc-200">
+                                                        <OptIcon className="h-5 w-5 text-zinc-900" />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <p className="font-semibold text-sm text-slate-800">{opt.type}</p>
-                                                        <p className="text-xs text-slate-500">{opt.desc}</p>
+                                                        <p className="font-semibold text-sm text-zinc-900">{opt.type}</p>
+                                                        <p className="text-xs text-zinc-500">{opt.desc}</p>
                                                     </div>
                                                     {selected && (
-                                                        <div className="h-6 w-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                        <div className="h-6 w-6 rounded-full bg-zinc-900 flex items-center justify-center">
                                                             <Check className="h-3.5 w-3.5 text-white" />
                                                         </div>
                                                     )}
@@ -739,20 +723,20 @@ export default function AttendanceClient() {
 
                                     {(workType === "WFH" || workType === "WFA") && (
                                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                            <label className="text-sm font-medium text-slate-700">Alasan</label>
+                                            <label className="text-sm font-medium text-zinc-900">Alasan</label>
                                             <Textarea
                                                 value={reason}
                                                 onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setReason(e.target.value)}
                                                 placeholder={`Masukkan alasan bekerja ${workType === "WFH" ? "dari rumah" : "dari lokasi lain"}...`}
                                                 rows={3}
-                                                className="rounded-xl border-slate-200 focus:border-emerald-300 focus:ring-emerald-200"
+                                                className="rounded-lg border-zinc-200 focus-visible:ring-zinc-900"
                                             />
                                         </div>
                                     )}
 
                                     <Button
                                         onClick={() => setCheckInStep('camera')}
-                                        className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
+                                        className="w-full h-12 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold"
                                     >
                                         Lanjutkan
                                         <ChevronRight className="h-4 w-4 ml-2" />
@@ -763,7 +747,7 @@ export default function AttendanceClient() {
                             {/* Step 2: Camera */}
                             {checkInStep === 'camera' && (
                                 <div className="space-y-3">
-                                    <div className="relative aspect-[4/3] bg-slate-900 rounded-2xl overflow-hidden">
+                                    <div className="relative aspect-4/3 bg-zinc-900 rounded-2xl overflow-hidden">
                                         {cameraActive ? (
                                             <>
                                                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
@@ -775,7 +759,7 @@ export default function AttendanceClient() {
                                                     onClick={takePhoto}
                                                     className="absolute bottom-4 left-1/2 -translate-x-1/2 h-16 w-16 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform ring-4 ring-white/30"
                                                 >
-                                                    <div className="h-12 w-12 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                    <div className="h-12 w-12 rounded-full bg-zinc-900 flex items-center justify-center">
                                                         <Camera className="h-6 w-6 text-white" />
                                                     </div>
                                                 </button>
@@ -812,14 +796,14 @@ export default function AttendanceClient() {
                                     <div className="flex gap-2">
                                         {!cameraActive && !photo && (
                                             <>
-                                                <Button onClick={startCamera} className="flex-1 h-12 rounded-xl">
+                                                <Button onClick={startCamera} className="flex-1 h-12 rounded-lg border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900">
                                                     <Camera className="h-5 w-5 mr-2" />
                                                     Buka Kamera
                                                 </Button>
                                                 <Button
                                                     onClick={() => fileInputRef.current?.click()}
                                                     variant="outline"
-                                                    className="h-12 rounded-xl px-4"
+                                                    className="h-12 rounded-lg px-4 border-zinc-200"
                                                     title="Upload foto"
                                                 >
                                                     Upload
@@ -829,7 +813,7 @@ export default function AttendanceClient() {
                                         {cameraActive && (
                                             <Button
                                                 onClick={takePhoto}
-                                                className="flex-1 h-12 rounded-xl bg-white text-slate-900 hover:bg-slate-100 border border-slate-200"
+                                                className="flex-1 h-12 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800"
                                             >
                                                 <Camera className="h-5 w-5 mr-2" />
                                                 Ambil Foto
@@ -839,7 +823,7 @@ export default function AttendanceClient() {
                                             <>
                                                 <Button
                                                     onClick={() => { setPhoto(""); startCamera(); }}
-                                                    className="flex-1 h-12 rounded-xl"
+                                                    className="flex-1 h-12 rounded-lg border-zinc-200"
                                                     variant="outline"
                                                 >
                                                     <RefreshCw className="h-5 w-5 mr-2" />
@@ -847,7 +831,7 @@ export default function AttendanceClient() {
                                                 </Button>
                                                 <Button
                                                     onClick={() => setCheckInStep('location')}
-                                                    className="flex-1 h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600"
+                                                    className="flex-1 h-12 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white"
                                                 >
                                                     Lanjut
                                                     <ChevronRight className="h-4 w-4 ml-2" />
@@ -862,16 +846,16 @@ export default function AttendanceClient() {
                             {checkInStep === 'location' && (
                                 <div className="space-y-3">
                                     <div className={cn(
-                                        "rounded-2xl border-2 p-6 text-center transition-all",
-                                        location ? "border-emerald-400 bg-emerald-50" : "border-slate-200 bg-slate-50"
+                                        "rounded-lg border p-6 text-center transition-all",
+                                        location ? "border-zinc-500 bg-zinc-50" : "border-zinc-200 bg-zinc-50"
                                     )}>
                                         {location ? (
                                             <div className="space-y-2">
-                                                <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-                                                    <MapPin className="h-6 w-6 text-emerald-600" />
+                                                <div className="h-12 w-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center mx-auto">
+                                                    <MapPin className="h-6 w-6 text-zinc-900" />
                                                 </div>
-                                                <p className="font-semibold text-slate-800">Lokasi Terdeteksi</p>
-                                                <p className="text-sm text-slate-500">
+                                                <p className="font-semibold text-zinc-900">Lokasi Terdeteksi</p>
+                                                <p className="text-sm text-zinc-500">
                                                     {location.lat.toFixed(6)}, {location.long.toFixed(6)}
                                                 </p>
                                                 {workType === "WFO" && (
@@ -887,17 +871,17 @@ export default function AttendanceClient() {
                                             </div>
                                         ) : (
                                             <div className="space-y-2">
-                                                <div className="h-12 w-12 rounded-full bg-slate-200 flex items-center justify-center mx-auto">
-                                                    <MapPin className="h-6 w-6 text-slate-400" />
+                                                <div className="h-12 w-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center mx-auto">
+                                                    <MapPin className="h-6 w-6 text-zinc-400" />
                                                 </div>
-                                                <p className="text-slate-500">Lokasi belum terdeteksi</p>
+                                                <p className="text-zinc-500">Lokasi belum terdeteksi</p>
                                             </div>
                                         )}
                                     </div>
 
                                     <Button
                                         onClick={getLocation}
-                                        className={cn("w-full h-12 rounded-xl", location ? "" : "bg-emerald-500 hover:bg-emerald-600")}
+                                        className={cn("w-full h-12 rounded-lg", location ? "border-zinc-200" : "bg-zinc-900 hover:bg-zinc-800 text-white")}
                                         variant={location ? "outline" : "default"}
                                     >
                                         <MapPin className="h-5 w-5 mr-2" />
@@ -907,7 +891,7 @@ export default function AttendanceClient() {
                                     {location && (
                                         <Button
                                             onClick={() => setCheckInStep('confirm')}
-                                            className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600"
+                                            className="w-full h-12 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white"
                                         >
                                             Lanjutkan
                                             <ChevronRight className="h-4 w-4 ml-2" />
@@ -919,25 +903,25 @@ export default function AttendanceClient() {
                             {/* Step 4: Confirm */}
                             {checkInStep === 'confirm' && (
                                 <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl">
-                                            <span className="text-sm text-slate-500">Mode Kerja</span>
-                                            <span className="font-semibold text-sm">{workType}</span>
+                                    <div className="space-y-2 border border-zinc-200 rounded-lg overflow-hidden bg-white">
+                                        <div className="flex items-center justify-between p-3.5 border-b border-zinc-100">
+                                            <span className="text-sm text-zinc-500">Mode Kerja</span>
+                                            <span className="font-semibold text-sm text-zinc-900">{workType}</span>
                                         </div>
-                                        <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl">
-                                            <span className="text-sm text-slate-500">Foto</span>
-                                            <div className="h-10 w-10 rounded-xl overflow-hidden border-2 border-white shadow-sm">
+                                        <div className="flex items-center justify-between p-3.5 border-b border-zinc-100">
+                                            <span className="text-sm text-zinc-500">Foto</span>
+                                            <div className="h-10 w-10 rounded-md overflow-hidden border border-zinc-200 shadow-sm">
                                                 <img src={photo} alt="Preview" className="w-full h-full object-cover" />
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl">
-                                            <span className="text-sm text-slate-500">Lokasi</span>
-                                            <span className="text-xs font-mono">{location?.lat.toFixed(4)}, {location?.long.toFixed(4)}</span>
+                                        <div className="flex items-center justify-between p-3.5 border-b border-zinc-100">
+                                            <span className="text-sm text-zinc-500">Lokasi</span>
+                                            <span className="text-xs font-mono text-zinc-900">{location?.lat.toFixed(4)}, {location?.long.toFixed(4)}</span>
                                         </div>
                                         {reason && (
-                                            <div className="p-3.5 bg-slate-50 rounded-xl">
-                                                <span className="text-sm text-slate-500 block mb-1">Alasan</span>
-                                                <span className="text-sm">{reason}</span>
+                                            <div className="p-3.5">
+                                                <span className="text-sm text-zinc-500 block mb-1">Alasan</span>
+                                                <span className="text-sm text-zinc-900">{reason}</span>
                                             </div>
                                         )}
                                     </div>
@@ -945,7 +929,7 @@ export default function AttendanceClient() {
                                     <Button
                                         onClick={handleCheckIn}
                                         disabled={checkingIn}
-                                        className="w-full h-14 rounded-xl text-base bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-200/50"
+                                        className="w-full h-14 rounded-lg text-base bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm"
                                     >
                                         {checkingIn ? (
                                             <Loader2 className="h-6 w-6 animate-spin" />
@@ -962,7 +946,7 @@ export default function AttendanceClient() {
 
                         {/* Footer Back Button */}
                         {checkInStep !== 'work-type' && checkInStep !== 'confirm' && (
-                            <div className="px-5 py-3 border-t border-slate-100 shrink-0">
+                            <div className="px-5 py-3 border-t border-zinc-100 shrink-0">
                                 <Button
                                     variant="ghost"
                                     onClick={() => {
@@ -971,7 +955,7 @@ export default function AttendanceClient() {
                                         if (checkInStep === 'camera') stopCamera()
                                         setCheckInStep(steps[idx - 1])
                                     }}
-                                    className="text-slate-500"
+                                    className="text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
                                 >
                                     <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
                                     Kembali
@@ -985,23 +969,23 @@ export default function AttendanceClient() {
             {/* ════════════ CHECK-OUT MODAL ════════════ */}
             {showCheckOutModal && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center">
-                    <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300">
+                    <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 border border-zinc-200 shadow-xl">
                         {/* Header */}
-                        <div className="px-5 py-4 flex items-center justify-between shrink-0">
+                        <div className="px-5 py-4 flex items-center justify-between shrink-0 border-b border-zinc-100 mb-2">
                             <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-rose-100 flex items-center justify-center">
-                                    <LogOut className="h-5 w-5 text-rose-600" />
+                                <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center border border-zinc-200">
+                                    <LogOut className="h-5 w-5 text-zinc-900" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800">Check Out</h3>
-                                    <p className="text-xs text-slate-500">
+                                    <h3 className="font-bold text-zinc-900">Check Out</h3>
+                                    <p className="text-xs text-zinc-500">
                                         Check-in pada {todayAttendance?.checkinTime}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 onClick={closeCheckOutModal}
-                                className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+                                className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200 transition-colors"
                             >
                                 <X className="h-4 w-4" />
                             </button>
@@ -1011,8 +995,8 @@ export default function AttendanceClient() {
                         <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-4">
                             {/* Camera */}
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700">Foto Selfie</label>
-                                <div className="relative aspect-[4/3] bg-slate-900 rounded-2xl overflow-hidden">
+                                <label className="text-sm font-semibold text-zinc-900">Foto Selfie</label>
+                                <div className="relative aspect-4/3 bg-zinc-900 rounded-2xl overflow-hidden">
                                     {cameraActive ? (
                                         <>
                                             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
@@ -1024,7 +1008,7 @@ export default function AttendanceClient() {
                                                 onClick={takePhoto}
                                                 className="absolute bottom-4 left-1/2 -translate-x-1/2 h-16 w-16 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform ring-4 ring-white/30"
                                             >
-                                                <div className="h-12 w-12 rounded-full bg-rose-500 flex items-center justify-center">
+                                                <div className="h-12 w-12 rounded-full bg-zinc-900 flex items-center justify-center">
                                                     <Camera className="h-6 w-6 text-white" />
                                                 </div>
                                             </button>
@@ -1055,14 +1039,14 @@ export default function AttendanceClient() {
                                 <div className="flex gap-2">
                                     {!cameraActive && !photo && (
                                         <>
-                                            <Button onClick={startCamera} className="flex-1 h-12 rounded-xl">
+                                            <Button onClick={startCamera} className="flex-1 h-12 rounded-lg border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900">
                                                 <Camera className="h-5 w-5 mr-2" />
                                                 Buka Kamera
                                             </Button>
                                             <Button
                                                 onClick={() => fileInputRef.current?.click()}
                                                 variant="outline"
-                                                className="h-12 rounded-xl px-4"
+                                                className="h-12 rounded-lg px-4 border-zinc-200"
                                                 title="Upload foto"
                                             >
                                                 Upload
@@ -1072,7 +1056,7 @@ export default function AttendanceClient() {
                                     {cameraActive && (
                                         <Button
                                             onClick={takePhoto}
-                                            className="flex-1 h-12 rounded-xl bg-white text-slate-900 hover:bg-slate-100 border border-slate-200"
+                                            className="flex-1 h-12 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800"
                                         >
                                             <Camera className="h-5 w-5 mr-2" />
                                             Ambil Foto
@@ -1082,7 +1066,7 @@ export default function AttendanceClient() {
                                         <Button
                                             onClick={() => { setPhoto(""); startCamera(); }}
                                             variant="outline"
-                                            className="flex-1 h-12 rounded-xl"
+                                            className="flex-1 h-12 rounded-lg border-zinc-200"
                                         >
                                             <RefreshCw className="h-5 w-5 mr-2" />
                                             Ulang
@@ -1093,34 +1077,34 @@ export default function AttendanceClient() {
 
                             {/* Location */}
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700">Lokasi</label>
+                                <label className="text-sm font-semibold text-zinc-900">Lokasi</label>
                                 <div className={cn(
-                                    "rounded-2xl border-2 p-4 text-center transition-all",
-                                    location ? "border-emerald-400 bg-emerald-50" : "border-slate-200 bg-slate-50"
+                                    "rounded-lg border p-4 text-center transition-all",
+                                    location ? "border-zinc-500 bg-zinc-50" : "border-zinc-200 bg-zinc-50"
                                 )}>
                                     {location ? (
                                         <div className="space-y-1">
-                                            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-                                                <MapPin className="h-5 w-5 text-emerald-600" />
+                                            <div className="h-10 w-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center mx-auto">
+                                                <MapPin className="h-5 w-5 text-zinc-900" />
                                             </div>
-                                            <p className="text-sm font-medium text-slate-800">Lokasi Terdeteksi</p>
-                                            <p className="text-xs text-slate-500">
+                                            <p className="text-sm font-medium text-zinc-900">Lokasi Terdeteksi</p>
+                                            <p className="text-xs text-zinc-500">
                                                 {location.lat.toFixed(4)}, {location.long.toFixed(4)}
                                             </p>
                                         </div>
                                     ) : (
                                         <div className="space-y-1">
-                                            <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center mx-auto">
-                                                <MapPin className="h-5 w-5 text-slate-400" />
+                                            <div className="h-10 w-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center mx-auto">
+                                                <MapPin className="h-5 w-5 text-zinc-400" />
                                             </div>
-                                            <p className="text-sm text-slate-500">Lokasi belum terdeteksi</p>
+                                            <p className="text-sm text-zinc-500">Lokasi belum terdeteksi</p>
                                         </div>
                                     )}
                                 </div>
 
                                 <Button
                                     onClick={getLocation}
-                                    className={cn("w-full h-12 rounded-xl", location ? "" : "bg-emerald-500 hover:bg-emerald-600")}
+                                    className={cn("w-full h-12 rounded-lg", location ? "border-zinc-200" : "bg-zinc-900 hover:bg-zinc-800 text-white")}
                                     variant={location ? "outline" : "default"}
                                 >
                                     <MapPin className="h-5 w-5 mr-2" />
@@ -1132,7 +1116,7 @@ export default function AttendanceClient() {
                             <Button
                                 onClick={handleCheckOut}
                                 disabled={checkingOut || !canCheckOut}
-                                className="w-full h-14 rounded-xl text-base bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-200/50"
+                                className="w-full h-14 rounded-lg text-base bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm"
                             >
                                 {checkingOut ? (
                                     <Loader2 className="h-6 w-6 animate-spin" />

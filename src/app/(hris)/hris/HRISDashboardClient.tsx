@@ -79,9 +79,9 @@ export default function HRISDashboardClient() {
     const getPieChartData = () => {
         if (!attendanceStats) return []
         return [
-            { name: 'WFO', value: attendanceStats.wfoCount, color: '#3b82f6' },
-            { name: 'WFH', value: attendanceStats.wfhCount, color: '#10b981' },
-            { name: 'WFA', value: attendanceStats.wfaCount, color: '#8b5cf6' },
+            { name: 'WFO', value: attendanceStats.wfoCount, color: '#3f3f46' },
+            { name: 'WFH', value: attendanceStats.wfhCount, color: '#a1a1aa' },
+            { name: 'WFA', value: attendanceStats.wfaCount, color: '#d4d4d8' },
             { name: 'Belum Absen', value: attendanceStats.notCheckedIn, color: '#ef4444' },
         ].filter(item => item.value > 0)
     }
@@ -93,72 +93,72 @@ export default function HRISDashboardClient() {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Dashboard HR</h1>
-                    <p className="text-slate-500">Selamat datang, {user?.name}</p>
+                    <h1 className="text-2xl font-bold text-zinc-900">Dashboard HR</h1>
+                    <p className="text-zinc-500">Selamat datang, {user?.name}</p>
                 </div>
                 <div className="flex gap-2">
                     <Link href="/hris/employees">
-                        <Button variant="outline">Data Pegawai</Button>
+                        <Button variant="outline" className="border-zinc-200">Data Pegawai</Button>
                     </Link>
                     <Link href="/hris/attendance">
-                        <Button>Lihat Absensi</Button>
+                        <Button className="bg-zinc-900 hover:bg-zinc-800 text-white">Lihat Absensi</Button>
                     </Link>
                 </div>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-l-4 border-l-blue-500">
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">Total Pegawai</p>
-                                <p className="text-3xl font-bold text-slate-900">{stats?.totalEmployees || 0}</p>
+                                <p className="text-sm text-zinc-500">Total Pegawai</p>
+                                <p className="text-3xl font-bold text-zinc-900">{stats?.totalEmployees || 0}</p>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center">
-                                <Users className="h-6 w-6 text-blue-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <Users className="h-6 w-6 text-zinc-600" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-emerald-500">
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">Hadir Hari Ini</p>
-                                <p className="text-3xl font-bold text-slate-900">{stats?.todayAttendance || 0}</p>
+                                <p className="text-sm text-zinc-500">Hadir Hari Ini</p>
+                                <p className="text-3xl font-bold text-zinc-900">{stats?.todayAttendance || 0}</p>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center">
-                                <UserCheck className="h-6 w-6 text-emerald-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <UserCheck className="h-6 w-6 text-zinc-600" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-amber-500">
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">Terlambat</p>
-                                <p className="text-3xl font-bold text-slate-900">{stats?.lateEmployees || 0}</p>
+                                <p className="text-sm text-zinc-500">Terlambat</p>
+                                <p className="text-3xl font-bold text-zinc-900">{stats?.lateEmployees || 0}</p>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center">
-                                <AlertTriangle className="h-6 w-6 text-amber-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <AlertTriangle className="h-6 w-6 text-zinc-600" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-rose-500">
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">Cuti Hari Ini</p>
-                                <p className="text-3xl font-bold text-slate-900">{stats?.onLeave || 0}</p>
+                                <p className="text-sm text-zinc-500">Cuti Hari Ini</p>
+                                <p className="text-3xl font-bold text-zinc-900">{stats?.onLeave || 0}</p>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center">
-                                <CalendarDays className="h-6 w-6 text-rose-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <CalendarDays className="h-6 w-6 text-zinc-600" />
                             </div>
                         </div>
                     </CardContent>
@@ -205,8 +205,8 @@ export default function HRISDashboardClient() {
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="text-center">
-                                            <p className="text-2xl font-bold">{totalChart}</p>
-                                            <p className="text-xs text-slate-500">Total</p>
+                                            <p className="text-2xl font-bold text-zinc-900">{totalChart}</p>
+                                            <p className="text-xs text-zinc-500">Total</p>
                                         </div>
                                     </div>
                                 </div>
@@ -216,7 +216,7 @@ export default function HRISDashboardClient() {
                                 {getPieChartData().map((item) => (
                                     <div key={item.name} className="flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                                        <span className="text-sm text-slate-600">
+                                        <span className="text-sm text-zinc-600">
                                             {item.name}: {item.value}
                                         </span>
                                     </div>
@@ -226,58 +226,58 @@ export default function HRISDashboardClient() {
                     </Card>
 
                     {/* Attendance Details */}
-                    <Card>
+                    <Card className="border border-zinc-200 shadow-sm rounded-lg">
                         <CardHeader>
-                            <CardTitle className="text-lg">Detail Kehadiran</CardTitle>
+                            <CardTitle className="text-lg text-zinc-900">Detail Kehadiran</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-md">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <Home className="h-5 w-5 text-blue-600" />
+                                    <div className="h-10 w-10 rounded-md bg-zinc-100 flex items-center justify-center">
+                                        <Home className="h-5 w-5 text-zinc-600" />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-slate-900">WFO (Work From Office)</p>
-                                        <p className="text-sm text-slate-500">Bekerja dari kantor</p>
+                                        <p className="font-medium text-zinc-900">WFO (Work From Office)</p>
+                                        <p className="text-sm text-zinc-500">Bekerja dari kantor</p>
                                     </div>
                                 </div>
-                                <p className="text-2xl font-bold text-blue-600">{attendanceStats.wfoCount}</p>
+                                <p className="text-2xl font-bold text-zinc-900">{attendanceStats.wfoCount}</p>
                             </div>
 
-                            <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-md">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                                        <Home className="h-5 w-5 text-emerald-600" />
+                                    <div className="h-10 w-10 rounded-md bg-zinc-100 flex items-center justify-center">
+                                        <Home className="h-5 w-5 text-zinc-600" />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-slate-900">WFH (Work From Home)</p>
-                                        <p className="text-sm text-slate-500">Bekerja dari rumah</p>
+                                        <p className="font-medium text-zinc-900">WFH (Work From Home)</p>
+                                        <p className="text-sm text-zinc-500">Bekerja dari rumah</p>
                                     </div>
                                 </div>
-                                <p className="text-2xl font-bold text-emerald-600">{attendanceStats.wfhCount}</p>
+                                <p className="text-2xl font-bold text-zinc-900">{attendanceStats.wfhCount}</p>
                             </div>
 
-                            <div className="flex items-center justify-between p-3 bg-violet-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-md">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-violet-100 flex items-center justify-center">
-                                        <MapPin className="h-5 w-5 text-violet-600" />
+                                    <div className="h-10 w-10 rounded-md bg-zinc-100 flex items-center justify-center">
+                                        <MapPin className="h-5 w-5 text-zinc-600" />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-slate-900">WFA (Work From Anywhere)</p>
-                                        <p className="text-sm text-slate-500">Bekerja dari lokasi lain</p>
+                                        <p className="font-medium text-zinc-900">WFA (Work From Anywhere)</p>
+                                        <p className="text-sm text-zinc-500">Bekerja dari lokasi lain</p>
                                     </div>
                                 </div>
-                                <p className="text-2xl font-bold text-violet-600">{attendanceStats.wfaCount}</p>
+                                <p className="text-2xl font-bold text-zinc-900">{attendanceStats.wfaCount}</p>
                             </div>
 
-                            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-md">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                                    <div className="h-10 w-10 rounded-md bg-red-100 flex items-center justify-center">
                                         <AlertTriangle className="h-5 w-5 text-red-600" />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-slate-900">Belum Absen</p>
-                                        <p className="text-sm text-slate-500">Belum melakukan check-in</p>
+                                        <p className="font-medium text-zinc-900">Belum Absen</p>
+                                        <p className="text-sm text-zinc-500">Belum melakukan check-in</p>
                                     </div>
                                 </div>
                                 <p className="text-2xl font-bold text-red-600">{attendanceStats.notCheckedIn}</p>
@@ -290,42 +290,42 @@ export default function HRISDashboardClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Link href="/hris/employees">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6 flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-violet-50 flex items-center justify-center">
-                                <Users className="h-6 w-6 text-violet-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <Users className="h-6 w-6 text-zinc-600" />
                             </div>
                             <div>
-                                <p className="font-medium text-slate-900">Kelola Pegawai</p>
-                                <p className="text-sm text-slate-500">Tambah, edit, atau nonaktifkan</p>
+                                <p className="font-medium text-zinc-900">Kelola Pegawai</p>
+                                <p className="text-sm text-zinc-500">Tambah, edit, atau nonaktifkan</p>
                             </div>
                         </CardContent>
                     </Card>
                 </Link>
 
                 <Link href="/hris/payroll">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6 flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-cyan-50 flex items-center justify-center">
-                                <DollarSign className="h-6 w-6 text-cyan-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <DollarSign className="h-6 w-6 text-zinc-600" />
                             </div>
                             <div>
-                                <p className="font-medium text-slate-900">Kelola Payroll</p>
-                                <p className="text-sm text-slate-500">Hitung dan bayarkan gaji</p>
+                                <p className="font-medium text-zinc-900">Kelola Payroll</p>
+                                <p className="text-sm text-zinc-500">Hitung dan bayarkan gaji</p>
                             </div>
                         </CardContent>
                     </Card>
                 </Link>
 
                 <Link href="/hris/leave">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6 flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center">
-                                <CalendarDays className="h-6 w-6 text-rose-500" />
+                            <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                <CalendarDays className="h-6 w-6 text-zinc-600" />
                             </div>
                             <div>
-                                <p className="font-medium text-slate-900">Approval Cuti</p>
-                                <p className="text-sm text-slate-500">{stats?.pendingLeaves || 0} pending</p>
+                                <p className="font-medium text-zinc-900">Approval Cuti</p>
+                                <p className="text-sm text-zinc-500">{stats?.pendingLeaves || 0} pending</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -338,15 +338,15 @@ export default function HRISDashboardClient() {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Dashboard Manager</h1>
-                    <p className="text-slate-500">Selamat datang, {user?.name}</p>
+                    <h1 className="text-2xl font-bold text-zinc-900">Dashboard Manager</h1>
+                    <p className="text-zinc-500">Selamat datang, {user?.name}</p>
                 </div>
             </div>
 
             {/* Team Attendance */}
-            <Card>
+            <Card className="border border-zinc-200 shadow-sm rounded-lg">
                 <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2 text-zinc-900">
                         <Clock className="h-5 w-5" />
                         Absensi Tim Hari Ini
                     </CardTitle>
@@ -355,25 +355,25 @@ export default function HRISDashboardClient() {
                     {teamAttendance.length > 0 ? (
                         <div className="space-y-3">
                             {teamAttendance.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div key={idx} className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-md">
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-8 w-8">
-                                            <AvatarFallback className="text-xs bg-slate-200">
+                                            <AvatarFallback className="text-xs bg-zinc-200 text-zinc-900 font-medium">
                                                 {item.employeeName.split(" ").map(n => n[0]).join("").slice(0, 2)}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <p className="font-medium text-slate-900">{item.employeeName}</p>
-                                            <p className="text-xs text-slate-500">
+                                            <p className="font-medium text-zinc-900">{item.employeeName}</p>
+                                            <p className="text-xs text-zinc-500">
                                                 {item.checkinTime ? `Check-in: ${item.checkinTime}` : "Belum check-in"}
                                             </p>
                                         </div>
                                     </div>
-                                    <Badge className={cn(
-                                        "capitalize",
-                                        item.status === "ontime" && "bg-emerald-100 text-emerald-700",
-                                        item.status === "late" && "bg-amber-100 text-amber-700",
-                                        item.status === "outside_radius" && "bg-red-100 text-red-700"
+                                    <Badge variant="outline" className={cn(
+                                        "capitalize rounded-md text-xs",
+                                        item.status === "ontime" && "bg-emerald-50 border-emerald-200 text-emerald-700",
+                                        item.status === "late" && "bg-amber-50 border-amber-200 text-amber-700",
+                                        item.status === "outside_radius" && "bg-red-50 border-red-200 text-red-700"
                                     )}>
                                         {item.status === "ontime" ? "Tepat Waktu" :
                                             item.status === "late" ? "Terlambat" : "Outside Radius"}
@@ -382,15 +382,15 @@ export default function HRISDashboardClient() {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-center text-slate-500 py-4">Belum ada data absensi tim</p>
+                        <p className="text-center text-zinc-500 py-4">Belum ada data absensi tim</p>
                     )}
                 </CardContent>
             </Card>
 
             {/* Team Leaves */}
-            <Card>
+            <Card className="border border-zinc-200 shadow-sm rounded-lg">
                 <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2 text-zinc-900">
                         <CalendarDays className="h-5 w-5" />
                         Request Cuti Tim
                     </CardTitle>
@@ -399,18 +399,18 @@ export default function HRISDashboardClient() {
                     {teamLeaves.length > 0 ? (
                         <div className="space-y-3">
                             {teamLeaves.slice(0, 5).map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div key={idx} className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-md">
                                     <div>
-                                        <p className="font-medium text-slate-900">{item.employeeName}</p>
-                                        <p className="text-xs text-slate-500">
+                                        <p className="font-medium text-zinc-900">{item.employeeName}</p>
+                                        <p className="text-xs text-zinc-500">
                                             {item.startDate} - {item.endDate}
                                         </p>
                                     </div>
-                                    <Badge className={cn(
-                                        "capitalize",
-                                        item.status === "pending" && "bg-amber-100 text-amber-700",
-                                        item.status === "approved" && "bg-emerald-100 text-emerald-700",
-                                        item.status === "rejected" && "bg-red-100 text-red-700"
+                                    <Badge variant="outline" className={cn(
+                                        "capitalize rounded-md text-xs",
+                                        item.status === "pending" && "bg-amber-50 border-amber-200 text-amber-700",
+                                        item.status === "approved" && "bg-emerald-50 border-emerald-200 text-emerald-700",
+                                        item.status === "rejected" && "bg-red-50 border-red-200 text-red-700"
                                     )}>
                                         {item.status}
                                     </Badge>
@@ -418,15 +418,15 @@ export default function HRISDashboardClient() {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-center text-slate-500 py-4">Belum ada request cuti</p>
+                        <p className="text-center text-zinc-500 py-4">Belum ada request cuti</p>
                     )}
                 </CardContent>
             </Card>
 
             {/* Team Reports */}
-            <Card>
+            <Card className="border border-zinc-200 shadow-sm rounded-lg">
                 <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2 text-zinc-900">
                         <FileText className="h-5 w-5" />
                         Laporan Kerja Terbaru
                     </CardTitle>
@@ -435,16 +435,16 @@ export default function HRISDashboardClient() {
                     {teamReports.length > 0 ? (
                         <div className="space-y-3">
                             {teamReports.slice(0, 5).map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div key={idx} className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-md">
                                     <div>
-                                        <p className="font-medium text-slate-900">{item.employeeName}</p>
-                                        <p className="text-xs text-slate-500">{item.date} - {item.itemsCount} task</p>
+                                        <p className="font-medium text-zinc-900">{item.employeeName}</p>
+                                        <p className="text-xs text-zinc-500">{item.date} - {item.itemsCount} task</p>
                                     </div>
-                                    <Badge className={cn(
-                                        "capitalize",
-                                        item.status === "submitted" && "bg-blue-100 text-blue-700",
-                                        item.status === "approved" && "bg-emerald-100 text-emerald-700",
-                                        item.status === "rejected" && "bg-red-100 text-red-700"
+                                    <Badge variant="outline" className={cn(
+                                        "capitalize rounded-md text-xs",
+                                        item.status === "submitted" && "bg-blue-50 border-blue-200 text-blue-700",
+                                        item.status === "approved" && "bg-emerald-50 border-emerald-200 text-emerald-700",
+                                        item.status === "rejected" && "bg-red-50 border-red-200 text-red-700"
                                     )}>
                                         {item.status}
                                     </Badge>
@@ -452,7 +452,7 @@ export default function HRISDashboardClient() {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-center text-slate-500 py-4">Belum ada laporan</p>
+                        <p className="text-center text-zinc-500 py-4">Belum ada laporan</p>
                     )}
                 </CardContent>
             </Card>
@@ -463,23 +463,23 @@ export default function HRISDashboardClient() {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Dashboard Karyawan</h1>
-                    <p className="text-slate-500">Selamat datang, {user?.name}</p>
+                    <h1 className="text-2xl font-bold text-zinc-900">Dashboard Karyawan</h1>
+                    <p className="text-zinc-500">Selamat datang, {user?.name}</p>
                 </div>
             </div>
 
             {/* Quick Actions for Employee */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Link href="/hris/attendance">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-emerald-500">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center">
-                                    <Clock className="h-6 w-6 text-emerald-500" />
+                                <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                    <Clock className="h-6 w-6 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-900">Absensi</p>
-                                    <p className="text-sm text-slate-500">Check in/out</p>
+                                    <p className="font-medium text-zinc-900">Absensi</p>
+                                    <p className="text-sm text-zinc-500">Check in/out</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -487,15 +487,15 @@ export default function HRISDashboardClient() {
                 </Link>
 
                 <Link href="/hris/daily-report">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-amber-500">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center">
-                                    <FileText className="h-6 w-6 text-amber-500" />
+                                <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                    <FileText className="h-6 w-6 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-900">Laporan Kerja</p>
-                                    <p className="text-sm text-slate-500">Buat laporan harian</p>
+                                    <p className="font-medium text-zinc-900">Laporan Kerja</p>
+                                    <p className="text-sm text-zinc-500">Buat laporan harian</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -503,15 +503,15 @@ export default function HRISDashboardClient() {
                 </Link>
 
                 <Link href="/hris/leave">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-rose-500">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-rose-50 flex items-center justify-center">
-                                    <CalendarDays className="h-6 w-6 text-rose-500" />
+                                <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                    <CalendarDays className="h-6 w-6 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-900">Cuti & Izin</p>
-                                    <p className="text-sm text-slate-500">Ajukan cuti</p>
+                                    <p className="font-medium text-zinc-900">Cuti & Izin</p>
+                                    <p className="text-sm text-zinc-500">Ajukan cuti</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -519,15 +519,15 @@ export default function HRISDashboardClient() {
                 </Link>
 
                 <Link href="/hris/payroll">
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-cyan-500">
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer border border-zinc-200 shadow-sm rounded-lg">
                         <CardContent className="pt-6">
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-cyan-50 flex items-center justify-center">
-                                    <DollarSign className="h-6 w-6 text-cyan-500" />
+                                <div className="h-12 w-12 rounded-md bg-zinc-100 flex items-center justify-center">
+                                    <DollarSign className="h-6 w-6 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-slate-900">Slip Gaji</p>
-                                    <p className="text-sm text-slate-500">Lihat slip gaji</p>
+                                    <p className="font-medium text-zinc-900">Slip Gaji</p>
+                                    <p className="text-sm text-zinc-500">Lihat slip gaji</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -541,8 +541,8 @@ export default function HRISDashboardClient() {
         return (
             <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <p className="text-slate-500">Memuat dashboard...</p>
+                    <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
+                    <p className="text-zinc-500">Memuat dashboard...</p>
                 </div>
             </div>
         )
@@ -552,9 +552,9 @@ export default function HRISDashboardClient() {
         return (
             <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col items-center gap-2">
-                    <AlertTriangle className="h-8 w-8 text-red-500" />
-                    <p className="text-red-500">{error}</p>
-                    <Button onClick={loadDashboard} variant="outline">Coba Lagi</Button>
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                    <p className="text-red-600">{error}</p>
+                    <Button onClick={loadDashboard} variant="outline" className="border-zinc-200">Coba Lagi</Button>
                 </div>
             </div>
         )

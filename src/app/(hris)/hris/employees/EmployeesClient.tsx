@@ -208,8 +208,8 @@ export default function EmployeesClient() {
         return (
             <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <p className="text-slate-500">Memuat data...</p>
+                    <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
+                    <p className="text-zinc-500">Memuat data...</p>
                 </div>
             </div>
         )
@@ -219,12 +219,12 @@ export default function EmployeesClient() {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Data Pegawai</h1>
-                    <p className="text-slate-500">Kelola data karyawan perusahaan</p>
+                    <h1 className="text-2xl font-bold text-zinc-900">Data Pegawai</h1>
+                    <p className="text-zinc-500">Kelola data karyawan perusahaan</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={() => handleOpenDialog()}>
+                        <Button onClick={() => handleOpenDialog()} className="bg-zinc-900 hover:bg-zinc-800 text-white">
                             <Plus className="h-4 w-4 mr-2" />
                             Tambah Pegawai
                         </Button>
@@ -358,10 +358,10 @@ export default function EmployeesClient() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            <Button variant="outline" className="border-zinc-200" onClick={() => setIsDialogOpen(false)}>
                                 Batal
                             </Button>
-                            <Button onClick={handleSave} disabled={saving}>
+                            <Button onClick={handleSave} disabled={saving} className="bg-zinc-900 hover:bg-zinc-800 text-white">
                                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                                 Simpan
                             </Button>
@@ -372,25 +372,25 @@ export default function EmployeesClient() {
 
             {/* Search */}
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                     placeholder="Cari nama, NIP, atau email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-zinc-200 focus-visible:ring-zinc-900"
                 />
             </div>
 
             {/* Error */}
             {error && (
-                <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-md">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
                     <p className="text-red-600">{error}</p>
                 </div>
             )}
 
             {/* Table */}
-            <Card>
+            <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
@@ -409,25 +409,26 @@ export default function EmployeesClient() {
                                     <TableRow key={employee.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <Avatar className="h-10 w-10">
-                                                    <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white">
+                                                <Avatar className="h-10 w-10 border border-zinc-200">
+                                                    <AvatarFallback className="bg-zinc-100 text-zinc-900 font-medium">
                                                         {initials(employee.name)}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium text-slate-900">{employee.name}</p>
-                                                    <p className="text-xs text-slate-500">{employee.nip}</p>
+                                                    <p className="font-medium text-zinc-900">{employee.name}</p>
+                                                    <p className="text-xs text-zinc-500">{employee.nip}</p>
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{employee.department?.name || "-"}</TableCell>
-                                        <TableCell>{employee.position?.name || "-"}</TableCell>
-                                        <TableCell>{employee.joinDate ? new Date(employee.joinDate).toLocaleDateString("id-ID") : "-"}</TableCell>
+                                        <TableCell className="text-zinc-600">{employee.department?.name || "-"}</TableCell>
+                                        <TableCell className="text-zinc-600">{employee.position?.name || "-"}</TableCell>
+                                        <TableCell className="text-zinc-600">{employee.joinDate ? new Date(employee.joinDate).toLocaleDateString("id-ID") : "-"}</TableCell>
                                         <TableCell>
-                                            <Badge className={cn(
+                                            <Badge variant="outline" className={cn(
+                                                "rounded-md font-medium",
                                                 employee.status === "active"
-                                                    ? "bg-emerald-100 text-emerald-700"
-                                                    : "bg-slate-100 text-slate-700"
+                                                    ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                                    : "bg-zinc-50 border-zinc-200 text-zinc-700"
                                             )}>
                                                 {employee.status === "active" ? "Aktif" : "Nonaktif"}
                                             </Badge>
@@ -437,6 +438,7 @@ export default function EmployeesClient() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    className="hover:bg-zinc-100 text-zinc-500"
                                                     onClick={() => handleOpenDialog(employee)}
                                                 >
                                                     <Edit className="h-4 w-4" />
@@ -444,9 +446,10 @@ export default function EmployeesClient() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    className="hover:bg-red-50 hover:text-red-600 text-zinc-500"
                                                     onClick={() => handleDelete(employee.id)}
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -456,8 +459,8 @@ export default function EmployeesClient() {
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8">
                                         <div className="flex flex-col items-center gap-2">
-                                            <Users className="h-8 w-8 text-slate-300" />
-                                            <p className="text-slate-500">Tidak ada data</p>
+                                            <Users className="h-8 w-8 text-zinc-300" />
+                                            <p className="text-zinc-500">Tidak ada data</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>

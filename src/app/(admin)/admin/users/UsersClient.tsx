@@ -166,17 +166,17 @@ export default function UsersAdminPage() {
 
   const getRoleBadge = (role: string) => {
     const styles: Record<string, string> = {
-      OWNER: "bg-purple-100 text-purple-700",
-      OPS: "bg-blue-100 text-blue-700",
-      CASHIER: "bg-green-100 text-green-700",
-      HR_ADMIN: "bg-orange-100 text-orange-700",
-      MANAGER: "bg-indigo-100 text-indigo-700",
-      TEAM_LEADER: "bg-teal-100 text-teal-700",
-      STAFF: "bg-cyan-100 text-cyan-700",
-      BACKEND: "bg-slate-100 text-slate-700",
-      FRONTEND: "bg-pink-100 text-pink-700",
+      OWNER: "border border-zinc-200 bg-zinc-900 text-white",
+      OPS: "border border-zinc-200 bg-white text-zinc-700",
+      CASHIER: "border border-zinc-200 bg-white text-zinc-700",
+      HR_ADMIN: "border border-zinc-200 bg-white text-zinc-700",
+      MANAGER: "border border-zinc-200 bg-white text-zinc-700",
+      TEAM_LEADER: "border border-zinc-200 bg-white text-zinc-700",
+      STAFF: "border border-zinc-200 bg-white text-zinc-700",
+      BACKEND: "border border-zinc-200 bg-white text-zinc-700",
+      FRONTEND: "border border-zinc-200 bg-white text-zinc-700",
     }
-    return styles[role] || "bg-slate-100 text-slate-700"
+    return styles[role] || "border border-zinc-200 bg-white text-zinc-700"
   }
 
   const getRoleIcon = (role: string) => {
@@ -203,7 +203,7 @@ export default function UsersAdminPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
       </div>
     )
   }
@@ -213,8 +213,8 @@ export default function UsersAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pengguna</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-zinc-900">Pengguna</h1>
+          <p className="text-sm text-zinc-500">
             Kelola pengguna dan hak akses
           </p>
         </div>
@@ -227,54 +227,54 @@ export default function UsersAdminPage() {
       </div>
 
       {/* Users Table */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-zinc-200 bg-zinc-50/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Pengguna
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Email
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Role
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">
                   Status
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600">
+                <th className="px-4 py-3 text-right text-xs font-semibold text-zinc-500">
                   Aksi
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {users.map((user) => {
                 const RoleIcon = getRoleIcon(user.role)
                 return (
-                  <tr key={user.id} className="hover:bg-slate-50">
+                  <tr key={user.id} className="hover:bg-zinc-50/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                          <RoleIcon className="h-5 w-5 text-slate-500" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-zinc-100">
+                          <RoleIcon className="h-4 w-4 text-zinc-500" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-900">
+                          <p className="text-sm font-medium text-zinc-900">
                             {user.name}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-zinc-500">
                             {user.id.slice(0, 8)}...
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">
+                    <td className="px-4 py-3 text-sm text-zinc-600">
                       {user.email}
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${getRoleBadge(
+                        className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold tracking-wide uppercase ${getRoleBadge(
                           user.role
                         )}`}
                       >
@@ -284,11 +284,11 @@ export default function UsersAdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       {user.mustChangePassword ? (
-                        <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+                        <span className="inline-flex rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-semibold tracking-wide uppercase text-amber-600">
                           Perlu Ganti Password
                         </span>
                       ) : (
-                        <span className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+                        <span className="inline-flex rounded-md border border-zinc-200 bg-white px-2 py-1 text-[10px] font-semibold tracking-wide uppercase text-zinc-700">
                           Aktif
                         </span>
                       )}
@@ -306,7 +306,7 @@ export default function UsersAdminPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDelete(user)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-500 hover:text-red-600 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -321,8 +321,8 @@ export default function UsersAdminPage() {
 
         {users.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12">
-            <Users className="h-12 w-12 text-slate-300" />
-            <p className="mt-2 text-sm text-slate-500">Tidak ada pengguna</p>
+            <Users className="h-10 w-10 text-zinc-300" />
+            <p className="mt-2 text-sm text-zinc-500">Tidak ada pengguna</p>
           </div>
         )}
       </div>
@@ -341,7 +341,7 @@ export default function UsersAdminPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Nama *
               </label>
               <input
@@ -351,12 +351,12 @@ export default function UsersAdminPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Email *
               </label>
               <input
@@ -366,12 +366,12 @@ export default function UsersAdminPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Password {editingUser ? "(kosongkan jika tidak diubah)" : "*"}
               </label>
               <input
@@ -381,13 +381,13 @@ export default function UsersAdminPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                 placeholder="Minimal 6 karakter"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-zinc-700">
                 Role *
               </label>
               <Select
@@ -412,7 +412,7 @@ export default function UsersAdminPage() {
             {/* Team Leader Dropdown - Only show for STAFF role */}
             {(formData.role === "STAFF") && (
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-medium text-zinc-700">
                   Team Leader
                 </label>
                 <Select

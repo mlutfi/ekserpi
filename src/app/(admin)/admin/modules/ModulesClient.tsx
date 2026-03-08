@@ -101,9 +101,9 @@ export default function ModulesPage() {
   if (!isOwner) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <X className="h-12 w-12 text-red-400" />
-        <h2 className="mt-4 text-lg font-semibold text-slate-900">Akses Ditolak</h2>
-        <p className="mt-2 text-sm text-slate-500">
+        <X className="h-12 w-12 text-red-500" />
+        <h2 className="mt-4 text-lg font-semibold text-zinc-900">Akses Ditolak</h2>
+        <p className="mt-2 text-sm text-zinc-500">
           Hanya Owner yang dapat mengakses halaman pengaturan modul
         </p>
       </div>
@@ -115,21 +115,21 @@ export default function ModulesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pengaturan Modul</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-zinc-900">Pengaturan Modul</h1>
+          <p className="text-sm text-zinc-500">
             Aktifkan atau nonaktifkan modul aplikasi
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
+        <div className="flex items-center gap-2 rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-700 font-medium">
           <Settings className="h-4 w-4" />
           <span>Hanya Owner</span>
         </div>
       </div>
 
       {/* Info Card */}
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-        <h3 className="font-medium text-blue-900">Informasi Modul</h3>
-        <p className="mt-1 text-sm text-blue-700">
+      <div className="rounded-md border border-zinc-200 bg-zinc-50/50 p-4">
+        <h3 className="font-medium text-zinc-900">Informasi Modul</h3>
+        <p className="mt-1 text-sm text-zinc-600">
           Mengaktifkan atau menonaktifkan modul akan mempengaruhi menu sidebar dan akses aplikasi.
           Modul yang dinonaktifkan tidak akan muncul di menu navigasi.
         </p>
@@ -143,17 +143,17 @@ export default function ModulesPage() {
           return (
             <div
               key={module.id}
-              className={`relative rounded-xl border-2 p-6 transition ${isActive
-                ? "border-green-200 bg-green-50"
-                : "border-slate-200 bg-white"
+              className={`relative rounded-lg border p-6 transition ${isActive
+                ? "border-zinc-900 bg-zinc-50/30 shadow-sm"
+                : "border-zinc-200 bg-white"
                 }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-900">
+                  <h3 className="text-lg font-semibold text-zinc-900">
                     {module.name}
                   </h3>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-zinc-600">
                     {module.description}
                   </p>
                 </div>
@@ -161,9 +161,9 @@ export default function ModulesPage() {
                 <button
                   onClick={() => toggleModule(module.id)}
                   disabled={saving}
-                  className={`ml-4 flex h-10 w-10 items-center justify-center rounded-full transition ${isActive
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-slate-200 text-slate-500 hover:bg-slate-300"
+                  className={`ml-4 flex h-10 w-10 items-center justify-center rounded-md transition ${isActive
+                    ? "bg-zinc-900 text-white hover:bg-zinc-800"
+                    : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                     } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {saving ? (
@@ -178,9 +178,9 @@ export default function ModulesPage() {
 
               <div className="mt-4 flex items-center gap-2">
                 <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${isActive
-                    ? "bg-green-100 text-green-700"
-                    : "bg-slate-100 text-slate-600"
+                  className={`inline-flex rounded-md border px-2.5 py-0.5 text-[10px] uppercase font-semibold tracking-wide ${isActive
+                    ? "border-zinc-200 bg-white text-zinc-900"
+                    : "border-zinc-200 bg-zinc-50 text-zinc-500"
                     }`}
                 >
                   {isActive ? "Aktif" : "Nonaktif"}
@@ -192,8 +192,8 @@ export default function ModulesPage() {
       </div>
 
       {/* Active Modules Summary */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <h3 className="font-medium text-slate-900">Ringkasan Modul Aktif</h3>
+      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+        <h3 className="font-medium text-zinc-900">Ringkasan Modul Aktif</h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {activeModules.length > 0 ? (
             activeModules.map((moduleId) => {
@@ -201,7 +201,7 @@ export default function ModulesPage() {
               return (
                 <span
                   key={moduleId}
-                  className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700"
+                  className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1 text-sm font-medium text-zinc-900"
                 >
                   <Check className="mr-1 h-3 w-3" />
                   {module?.name || moduleId}
@@ -209,7 +209,7 @@ export default function ModulesPage() {
               )
             })
           ) : (
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-zinc-500">
               Tidak ada modul yang aktif
             </span>
           )}

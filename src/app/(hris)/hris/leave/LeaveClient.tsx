@@ -178,26 +178,26 @@ export default function LeaveClient() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "pending":
-                return <Badge className="bg-amber-100 text-amber-700">Menunggu</Badge>
+                return <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50 font-medium">Menunggu</Badge>
             case "approved":
-                return <Badge className="bg-emerald-100 text-emerald-700">Disetujui</Badge>
+                return <Badge variant="outline" className="border-emerald-200 text-emerald-700 bg-emerald-50 font-medium">Disetujui</Badge>
             case "rejected":
-                return <Badge className="bg-red-100 text-red-700">Ditolak</Badge>
+                return <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50 font-medium">Ditolak</Badge>
             default:
-                return <Badge>{status}</Badge>
+                return <Badge variant="outline" className="border-zinc-200 text-zinc-600 bg-zinc-50">{status}</Badge>
         }
     }
 
     const getLeaveTypeBadge = (type: string) => {
         switch (type) {
             case "annual":
-                return <Badge className="bg-blue-100 text-blue-700">Cuti Tahunan</Badge>
+                return <Badge variant="outline" className="border-zinc-200 text-zinc-700 bg-white font-medium">Cuti Tahunan</Badge>
             case "sick":
-                return <Badge className="bg-red-100 text-red-700">Sakit</Badge>
+                return <Badge variant="outline" className="border-zinc-200 text-zinc-700 bg-white font-medium">Sakit</Badge>
             case "personal":
-                return <Badge className="bg-purple-100 text-purple-700">Izin Pribadi</Badge>
+                return <Badge variant="outline" className="border-zinc-200 text-zinc-700 bg-white font-medium">Izin Pribadi</Badge>
             default:
-                return <Badge>{type}</Badge>
+                return <Badge variant="outline" className="border-zinc-200 text-zinc-700 bg-white font-medium">{type}</Badge>
         }
     }
 
@@ -211,10 +211,10 @@ export default function LeaveClient() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <p className="text-slate-500">Memuat data...</p>
+            <div className="flex items-center justify-center p-12">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-6 w-6 animate-spin text-zinc-900" />
+                    <p className="text-sm font-medium text-zinc-500">Memuat data...</p>
                 </div>
             </div>
         )
@@ -223,31 +223,31 @@ export default function LeaveClient() {
     // Employee View - Request and view own leaves
     if (user?.role === "EMPLOYEE") {
         return (
-            <div className="p-6 space-y-6">
-                <div className="flex items-center justify-between">
+            <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Cuti & Izin</h1>
-                        <p className="text-slate-500">Ajukan dan lihat status cuti Anda</p>
+                        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Cuti & Izin</h1>
+                        <p className="text-sm text-zinc-500 mt-1">Ajukan dan lihat status cuti Anda</p>
                     </div>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button disabled={employeeNotFound}>
+                            <Button disabled={employeeNotFound} className="bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Ajukan Cuti
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
                                 <DialogTitle>Ajukan Cuti / Izin</DialogTitle>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
                                 <div className="grid gap-2">
-                                    <Label>Jenis Cuti</Label>
+                                    <Label className="text-zinc-900 font-medium">Jenis Cuti</Label>
                                     <Select
                                         value={formData.leaveType}
                                         onValueChange={(value: "annual" | "sick" | "personal") => setFormData({ ...formData, leaveType: value })}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger className="border-zinc-200">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -260,46 +260,49 @@ export default function LeaveClient() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label>Tanggal Mulai</Label>
+                                        <Label className="text-zinc-900 font-medium">Tanggal Mulai</Label>
                                         <Input
                                             type="date"
                                             value={formData.startDate}
                                             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                            className="border-zinc-200"
                                         />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label>Tanggal Selesai</Label>
+                                        <Label className="text-zinc-900 font-medium">Tanggal Selesai</Label>
                                         <Input
                                             type="date"
                                             value={formData.endDate}
                                             onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                            className="border-zinc-200"
                                         />
                                     </div>
                                 </div>
 
                                 {formData.startDate && formData.endDate && (
-                                    <div className="p-3 bg-slate-50 rounded-lg">
-                                        <p className="text-sm text-slate-600">
-                                            Total hari: <strong>{calculateDays(formData.startDate, formData.endDate)} hari</strong>
+                                    <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200">
+                                        <p className="text-sm text-zinc-600">
+                                            Total hari: <strong className="text-zinc-900">{calculateDays(formData.startDate, formData.endDate)} hari</strong>
                                         </p>
                                     </div>
                                 )}
 
                                 <div className="grid gap-2">
-                                    <Label>Alasan</Label>
+                                    <Label className="text-zinc-900 font-medium">Alasan</Label>
                                     <Textarea
                                         value={formData.reason}
                                         onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                                         placeholder="Alasan pengajuan cuti..."
                                         rows={3}
+                                        className="border-zinc-200 resize-none"
                                     />
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                <Button variant="outline" className="border-zinc-200 text-zinc-700" onClick={() => setIsDialogOpen(false)}>
                                     Batal
                                 </Button>
-                                <Button onClick={handleSubmit} disabled={saving}>
+                                <Button className="bg-zinc-900 hover:bg-zinc-800 text-white" onClick={handleSubmit} disabled={saving}>
                                     {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                                     Ajukan
                                 </Button>
@@ -310,11 +313,11 @@ export default function LeaveClient() {
 
                 {/* Employee profile not found banner */}
                 {employeeNotFound && (
-                    <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                        <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+                        <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
                         <div>
-                            <p className="font-medium text-amber-800">Profil Karyawan Belum Terdaftar</p>
-                            <p className="text-sm text-amber-700 mt-1">
+                            <p className="font-medium text-red-900">Profil Karyawan Belum Terdaftar</p>
+                            <p className="text-sm text-red-700 mt-1">
                                 Akun Anda belum terhubung dengan data karyawan. Silakan hubungi HR Admin untuk mendaftarkan profil karyawan Anda.
                             </p>
                         </div>
@@ -322,19 +325,19 @@ export default function LeaveClient() {
                 )}
 
                 {/* My Leaves List */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Riwayat Cuti</CardTitle>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden">
+                    <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
+                        <CardTitle className="text-base font-semibold text-zinc-900">Riwayat Cuti</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>Jenis</TableHead>
-                                    <TableHead>Tanggal</TableHead>
-                                    <TableHead>Hari</TableHead>
-                                    <TableHead>Alasan</TableHead>
-                                    <TableHead>Status</TableHead>
+                                <TableRow className="bg-zinc-50/50 hover:bg-zinc-50/50">
+                                    <TableHead className="font-semibold text-zinc-900">Jenis</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Tanggal</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Hari</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Alasan</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -344,21 +347,24 @@ export default function LeaveClient() {
                                             <TableCell>{getLeaveTypeBadge(leave.leaveType)}</TableCell>
                                             <TableCell>
                                                 <div className="text-sm">
-                                                    <p>{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
-                                                    <p className="text-slate-500">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
+                                                    <p className="font-medium text-zinc-900">{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
+                                                    <p className="text-zinc-500 text-xs mt-0.5">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{leave.days} hari</TableCell>
-                                            <TableCell className="max-w-xs truncate">{leave.reason}</TableCell>
+                                            <TableCell className="font-medium text-zinc-900">{leave.days} hari</TableCell>
+                                            <TableCell className="max-w-xs truncate text-zinc-600">{leave.reason}</TableCell>
                                             <TableCell>{getStatusBadge(leave.status)}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-8">
+                                        <TableCell colSpan={5} className="text-center py-12">
                                             <div className="flex flex-col items-center gap-2">
-                                                <CalendarDays className="h-8 w-8 text-slate-300" />
-                                                <p className="text-slate-500">Belum ada pengajuan</p>
+                                                <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center mb-1">
+                                                    <CalendarDays className="h-5 w-5 text-zinc-400" />
+                                                </div>
+                                                <p className="font-medium text-zinc-900">Belum ada pengajuan</p>
+                                                <p className="text-xs text-zinc-500">Anda belum pernah mengajukan cuti</p>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -373,13 +379,13 @@ export default function LeaveClient() {
 
     // Manager / HR View - Approve leaves
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="p-6 md:p-8 space-y-6 max-w-6xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">
+                    <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
                         {user?.role === "MANAGER" ? "Approval Cuti" : "Kelola Cuti"}
                     </h1>
-                    <p className="text-slate-500">
+                    <p className="text-sm text-zinc-500 mt-1">
                         {user?.role === "MANAGER" ? "Review request cuti dari tim" : "Kelola seluruh request cuti"}
                     </p>
                 </div>
@@ -387,29 +393,29 @@ export default function LeaveClient() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center">
-                                <Clock className="h-6 w-6 text-amber-500" />
+                            <div className="h-12 w-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                                <Clock className="h-5 w-5 text-zinc-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Menunggu Approval</p>
-                                <p className="text-2xl font-bold text-slate-900">{pendingLeaves.length}</p>
+                                <p className="text-sm font-medium text-zinc-500">Menunggu Approval</p>
+                                <p className="text-2xl font-bold text-zinc-900">{pendingLeaves.length}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center">
-                                <CheckCircle className="h-6 w-6 text-emerald-500" />
+                            <div className="h-12 w-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                                <CheckCircle className="h-5 w-5 text-emerald-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Disetujui</p>
-                                <p className="text-2xl font-bold text-slate-900">
+                                <p className="text-sm font-medium text-zinc-500">Disetujui</p>
+                                <p className="text-2xl font-bold text-zinc-900">
                                     {teamLeaves.filter(l => l.status === "approved").length}
                                 </p>
                             </div>
@@ -417,15 +423,15 @@ export default function LeaveClient() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border border-zinc-200 shadow-sm rounded-lg">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center">
-                                <XCircle className="h-6 w-6 text-red-500" />
+                            <div className="h-12 w-12 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
+                                <XCircle className="h-5 w-5 text-red-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Ditolak</p>
-                                <p className="text-2xl font-bold text-slate-900">
+                                <p className="text-sm font-medium text-zinc-500">Ditolak</p>
+                                <p className="text-2xl font-bold text-zinc-900">
                                     {teamLeaves.filter(l => l.status === "rejected").length}
                                 </p>
                             </div>
@@ -436,58 +442,62 @@ export default function LeaveClient() {
 
             {/* Pending Leaves */}
             {pendingLeaves.length > 0 && (
-                <Card className="border-amber-200">
-                    <CardHeader className="bg-amber-50">
-                        <CardTitle className="flex items-center gap-2 text-amber-800">
-                            <Clock className="h-5 w-5" />
+                <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden">
+                    <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
+                        <CardTitle className="flex items-center gap-2 text-base font-semibold text-zinc-900">
+                            <Clock className="h-4 w-4 text-zinc-500" />
                             Menunggu Approval ({pendingLeaves.length})
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>Pegawai</TableHead>
-                                    <TableHead>Jenis</TableHead>
-                                    <TableHead>Tanggal</TableHead>
-                                    <TableHead>Hari</TableHead>
-                                    <TableHead>Alasan</TableHead>
-                                    <TableHead className="text-right">Aksi</TableHead>
+                                <TableRow className="bg-zinc-50/50 hover:bg-zinc-50/50">
+                                    <TableHead className="font-semibold text-zinc-900">Pegawai</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Jenis</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Tanggal</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Hari</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Alasan</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900">Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {pendingLeaves.map((leave) => (
                                     <TableRow key={leave.id}>
                                         <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <User className="h-4 w-4 text-slate-400" />
-                                                {leave.employee?.name || "-"}
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                                                    <User className="h-4 w-4 text-zinc-500" />
+                                                </div>
+                                                <span className="font-medium text-zinc-900">{leave.employee?.name || "-"}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>{getLeaveTypeBadge(leave.leaveType)}</TableCell>
                                         <TableCell>
                                             <div className="text-sm">
-                                                <p>{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
-                                                <p className="text-slate-500">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
+                                                <p className="font-medium text-zinc-900">{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
+                                                <p className="text-zinc-500 text-xs mt-0.5">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{leave.days} hari</TableCell>
-                                        <TableCell className="max-w-xs truncate">{leave.reason}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <TableCell className="font-medium text-zinc-900">{leave.days} hari</TableCell>
+                                        <TableCell className="max-w-xs truncate text-zinc-600">{leave.reason}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
+                                                    className="border-zinc-200 text-zinc-700 hover:text-red-600 hover:bg-red-50"
                                                     onClick={() => handleReject(leave.id)}
                                                 >
-                                                    <XCircle className="h-4 w-4 mr-1" />
+                                                    <XCircle className="h-4 w-4 mr-1.5" />
                                                     Tolak
                                                 </Button>
                                                 <Button
                                                     size="sm"
+                                                    className="bg-zinc-900 text-white hover:bg-zinc-800"
                                                     onClick={() => handleApprove(leave.id)}
                                                 >
-                                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                                    <CheckCircle className="h-4 w-4 mr-1.5" />
                                                     Setuju
                                                 </Button>
                                             </div>
@@ -501,19 +511,19 @@ export default function LeaveClient() {
             )}
 
             {/* All Leaves */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Riwayat Cuti</CardTitle>
+            <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden">
+                <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
+                    <CardTitle className="text-base font-semibold text-zinc-900">Riwayat Cuti</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Pegawai</TableHead>
-                                <TableHead>Jenis</TableHead>
-                                <TableHead>Tanggal</TableHead>
-                                <TableHead>Hari</TableHead>
-                                <TableHead>Status</TableHead>
+                            <TableRow className="bg-zinc-50/50 hover:bg-zinc-50/50">
+                                <TableHead className="font-semibold text-zinc-900">Pegawai</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Jenis</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Tanggal</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Hari</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -521,28 +531,33 @@ export default function LeaveClient() {
                                 teamLeaves.map((leave) => (
                                     <TableRow key={leave.id}>
                                         <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <User className="h-4 w-4 text-slate-400" />
-                                                {leave.employee?.name || "-"}
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                                                    <User className="h-4 w-4 text-zinc-500" />
+                                                </div>
+                                                <span className="font-medium text-zinc-900">{leave.employee?.name || "-"}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>{getLeaveTypeBadge(leave.leaveType)}</TableCell>
                                         <TableCell>
                                             <div className="text-sm">
-                                                <p>{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
-                                                <p className="text-slate-500">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
+                                                <p className="font-medium text-zinc-900">{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
+                                                <p className="text-zinc-500 text-xs mt-0.5">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{leave.days} hari</TableCell>
+                                        <TableCell className="font-medium text-zinc-900">{leave.days} hari</TableCell>
                                         <TableCell>{getStatusBadge(leave.status)}</TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8">
+                                    <TableCell colSpan={5} className="text-center py-12">
                                         <div className="flex flex-col items-center gap-2">
-                                            <CalendarDays className="h-8 w-8 text-slate-300" />
-                                            <p className="text-slate-500">Belum ada data</p>
+                                            <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center mb-1">
+                                                <CalendarDays className="h-5 w-5 text-zinc-400" />
+                                            </div>
+                                            <p className="font-medium text-zinc-900">Belum ada data</p>
+                                            <p className="text-xs text-zinc-500">Tidak ada riwayat cuti dari tim</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>

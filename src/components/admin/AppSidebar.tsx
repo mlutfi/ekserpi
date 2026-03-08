@@ -3,22 +3,14 @@
 import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
 import { useSidebarState } from "@/lib/useSidebarState"
-import { getAccessibleApps } from "@/lib/appSwitcher"
+import { getAccessibleApps, getCurrentApp } from "@/lib/appSwitcher"
 import Link from "next/link"
+import { adminNavItems } from "@/lib/sidebar"
 import {
-    LayoutDashboard,
     LogOut,
     ChevronRight,
     ChevronDown,
     ShoppingCart,
-    Layers,
-    TrendingUp,
-    Box,
-    Users,
-    Package,
-    Sparkles,
-    LayoutGrid,
-    Settings,
     ChevronsDownUp,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -26,108 +18,6 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
-
-const navItems = [
-    {
-        href: "/admin",
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        iconBg: "bg-sky-90",
-        iconColor: "text-sky-500",
-        activeIconBg: "bg-sky-500",
-        activeBg: "bg-sky-50",
-        activeBorder: "bg-sky-500",
-        activeText: "text-sky-700",
-        badge: null,
-    },
-    {
-        href: "/admin/products",
-        label: "Produk",
-        icon: Box,
-        iconBg: "bg-violet-50",
-        iconColor: "text-violet-500",
-        activeIconBg: "bg-violet-500",
-        activeBg: "bg-violet-50",
-        activeBorder: "bg-violet-500",
-        activeText: "text-violet-700",
-        badge: null,
-    },
-    {
-        href: "/admin/categories",
-        label: "Kategori",
-        icon: Layers,
-        iconBg: "bg-indigo-50",
-        iconColor: "text-indigo-500",
-        activeIconBg: "bg-indigo-500",
-        activeBg: "bg-indigo-50",
-        activeBorder: "bg-indigo-500",
-        activeText: "text-indigo-700",
-        badge: null,
-    },
-    {
-        href: "/admin/stock",
-        label: "Stok",
-        icon: Package,
-        iconBg: "bg-emerald-50",
-        iconColor: "text-emerald-500",
-        activeIconBg: "bg-emerald-500",
-        activeBg: "bg-emerald-50",
-        activeBorder: "bg-emerald-500",
-        activeText: "text-emerald-700",
-        badge: null,
-    },
-    {
-        href: "/admin/users",
-        label: "Pengguna",
-        icon: Users,
-        iconBg: "bg-amber-50",
-        iconColor: "text-amber-500",
-        activeIconBg: "bg-amber-500",
-        activeBg: "bg-amber-50",
-        activeBorder: "bg-amber-500",
-        activeText: "text-amber-700",
-        badge: null,
-    },
-    {
-        href: "/admin/reports",
-        label: "Laporan",
-        icon: TrendingUp,
-        iconBg: "bg-rose-50",
-        iconColor: "text-rose-500",
-        activeIconBg: "bg-rose-500",
-        activeBg: "bg-rose-50",
-        activeBorder: "bg-rose-500",
-        activeText: "text-rose-700",
-        badge: "Baru",
-    },
-    {
-        href: "/admin/modules",
-        label: "Modul",
-        icon: Sparkles,
-        iconBg: "bg-cyan-50",
-        iconColor: "text-cyan-500",
-        activeIconBg: "bg-cyan-500",
-        activeBg: "bg-cyan-50",
-        activeBorder: "bg-cyan-500",
-        activeText: "text-cyan-700",
-        badge: null,
-        requiredRole: "OWNER",
-    },
-    {
-        href: "/admin/settings/pos",
-        label: "Pengaturan POS",
-        icon: Settings,
-        iconBg: "bg-slate-50",
-        iconColor: "text-slate-500",
-        activeIconBg: "bg-slate-500",
-        activeBg: "bg-slate-50",
-        activeBorder: "bg-slate-500",
-        activeText: "text-slate-700",
-        badge: null,
-        requiredRole: "OWNER",
-    },
-]
-
 
 
 export function AppSidebar() {
@@ -140,7 +30,7 @@ export function AppSidebar() {
     const [appSwitcherOpen, setAppSwitcherOpen] = useState(false)
 
     const accessibleApps = getAccessibleApps(user?.role, activeModules)
-    const currentApp = accessibleApps.find(item => item.key === "admin")
+    const currentApp = getCurrentApp("admin")
 
     const handleLogout = () => {
         logout()
@@ -176,25 +66,25 @@ export function AppSidebar() {
                     /* Collapsed: show only current app icon */
                     <button
                         onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
-                        className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-500 to-gray-900 shadow-lg shadow-gray-400/500 shadow-lg transition-transform hover:scale-105"
+                        className="relative mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 shadow-sm transition-transform hover:scale-105"
                     >
-                        <ChevronsDownUp className="h-6 w-6 text-white" />
+                        <ChevronsDownUp className="h-4 w-4 text-white" />
                     </button>
                 ) : (
                     /* Expanded: show app switcher button */
                     <button
                         onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
-                        className="flex w-full items-center gap-3 rounded-xl px-2 py-2 transition-all hover:bg-slate-50"
+                        className="flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-all hover:bg-zinc-100/80"
                     >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-500 to-gray-900 shadow-lg shadow-gray-400/50">
-                            <ChevronsDownUp className="h-6 w-6 text-white" />
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 shadow-sm">
+                            <ChevronsDownUp className="h-4 w-4 text-white" />
                         </div>
                         <div className="flex-1 text-left min-w-0">
-                            <span className="text-base font-bold text-slate-800 block truncate">{currentApp.label}</span>
-                            <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase truncate">{currentApp.description}</p>
+                            <span className="text-sm font-semibold text-zinc-900 block truncate">{currentApp.label}</span>
+                            <p className="text-[10px] text-zinc-500 font-medium tracking-wider uppercase truncate">{currentApp.description}</p>
                         </div>
                         <ChevronDown className={cn(
-                            "h-4 w-4 text-slate-400 shrink-0 transition-transform duration-200",
+                            "h-4 w-4 text-zinc-400 shrink-0 transition-transform duration-200",
                             appSwitcherOpen && "rotate-180"
                         )} />
                     </button>
@@ -203,8 +93,8 @@ export function AppSidebar() {
                 {/* Dropdown */}
                 {appSwitcherOpen && (
                     <div className={cn(
-                        "mt-2 space-y-1 rounded-xl border border-slate-100 bg-slate-50/80 p-1.5",
-                        collapsed && "absolute left-[68px] top-2 z-50 w-52 bg-white shadow-xl border-slate-200"
+                        "mt-2 space-y-1 rounded-lg border border-zinc-200 bg-white p-1.5 shadow-sm",
+                        collapsed && "absolute left-[68px] top-2 z-50 w-52 bg-white shadow-md border-zinc-200"
                     )}>
                         {accessibleApps.map((app) => {
                             const AppIcon = app.icon
@@ -224,17 +114,17 @@ export function AppSidebar() {
                                     )}
                                 >
                                     <div className={cn(
-                                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br",
+                                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-linear-to-br",
                                         app.gradient
                                     )}>
                                         <AppIcon className="h-3.5 w-3.5 text-white" />
                                     </div>
                                     <div className="flex-1 text-left min-w-0">
                                         <span className="block text-sm truncate">{app.label}</span>
-                                        <span className="block text-[10px] text-slate-400 truncate">{app.description}</span>
+                                        <span className="block text-[10px] text-zinc-500 truncate">{app.description}</span>
                                     </div>
                                     {isCurrent && (
-                                        <span className="flex h-1.5 w-1.5 rounded-full bg-gray-500" />
+                                        <span className="flex h-1.5 w-1.5 rounded-full bg-zinc-900" />
                                     )}
                                 </button>
                             )
@@ -245,14 +135,14 @@ export function AppSidebar() {
 
             {/* ── Navigation ── */}
             <ScrollArea className="flex-1">
-                <nav className={cn("py-4 space-y-1", collapsed ? "px-2" : "px-3")}>
+                <nav className={cn("py-4 space-y-0.5", collapsed ? "px-2" : "px-3")}>
                     {!collapsed && (
-                        <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                        <p className="mb-2 px-2 text-xs font-medium text-zinc-500">
                             Menu Utama
                         </p>
                     )}
 
-                    {navItems.map((item) => {
+                    {adminNavItems.map((item) => {
                         // Skip items that require specific role
                         if (item.requiredRole && user?.role !== item.requiredRole) {
                             return null
@@ -265,25 +155,25 @@ export function AppSidebar() {
                                 href={item.href}
                                 title={collapsed ? item.label : undefined}
                                 className={cn(
-                                    "group relative flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-200",
-                                    collapsed ? "justify-center p-2" : "px-3 py-2.5",
+                                    "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200",
+                                    collapsed ? "justify-center p-2" : "px-3 py-2",
                                     active
-                                        ? `${item.activeBg} border border-slate-200/80 ${item.activeText}`
-                                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                                        ? `${item.activeBg} ${item.activeText}`
+                                        : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
                                 )}
                             >
                                 {/* Active left border accent — only in expanded mode */}
                                 {active && !collapsed && (
                                     <span className={cn(
-                                        "absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full",
+                                        "absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full",
                                         item.activeBorder
                                     )} />
                                 )}
 
                                 <span className={cn(
-                                    "flex items-center justify-center rounded-lg shrink-0 transition-all duration-200",
-                                    collapsed ? "h-9 w-9" : "h-7 w-7",
-                                    active ? item.activeIconBg : item.iconBg
+                                    "flex items-center justify-center rounded-md shrink-0 transition-all duration-200",
+                                    collapsed ? "h-9 w-9" : "h-6 w-6",
+                                    active ? item.activeIconBg : "bg-transparent"
                                 )}>
                                     <Icon className={cn(
                                         "h-4 w-4 transition-all",
@@ -295,7 +185,7 @@ export function AppSidebar() {
                                     <>
                                         <span className="flex-1 truncate">{item.label}</span>
                                         {item.badge && (
-                                            <Badge className="bg-rose-100 text-rose-500 border-rose-200 text-[9px] px-1.5 py-0 h-4 font-semibold hover:bg-rose-100">
+                                            <Badge className="bg-zinc-900 text-white rounded-full text-[10px] px-1.5 py-0 h-4 font-medium hover:bg-zinc-800">
                                                 {item.badge}
                                             </Badge>
                                         )}
@@ -319,8 +209,8 @@ export function AppSidebar() {
                     onClick={() => router.push("/pos")}
                     title={collapsed ? "Buka POS" : undefined}
                     className={cn(
-                        "flex w-full items-center rounded-xl bg-orange-50 text-orange-700 border border-orange-100 text-sm font-medium transition-all duration-200 hover:bg-orange-100 hover:border-orange-200",
-                        collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+                        "flex w-full items-center rounded-md bg-zinc-900 text-white border border-transparent shadow-sm text-sm font-medium transition-all duration-200 hover:bg-zinc-800",
+                        collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
                     )}
                 >
                     <ShoppingCart className="h-4 w-4 shrink-0" />
@@ -335,43 +225,43 @@ export function AppSidebar() {
 
             {/* ── User Footer ── */}
             <div className={cn(
-                "border-t border-slate-100 py-4",
+                "border-t border-zinc-200 py-3",
                 collapsed ? "px-2" : "px-3"
             )}>
                 {collapsed ? (
                     <div className="flex flex-col items-center gap-2">
-                        <Avatar className="h-9 w-9">
-                            <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-500 text-white text-xs font-bold">
+                        <Avatar className="h-9 w-9 rounded-md border border-zinc-200">
+                            <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs font-medium rounded-md">
                                 {initials(user?.name)}
                             </AvatarFallback>
                         </Avatar>
                         <button
                             onClick={handleLogout}
                             title="Keluar"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-red-50 hover:text-red-500"
+                            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900"
                         >
                             <LogOut className="h-3.5 w-3.5" />
                         </button>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2.5">
-                        <Avatar className="h-8 w-8 shrink-0">
-                            <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-500 text-white text-xs font-bold">
+                    <div className="flex items-center gap-3 rounded-md bg-transparent px-2 py-2 hover:bg-zinc-50 transition-colors">
+                        <Avatar className="h-8 w-8 shrink-0 rounded-md border border-zinc-200">
+                            <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs font-medium rounded-md">
                                 {initials(user?.name)}
                             </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-800 truncate leading-tight">
+                            <p className="text-sm font-medium text-zinc-900 truncate leading-tight">
                                 {user?.name || "User"}
                             </p>
-                            <p className="text-[10px] text-slate-400 truncate mt-0.5 leading-tight">
+                            <p className="text-xs text-zinc-500 truncate mt-0.5 leading-tight">
                                 {user?.role || ""}
                             </p>
                         </div>
                         <button
                             onClick={handleLogout}
                             title="Keluar"
-                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-red-50 hover:text-red-500"
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-900"
                         >
                             <LogOut className="h-3.5 w-3.5" />
                         </button>

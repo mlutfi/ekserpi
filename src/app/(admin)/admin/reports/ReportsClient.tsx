@@ -160,18 +160,18 @@ export default function ReportsAdminPage() {
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Laporan Penjualan</h1>
-                    <p className="text-sm text-slate-500">
+                    <h1 className="text-2xl font-bold text-zinc-900">Laporan Penjualan</h1>
+                    <p className="text-sm text-zinc-500">
                         Analisis performa penjualan dan unduh laporan
                     </p>
                 </div>
                 <button
                     onClick={handleExport}
                     disabled={exporting}
-                    className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+                    className="flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
                 >
                     {exporting ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-white" />
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-200 border-t-white" />
                     ) : (
                         <Download className="h-4 w-4" />
                     )}
@@ -180,12 +180,12 @@ export default function ReportsAdminPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex px-1 space-x-1 bg-slate-100/50 p-1 rounded-xl w-fit">
+            <div className="flex px-1 space-x-1 bg-zinc-100/50 p-1 rounded-md w-fit">
                 <button
                     onClick={() => setActiveTab("SALES")}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${activeTab === "SALES"
-                        ? "bg-white text-indigo-600 shadow-sm"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === "SALES"
+                        ? "bg-white text-zinc-900 shadow-sm border border-zinc-200"
+                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                         }`}
                 >
                     <BarChart className="w-4 h-4" />
@@ -193,9 +193,9 @@ export default function ReportsAdminPage() {
                 </button>
                 <button
                     onClick={() => setActiveTab("PROFIT")}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${activeTab === "PROFIT"
-                        ? "bg-white text-emerald-600 shadow-sm"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${activeTab === "PROFIT"
+                        ? "bg-white text-zinc-900 shadow-sm border border-zinc-200"
+                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
                         }`}
                 >
                     <TrendingUp className="w-4 h-4" />
@@ -204,43 +204,43 @@ export default function ReportsAdminPage() {
             </div>
 
             {/* Filters */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                    <Filter className="h-4 w-4 text-slate-500" />
-                    <h2 className="text-sm font-semibold text-slate-700">Filter Laporan</h2>
+                    <Filter className="h-4 w-4 text-zinc-500" />
+                    <h2 className="text-sm font-semibold text-zinc-700">Filter Laporan</h2>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">
+                        <label className="mb-1 block text-xs font-medium text-zinc-500">
                             Dari Tanggal
                         </label>
                         <input
                             type="date"
                             value={filter.startDate}
                             onChange={(e) => setFilter({ ...filter, startDate: e.target.value })}
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-300 focus:ring-1 focus:ring-slate-200"
+                            className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-300 focus:ring-1 focus:ring-zinc-100"
                         />
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">
+                        <label className="mb-1 block text-xs font-medium text-zinc-500">
                             Sampai Tanggal
                         </label>
                         <input
                             type="date"
                             value={filter.endDate}
                             onChange={(e) => setFilter({ ...filter, endDate: e.target.value })}
-                            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-300 focus:ring-1 focus:ring-slate-200"
+                            className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-300 focus:ring-1 focus:ring-zinc-100"
                         />
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">
+                        <label className="mb-1 block text-xs font-medium text-zinc-500">
                             Kasir
                         </label>
                         <Select
                             value={filter.cashierId || "ALL"}
                             onValueChange={(value) => setFilter({ ...filter, cashierId: value === "ALL" ? "" : value })}
                         >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full bg-white border-zinc-200 text-zinc-900 focus:ring-1 focus:ring-zinc-100">
                                 <SelectValue placeholder="Semua Kasir" />
                             </SelectTrigger>
                             <SelectContent>
@@ -252,14 +252,14 @@ export default function ReportsAdminPage() {
                         </Select>
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">
+                        <label className="mb-1 block text-xs font-medium text-zinc-500">
                             Metode Pembayaran
                         </label>
                         <Select
                             value={filter.paymentMethod || "ALL"}
                             onValueChange={(value) => setFilter({ ...filter, paymentMethod: value === "ALL" ? "" : value })}
                         >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full bg-white border-zinc-200 text-zinc-900 focus:ring-1 focus:ring-zinc-100">
                                 <SelectValue placeholder="Semua Metode" />
                             </SelectTrigger>
                             <SelectContent>
@@ -275,64 +275,64 @@ export default function ReportsAdminPage() {
 
             {loading ? (
                 <div className="flex items-center justify-center py-12">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
                 </div>
             ) : activeTab === "SALES" && summary ? (
                 <>
                     {/* Summary Cards */}
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-green-100 p-2">
-                                    <DollarSign className="h-5 w-5 text-green-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <DollarSign className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Total Pendapatan</p>
-                                    <p className="text-xl font-bold text-slate-900">{formatPrice(summary.totalRevenue)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Total Pendapatan</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(summary.totalRevenue)}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-blue-100 p-2">
-                                    <ShoppingBag className="h-5 w-5 text-blue-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <ShoppingBag className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Transaksi Berhasil</p>
-                                    <p className="text-xl font-bold text-slate-900">{summary.totalTransactions}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Transaksi Berhasil</p>
+                                    <p className="text-xl font-bold text-zinc-900">{summary.totalTransactions}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-amber-100 p-2">
-                                    <Banknote className="h-5 w-5 text-amber-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <Banknote className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Pendapatan Tunai</p>
-                                    <p className="text-xl font-bold text-slate-900">{formatPrice(summary.cashRevenue)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Pendapatan Tunai</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(summary.cashRevenue)}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-purple-100 p-2">
-                                    <CreditCard className="h-5 w-5 text-purple-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <CreditCard className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Pendapatan QRIS</p>
-                                    <p className="text-xl font-bold text-slate-900">{formatPrice(summary.qrisRevenue)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Pendapatan QRIS</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(summary.qrisRevenue)}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-emerald-100 p-2">
-                                    <CreditCard className="h-5 w-5 text-emerald-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <CreditCard className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Pendapatan Transfer</p>
-                                    <p className="text-xl font-bold text-slate-900">{formatPrice(summary.transferRevenue)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Pendapatan Transfer</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(summary.transferRevenue)}</p>
                                 </div>
                             </div>
                         </div>
@@ -340,38 +340,38 @@ export default function ReportsAdminPage() {
 
                     <div className="grid gap-6 lg:grid-cols-3">
                         {/* Chart */}
-                        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                            <h3 className="mb-4 text-sm font-semibold text-slate-700">Grafik Pendapatan Harian</h3>
+                        <div className="lg:col-span-2 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                            <h3 className="mb-4 text-sm font-semibold text-zinc-700">Grafik Pendapatan Harian</h3>
                             <div className="h-72 w-full">
                                 {chartData.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E4E4E7" />
                                             <XAxis
                                                 dataKey="date"
                                                 axisLine={false}
                                                 tickLine={false}
-                                                tick={{ fontSize: 12, fill: '#64748B' }}
+                                                tick={{ fontSize: 12, fill: '#71717A' }}
                                                 dy={10}
                                             />
                                             <YAxis
                                                 axisLine={false}
                                                 tickLine={false}
-                                                tick={{ fontSize: 12, fill: '#64748B' }}
+                                                tick={{ fontSize: 12, fill: '#71717A' }}
                                                 tickFormatter={(value) => `Rp${value / 1000}k`}
                                             />
                                             <Tooltip
-                                                cursor={{ fill: '#F1F5F9' }}
+                                                cursor={{ fill: '#F4F4F5' }}
                                                 content={({ active, payload }) => {
                                                     if (active && payload && payload.length) {
                                                         return (
-                                                            <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                                                                <p className="mb-1 text-sm font-medium text-slate-900">{payload[0].payload.date}</p>
-                                                                <p className="text-sm text-slate-600">
-                                                                    Pendapatan: <span className="font-semibold text-slate-900">{formatPrice(payload[0].value as number)}</span>
+                                                            <div className="rounded-md border border-zinc-200 bg-white p-3 shadow-lg">
+                                                                <p className="mb-1 text-sm font-medium text-zinc-900">{payload[0].payload.date}</p>
+                                                                <p className="text-sm text-zinc-600">
+                                                                    Pendapatan: <span className="font-semibold text-zinc-900">{formatPrice(payload[0].value as number)}</span>
                                                                 </p>
-                                                                <p className="text-sm text-slate-600">
-                                                                    Transaksi: <span className="font-semibold text-slate-900">{payload[0].payload.transactions}</span>
+                                                                <p className="text-sm text-zinc-600">
+                                                                    Transaksi: <span className="font-semibold text-zinc-900">{payload[0].payload.transactions}</span>
                                                                 </p>
                                                             </div>
                                                         )
@@ -389,57 +389,57 @@ export default function ReportsAdminPage() {
                                     </ResponsiveContainer>
                                 ) : (
                                     <div className="flex h-full items-center justify-center">
-                                        <p className="text-sm text-slate-500">Tidak ada data untuk rentang waktu ini</p>
+                                        <p className="text-sm text-zinc-500">Tidak ada data untuk rentang waktu ini</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Quick Stats side */}
-                        <div className="rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col">
-                            <div className="border-b border-slate-100 p-5">
-                                <h3 className="text-sm font-semibold text-slate-700">Rincian Performa</h3>
+                        <div className="rounded-lg border border-zinc-200 bg-white shadow-sm flex flex-col">
+                            <div className="border-b border-zinc-100 p-5">
+                                <h3 className="text-sm font-semibold text-zinc-700">Rincian Performa</h3>
                             </div>
                             <div className="flex-1 p-5 flex flex-col gap-6">
                                 <div>
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Rata-rata Transaksi</p>
-                                    <p className="text-2xl font-bold text-slate-900">{formatPrice(summary.averageOrder)}</p>
+                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Rata-rata Transaksi</p>
+                                    <p className="text-2xl font-bold text-zinc-900">{formatPrice(summary.averageOrder)}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Total Item Terjual</p>
-                                    <p className="text-2xl font-bold text-slate-900">{summary.totalItems} <span className="text-sm font-normal text-slate-500 normal-case">item</span></p>
+                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Total Item Terjual</p>
+                                    <p className="text-2xl font-bold text-zinc-900">{summary.totalItems} <span className="text-sm font-normal text-zinc-500 normal-case">item</span></p>
                                 </div>
 
                                 <div className="mt-auto">
                                     <div className="mb-2 flex items-center justify-between text-sm">
-                                        <span className="text-slate-500">Tunai</span>
-                                        <span className="font-medium text-slate-900">{summary.cashTransactions} TRX</span>
+                                        <span className="text-zinc-500">Tunai</span>
+                                        <span className="font-medium text-zinc-900">{summary.cashTransactions} TRX</span>
                                     </div>
-                                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                                         <div
-                                            className="h-full bg-green-500"
+                                            className="h-full bg-zinc-900"
                                             style={{ width: `${summary.totalTransactions ? (summary.cashTransactions / summary.totalTransactions) * 100 : 0}%` }}
                                         ></div>
                                     </div>
 
                                     <div className="mt-4 mb-2 flex items-center justify-between text-sm">
-                                        <span className="text-slate-500">QRIS</span>
-                                        <span className="font-medium text-slate-900">{summary.qrisTransactions} TRX</span>
+                                        <span className="text-zinc-500">QRIS</span>
+                                        <span className="font-medium text-zinc-900">{summary.qrisTransactions} TRX</span>
                                     </div>
-                                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                                         <div
-                                            className="h-full bg-purple-500"
+                                            className="h-full bg-zinc-600"
                                             style={{ width: `${summary.totalTransactions ? (summary.qrisTransactions / summary.totalTransactions) * 100 : 0}%` }}
                                         ></div>
                                     </div>
 
                                     <div className="mt-4 mb-2 flex items-center justify-between text-sm">
-                                        <span className="text-slate-500">Transfer</span>
-                                        <span className="font-medium text-slate-900">{summary.transferTransactions} TRX</span>
+                                        <span className="text-zinc-500">Transfer</span>
+                                        <span className="font-medium text-zinc-900">{summary.transferTransactions} TRX</span>
                                     </div>
-                                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                                         <div
-                                            className="h-full bg-emerald-500"
+                                            className="h-full bg-zinc-400"
                                             style={{ width: `${summary.totalTransactions ? (summary.transferTransactions / summary.totalTransactions) * 100 : 0}%` }}
                                         ></div>
                                     </div>
@@ -449,13 +449,13 @@ export default function ReportsAdminPage() {
                     </div>
 
                     {/* Details Table */}
-                    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                        <div className="border-b border-slate-100 p-5">
-                            <h3 className="text-sm font-semibold text-slate-700">Detail Transaksi</h3>
+                    <div className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
+                        <div className="border-b border-zinc-100 p-5">
+                            <h3 className="text-sm font-semibold text-zinc-700">Detail Transaksi</h3>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-100">
+                                <thead className="bg-zinc-50/50 text-xs uppercase text-zinc-500 border-b border-zinc-100">
                                     <tr>
                                         <th className="px-5 py-3 font-medium">Tanggal</th>
                                         <th className="px-5 py-3 font-medium">ID Transaksi</th>
@@ -465,49 +465,49 @@ export default function ReportsAdminPage() {
                                         <th className="px-5 py-3 font-medium text-right">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100/80">
+                                <tbody className="divide-y divide-zinc-100">
                                     {sales.length > 0 ? (
                                         sales.map((sale) => (
                                             <tr
                                                 key={sale.id}
-                                                className="hover:bg-slate-50/50 cursor-pointer"
+                                                className="hover:bg-zinc-50/50 cursor-pointer"
                                                 onClick={() => setSelectedSale(sale)}
                                             >
-                                                <td className="px-5 py-3 text-slate-600 whitespace-nowrap">
+                                                <td className="px-5 py-3 text-zinc-600 whitespace-nowrap">
                                                     {formatDate(sale.createdAt)}
                                                 </td>
-                                                <td className="px-5 py-3 text-slate-900 font-medium">
+                                                <td className="px-5 py-3 text-zinc-900 font-medium">
                                                     {sale.id.slice(0, 8)}...
                                                 </td>
-                                                <td className="px-5 py-3 text-slate-600">
+                                                <td className="px-5 py-3 text-zinc-600">
                                                     {sale.cashierName}
                                                 </td>
                                                 <td className="px-5 py-3">
-                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${sale.paymentMethod === 'CASH'
-                                                        ? 'bg-green-100 text-green-700'
+                                                    <span className={`inline-flex items-center rounded-md border text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 ${sale.paymentMethod === 'CASH'
+                                                        ? 'bg-zinc-100 border-zinc-200 text-zinc-700'
                                                         : sale.paymentMethod === 'QRIS'
-                                                            ? 'bg-purple-100 text-purple-700'
+                                                            ? 'bg-zinc-900 text-white'
                                                             : sale.paymentMethod === 'TRANSFER'
-                                                                ? 'bg-emerald-100 text-emerald-700'
-                                                                : 'bg-slate-100 text-slate-700'
+                                                                ? 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                                                                : 'bg-zinc-100 border-zinc-200 text-zinc-700'
                                                         }`}>
                                                         {sale.paymentMethod}
                                                     </span>
                                                     {sale.providerRef && sale.paymentMethod === 'TRANSFER' && (
-                                                        <span className="block text-[10px] text-slate-400 mt-1 max-w-[150px] truncate" title={sale.providerRef}>{sale.providerRef}</span>
+                                                        <span className="block text-[10px] text-zinc-400 mt-1 max-w-[150px] truncate" title={sale.providerRef}>{sale.providerRef}</span>
                                                     )}
                                                 </td>
-                                                <td className="px-5 py-3 text-slate-600">
+                                                <td className="px-5 py-3 text-zinc-600">
                                                     {sale.itemCount}
                                                 </td>
-                                                <td className="px-5 py-3 text-right font-medium text-slate-900">
+                                                <td className="px-5 py-3 text-right font-medium text-zinc-900">
                                                     {formatPrice(sale.total)}
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="px-5 py-8 text-center text-slate-500">
+                                            <td colSpan={6} className="px-5 py-8 text-center text-zinc-500">
                                                 Tidak ada transaksi yang sesuai dengan filter
                                             </td>
                                         </tr>
@@ -519,10 +519,10 @@ export default function ReportsAdminPage() {
 
                     {/* Sales Detail Modal */}
                     <Dialog open={!!selectedSale} onOpenChange={() => setSelectedSale(null)}>
-                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden bg-white border-zinc-200">
                             <DialogHeader>
-                                <DialogTitle>Detail Transaksi</DialogTitle>
-                                <DialogDescription className="font-mono">
+                                <DialogTitle className="text-zinc-900">Detail Transaksi</DialogTitle>
+                                <DialogDescription className="font-mono text-zinc-500">
                                     {selectedSale?.id}
                                 </DialogDescription>
                             </DialogHeader>
@@ -531,33 +531,33 @@ export default function ReportsAdminPage() {
                                 {selectedSale && (
                                     <>
                                         <div className="grid grid-cols-2 gap-4 mb-6">
-                                            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
-                                                <p className="text-xs font-medium text-slate-500 mb-1">Tanggal</p>
-                                                <p className="text-sm font-semibold text-slate-900">{formatDate(selectedSale.createdAt)}</p>
+                                            <div className="rounded-md bg-zinc-50/50 p-4 border border-zinc-200">
+                                                <p className="text-xs font-medium text-zinc-500 mb-1">Tanggal</p>
+                                                <p className="text-sm font-semibold text-zinc-900">{formatDate(selectedSale.createdAt)}</p>
                                             </div>
-                                            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
-                                                <p className="text-xs font-medium text-slate-500 mb-1">Kasir</p>
-                                                <p className="text-sm font-semibold text-slate-900">{selectedSale.cashierName}</p>
+                                            <div className="rounded-md bg-zinc-50/50 p-4 border border-zinc-200">
+                                                <p className="text-xs font-medium text-zinc-500 mb-1">Kasir</p>
+                                                <p className="text-sm font-semibold text-zinc-900">{selectedSale.cashierName}</p>
                                             </div>
-                                            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 flex flex-col justify-center">
-                                                <p className="text-xs font-medium text-slate-500 mb-1">Metode</p>
-                                                <p className="text-sm font-semibold text-slate-900 flex flex-col">
+                                            <div className="rounded-md bg-zinc-50/50 p-4 border border-zinc-200 flex flex-col justify-center">
+                                                <p className="text-xs font-medium text-zinc-500 mb-1">Metode</p>
+                                                <p className="text-sm font-semibold text-zinc-900 flex flex-col">
                                                     {selectedSale.paymentMethod}
                                                     {selectedSale.paymentMethod === 'TRANSFER' && selectedSale.providerRef && (
-                                                        <span className="text-[10px] text-slate-500 font-normal mt-0.5 leading-tight">{selectedSale.providerRef}</span>
+                                                        <span className="text-[10px] text-zinc-500 font-normal mt-0.5 leading-tight">{selectedSale.providerRef}</span>
                                                     )}
                                                 </p>
                                             </div>
-                                            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
-                                                <p className="text-xs font-medium text-slate-500 mb-1">Total Item</p>
-                                                <p className="text-sm font-semibold text-slate-900">{selectedSale.itemCount} Item</p>
+                                            <div className="rounded-md bg-zinc-50/50 p-4 border border-zinc-200">
+                                                <p className="text-xs font-medium text-zinc-500 mb-1">Total Item</p>
+                                                <p className="text-sm font-semibold text-zinc-900">{selectedSale.itemCount} Item</p>
                                             </div>
                                         </div>
 
-                                        <h3 className="text-sm font-bold text-slate-900 mb-3">Rincian Produk</h3>
-                                        <div className="rounded-xl border border-slate-200 overflow-hidden">
+                                        <h3 className="text-sm font-bold text-zinc-900 mb-3">Rincian Produk</h3>
+                                        <div className="rounded-md border border-zinc-200 overflow-hidden">
                                             <table className="w-full text-left text-sm">
-                                                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-200">
+                                                <thead className="bg-zinc-50/50 text-xs uppercase text-zinc-500 border-b border-zinc-200">
                                                     <tr>
                                                         <th className="px-4 py-3 font-medium">Produk</th>
                                                         <th className="px-4 py-3 font-medium text-center">Harga</th>
@@ -565,28 +565,28 @@ export default function ReportsAdminPage() {
                                                         <th className="px-5 py-3 font-medium text-right">Margin (%)</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-slate-100/80">
+                                                <tbody className="divide-y divide-zinc-100">
                                                     {selectedSale.items && selectedSale.items.length > 0 ? (
                                                         selectedSale.items.map((item: any, index: number) => (
-                                                            <tr key={index} className="hover:bg-slate-50/50">
-                                                                <td className="px-4 py-3 font-medium text-slate-900">{item.productName}</td>
-                                                                <td className="px-4 py-3 text-center text-slate-600">{formatPrice(item.price)}</td>
-                                                                <td className="px-4 py-3 text-center font-semibold text-slate-900">{item.quantity}</td>
-                                                                <td className="px-4 py-3 text-right font-semibold text-slate-900">{formatPrice(item.subtotal)}</td>
+                                                            <tr key={index} className="hover:bg-zinc-50/50">
+                                                                <td className="px-4 py-3 font-medium text-zinc-900">{item.productName}</td>
+                                                                <td className="px-4 py-3 text-center text-zinc-600">{formatPrice(item.price)}</td>
+                                                                <td className="px-4 py-3 text-center font-semibold text-zinc-900">{item.quantity}</td>
+                                                                <td className="px-4 py-3 text-right font-semibold text-zinc-900">{formatPrice(item.subtotal)}</td>
                                                             </tr>
                                                         ))
                                                     ) : (
                                                         <tr>
-                                                            <td colSpan={4} className="px-4 py-6 text-center text-slate-500 italic">
+                                                            <td colSpan={4} className="px-4 py-6 text-center text-zinc-500 italic">
                                                                 Rincian produk tidak tersedia.
                                                             </td>
                                                         </tr>
                                                     )}
                                                 </tbody>
-                                                <tfoot className="bg-slate-50 border-t border-slate-200">
+                                                <tfoot className="bg-zinc-50/50 border-t border-zinc-200">
                                                     <tr>
-                                                        <td colSpan={3} className="px-4 py-4 text-right font-bold text-slate-700">Total Belanja:</td>
-                                                        <td className="px-4 py-4 text-right font-bold text-slate-900 text-lg">{formatPrice(selectedSale.total)}</td>
+                                                        <td colSpan={3} className="px-4 py-4 text-right font-bold text-zinc-700">Total Belanja:</td>
+                                                        <td className="px-4 py-4 text-right font-bold text-zinc-900 text-lg">{formatPrice(selectedSale.total)}</td>
                                                     </tr>
                                                 </tfoot>
                                             </table>
@@ -601,49 +601,49 @@ export default function ReportsAdminPage() {
                 <div className="space-y-6">
                     {/* Profit Summary Cards */}
                     <div className="grid gap-4 sm:grid-cols-3">
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-indigo-100 p-2">
-                                    <DollarSign className="h-5 w-5 text-indigo-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <DollarSign className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Total Omzet</p>
-                                    <p className="text-xl font-bold text-slate-900">{formatPrice(profitReport.totalRevenue)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Total Omzet</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(profitReport.totalRevenue)}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-orange-100 p-2">
-                                    <ShoppingBag className="h-5 w-5 text-orange-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <ShoppingBag className="h-5 w-5 text-zinc-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Total HPP</p>
-                                    <p className="text-xl font-bold text-slate-900">{formatPrice(profitReport.totalCogs)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Total HPP</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(profitReport.totalCogs)}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-emerald-100 p-2">
-                                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                                <div className="rounded-md bg-zinc-100 p-2">
+                                    <TrendingUp className="h-5 w-5 text-zinc-900" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500">Total Laba Kotor</p>
-                                    <p className="text-xl font-bold text-emerald-600">{formatPrice(profitReport.totalProfit)}</p>
+                                    <p className="text-sm font-medium text-zinc-500">Total Laba Kotor</p>
+                                    <p className="text-xl font-bold text-zinc-900">{formatPrice(profitReport.totalProfit)}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Profit Table */}
-                    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                        <div className="border-b border-slate-100 p-5">
-                            <h3 className="text-sm font-semibold text-slate-700">Rincian Laba per Produk</h3>
+                    <div className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
+                        <div className="border-b border-zinc-100 p-5">
+                            <h3 className="text-sm font-semibold text-zinc-700">Rincian Laba per Produk</h3>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 text-xs uppercase text-slate-500 border-b border-slate-100">
+                                <thead className="bg-zinc-50/50 text-xs uppercase text-zinc-500 border-b border-zinc-100">
                                     <tr>
                                         <th className="px-5 py-3 font-medium">Produk</th>
                                         <th className="px-5 py-3 font-medium text-center">Terjual</th>
@@ -654,34 +654,34 @@ export default function ReportsAdminPage() {
                                         <th className="px-5 py-3 font-medium text-right">Margin (%)</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100/80">
+                                <tbody className="divide-y divide-zinc-100">
                                     {profitReport.items && profitReport.items.length > 0 ? (
                                         profitReport.items.map((item) => (
-                                            <tr key={item.productId} className="hover:bg-slate-50/50">
+                                            <tr key={item.productId} className="hover:bg-zinc-50/50">
                                                 <td className="px-5 py-3">
-                                                    <p className="font-medium text-slate-900">{item.productName}</p>
-                                                    <p className="text-xs text-slate-500">{item.categoryName}</p>
+                                                    <p className="font-medium text-zinc-900">{item.productName}</p>
+                                                    <p className="text-xs text-zinc-500">{item.categoryName}</p>
                                                 </td>
-                                                <td className="px-5 py-3 text-center text-slate-700">
+                                                <td className="px-5 py-3 text-center text-zinc-700">
                                                     {item.qtySold}
                                                 </td>
-                                                <td className="px-5 py-3 text-right text-slate-700">
+                                                <td className="px-5 py-3 text-right text-zinc-700">
                                                     {formatPrice(item.sellingPrice)}
                                                 </td>
-                                                <td className="px-5 py-3 text-right text-slate-700">
+                                                <td className="px-5 py-3 text-right text-zinc-700">
                                                     {formatPrice(item.avgCost)}
                                                 </td>
-                                                <td className="px-5 py-3 text-right font-medium text-slate-900">
+                                                <td className="px-5 py-3 text-right font-medium text-zinc-900">
                                                     {formatPrice(item.revenue)}
                                                 </td>
-                                                <td className="px-5 py-3 text-right font-medium text-emerald-600">
+                                                <td className="px-5 py-3 text-right font-medium text-zinc-900 border-l border-zinc-50">
                                                     {formatPrice(item.profit)}
                                                 </td>
                                                 <td className="px-5 py-3 text-right">
-                                                    <span className={`inline-flex px-2 py-1 rounded-md text-xs font-semibold ${item.profitMargin > 30 ? 'bg-emerald-50 text-emerald-700' :
-                                                        item.profitMargin > 15 ? 'bg-blue-50 text-blue-700' :
-                                                            item.profitMargin > 0 ? 'bg-amber-50 text-amber-700' :
-                                                                'bg-rose-50 text-rose-700'
+                                                    <span className={`inline-flex px-2 py-1 rounded-md text-[10px] font-semibold tracking-wide uppercase border ${item.profitMargin > 30 ? 'bg-white border-zinc-200 text-zinc-700' :
+                                                        item.profitMargin > 15 ? 'bg-white border-zinc-200 text-zinc-700' :
+                                                            item.profitMargin > 0 ? 'bg-white border-zinc-200 text-zinc-700' :
+                                                                'bg-red-50 border-red-200 text-red-700'
                                                         }`}>
                                                         {item.profitMargin.toFixed(1)}%
                                                     </span>
@@ -690,7 +690,7 @@ export default function ReportsAdminPage() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={7} className="px-5 py-8 text-center text-slate-500">
+                                            <td colSpan={7} className="px-5 py-8 text-center text-zinc-500">
                                                 Tidak ada data laba/rugi untuk rentang waktu ini
                                             </td>
                                         </tr>

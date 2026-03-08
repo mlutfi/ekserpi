@@ -137,12 +137,12 @@ export default function DepartmentsClient() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Data Departemen</h1>
-                    <p className="text-gray-500">Kelola departemen perusahaan</p>
+                    <h1 className="text-2xl font-bold text-zinc-900">Data Departemen</h1>
+                    <p className="text-zinc-500">Kelola departemen perusahaan</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+                        <Button onClick={openCreateDialog} className="bg-zinc-900 hover:bg-zinc-800 text-white">
                             <Plus className="mr-2 h-4 w-4" />
                             Tambah Departemen
                         </Button>
@@ -176,10 +176,10 @@ export default function DepartmentsClient() {
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                <Button type="button" variant="outline" className="border-zinc-200" onClick={() => setIsDialogOpen(false)}>
                                     Batal
                                 </Button>
-                                <Button type="submit" disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+                                <Button type="submit" disabled={saving} className="bg-zinc-900 hover:bg-zinc-800 text-white">
                                     {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     {editingDepartment ? "Simpan" : "Buat"}
                                 </Button>
@@ -189,72 +189,75 @@ export default function DepartmentsClient() {
                 </Dialog>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Building2 className="h-5 w-5" />
+            <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden">
+                <CardHeader className="border-b border-zinc-100 bg-zinc-50/50 pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2 text-zinc-900">
+                        <Building2 className="h-5 w-5 text-zinc-500" />
                         Daftar Departemen
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                     <div className="mb-4">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                             <Input
                                 placeholder="Cari departemen..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
+                                className="pl-10 border-zinc-200 focus-visible:ring-zinc-900"
                             />
                         </div>
                     </div>
 
                     {loading ? (
                         <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                            <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
                         </div>
                     ) : filteredDepartments.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-                            <AlertTriangle className="h-12 w-12 mb-2 text-amber-500" />
+                        <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
+                            <AlertTriangle className="h-12 w-12 mb-2 text-zinc-400" />
                             <p>Tidak ada departemen ditemukan</p>
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nama</TableHead>
-                                    <TableHead>Deskripsi</TableHead>
-                                    <TableHead className="text-right">Aksi</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredDepartments.map((department) => (
-                                    <TableRow key={department.id}>
-                                        <TableCell className="font-medium">{department.name}</TableCell>
-                                        <TableCell>{department.description || "-"}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    onClick={() => openEditDialog(department)}
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="text-red-500 hover:text-red-600"
-                                                    onClick={() => handleDelete(department)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
+                        <div className="border border-zinc-200 rounded-md overflow-hidden">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-zinc-50 hover:bg-zinc-50">
+                                        <TableHead className="font-semibold text-zinc-900">Nama</TableHead>
+                                        <TableHead className="font-semibold text-zinc-900">Deskripsi</TableHead>
+                                        <TableHead className="text-right font-semibold text-zinc-900">Aksi</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredDepartments.map((department) => (
+                                        <TableRow key={department.id}>
+                                            <TableCell className="font-medium text-zinc-900">{department.name}</TableCell>
+                                            <TableCell className="text-zinc-600">{department.description || "-"}</TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="hover:bg-zinc-100 text-zinc-500"
+                                                        onClick={() => openEditDialog(department)}
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="hover:bg-red-50 hover:text-red-600 text-zinc-500"
+                                                        onClick={() => handleDelete(department)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     )}
                 </CardContent>
             </Card>

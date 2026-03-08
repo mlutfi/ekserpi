@@ -105,7 +105,8 @@ export default function AdminDashboard() {
       icon: DollarSign,
       trend: "+12.5%",
       trendUp: true,
-      color: "bg-green-500",
+      color: "bg-zinc-100/50 border-zinc-200 text-zinc-900",
+      iconColor: "text-zinc-600",
     },
     {
       title: "Transaksi Hari Ini",
@@ -113,7 +114,8 @@ export default function AdminDashboard() {
       icon: ShoppingBag,
       trend: "+8.2%",
       trendUp: true,
-      color: "bg-blue-500",
+      color: "bg-zinc-100/50 border-zinc-200 text-zinc-900",
+      iconColor: "text-zinc-600",
     },
     {
       title: "Total Produk",
@@ -121,7 +123,8 @@ export default function AdminDashboard() {
       icon: Package,
       trend: null,
       trendUp: true,
-      color: "bg-purple-500",
+      color: "bg-zinc-100/50 border-zinc-200 text-zinc-900",
+      iconColor: "text-zinc-600",
     },
     {
       title: "Total Kategori",
@@ -129,7 +132,8 @@ export default function AdminDashboard() {
       icon: Users,
       trend: null,
       trendUp: true,
-      color: "bg-amber-500",
+      color: "bg-zinc-100/50 border-zinc-200 text-zinc-900",
+      iconColor: "text-zinc-600",
     },
   ]
 
@@ -154,7 +158,7 @@ export default function AdminDashboard() {
         <button
           onClick={() => fetchStats(true)}
           disabled={refreshing}
-          className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 shadow-sm disabled:opacity-50"
+          className="flex items-center gap-2 rounded-md bg-white border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900 shadow-sm disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           {refreshing ? "Memperbarui..." : "Refresh"}
@@ -168,15 +172,15 @@ export default function AdminDashboard() {
           return (
             <div
               key={stat.title}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <div className={`rounded-lg p-2 ${stat.color}`}>
-                  <Icon className="h-5 w-5 text-white" />
+                <div className={`rounded-md p-2 border ${stat.color}`}>
+                  <Icon className={`h-4 w-4 ${stat.iconColor}`} />
                 </div>
                 {stat.trend && (
                   <span
-                    className={`flex items-center gap-1 text-xs font-medium ${stat.trendUp ? "text-green-600" : "text-red-600"
+                    className={`flex items-center gap-1 text-xs font-medium ${stat.trendUp ? "text-zinc-600" : "text-zinc-500"
                       }`}
                   >
                     {stat.trendUp ? (
@@ -189,8 +193,8 @@ export default function AdminDashboard() {
                 )}
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                <p className="text-sm text-slate-500">{stat.title}</p>
+                <p className="text-2xl font-semibold text-zinc-900">{stat.value}</p>
+                <p className="text-sm text-zinc-500 mt-1">{stat.title}</p>
               </div>
             </div>
           )
@@ -199,39 +203,40 @@ export default function AdminDashboard() {
 
       {/* Payment Methods */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
+        <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
+          <h2 className="text-base font-semibold text-zinc-900">
             Metode Pembayaran Hari Ini
           </h2>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-zinc-500">
             Distribusi berdasarkan metode pembayaran
           </p>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 flex-1 flex flex-col justify-center space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-green-500" />
-                <span className="text-sm text-slate-700">Tunai</span>
+                <div className="h-3 w-3 rounded-sm bg-zinc-900" />
+                <span className="text-sm font-medium text-zinc-700">Tunai</span>
               </div>
-              <span className="text-sm font-semibold text-slate-900">
+              <span className="text-sm text-zinc-500">
                 {stats.cashSales} transaksi
               </span>
             </div>
+            <div className="border-t border-zinc-100" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-3 w-3 rounded-full bg-purple-500" />
-                <span className="text-sm text-slate-700">QRIS</span>
+                <div className="h-3 w-3 rounded-sm bg-zinc-400" />
+                <span className="text-sm font-medium text-zinc-700">QRIS</span>
               </div>
-              <span className="text-sm font-semibold text-slate-900">
+              <span className="text-sm text-zinc-500">
                 {stats.qrisSales} transaksi
               </span>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-8 flex h-1.5 overflow-hidden rounded-full bg-zinc-100">
             <div
-              className="bg-green-500 transition-all"
+              className="bg-zinc-900 transition-all"
               style={{
                 width: `${stats.totalSales > 0
                   ? (stats.cashSales / stats.totalSales) * 100
@@ -240,7 +245,7 @@ export default function AdminDashboard() {
               }}
             />
             <div
-              className="bg-purple-500 transition-all"
+              className="bg-zinc-400 transition-all"
               style={{
                 width: `${stats.totalSales > 0
                   ? (stats.qrisSales / stats.totalSales) * 100
@@ -252,23 +257,23 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top 10 Produk Terlaris */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-1">
-            <Trophy className="h-5 w-5 text-amber-500" />
-            <h2 className="text-lg font-semibold text-slate-900">Top 10 Produk Terlaris</h2>
+            <Trophy className="h-4 w-4 text-zinc-900" />
+            <h2 className="text-base font-semibold text-zinc-900">Top 10 Produk Terlaris</h2>
           </div>
-          <p className="text-sm text-slate-500">Produk dengan penjualan terbanyak</p>
+          <p className="text-sm text-zinc-500">Produk dengan penjualan terbanyak</p>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-2">
             {topProducts.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-6">Belum ada data penjualan</p>
+              <p className="text-sm text-zinc-400 text-center py-6">Belum ada data penjualan</p>
             ) : (
               topProducts.map((product, index) => (
                 <div
                   key={product.productId}
-                  className="flex items-center gap-3 rounded-lg border border-slate-100 p-3 transition hover:bg-slate-50"
+                  className="flex items-center gap-3 rounded-md border border-zinc-100 p-2 transition hover:bg-zinc-50/50"
                 >
-                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${index === 0 ? 'bg-amber-500' : index === 1 ? 'bg-slate-400' : index === 2 ? 'bg-amber-700' : 'bg-slate-300'
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-xs font-semibold ${index === 0 ? 'bg-zinc-900 text-white' : index === 1 ? 'bg-zinc-200 text-zinc-900' : index === 2 ? 'bg-zinc-100 text-zinc-800' : 'bg-zinc-50 text-zinc-500'
                     }`}>
                     {index + 1}
                   </span>
@@ -276,18 +281,18 @@ export default function AdminDashboard() {
                     <img
                       src={getImageUrl(product.imageUrl)}
                       alt={product.productName}
-                      className="h-10 w-10 shrink-0 rounded-lg object-cover border border-slate-200"
+                      className="h-9 w-9 shrink-0 rounded-md object-cover border border-zinc-200"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                      <Package className="h-5 w-5 text-slate-400" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-50 border border-zinc-100">
+                      <Package className="h-4 w-4 text-zinc-400" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">{product.productName}</p>
-                    <p className="text-xs text-slate-500">{product.totalQty} terjual</p>
+                    <p className="text-sm font-medium text-zinc-900 truncate">{product.productName}</p>
+                    <p className="text-xs text-zinc-500">{product.totalQty} terjual</p>
                   </div>
-                  <span className="text-sm font-semibold text-slate-700 shrink-0">
+                  <span className="text-sm font-medium text-zinc-900 shrink-0">
                     {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.totalSales)}
                   </span>
                 </div>

@@ -64,13 +64,13 @@ export function HrisHeader() {
 
     return (
         <>
-            <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm w-full">
+            <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-4 shadow-sm w-full">
                 <div className="flex items-center gap-3">
                     {/* Sidebar Toggle */}
                     <button
                         onClick={toggleCollapsed}
                         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-900"
                     >
                         {collapsed ? (
                             <PanelLeftOpen className="h-4 w-4" />
@@ -80,17 +80,17 @@ export function HrisHeader() {
                     </button>
 
                     {/* Divider */}
-                    <div className="h-5 w-px bg-slate-200" />
+                    <div className="h-5 w-px bg-zinc-200" />
 
                     {/* Page Name */}
                     <div className="flex items-center gap-2.5">
                         {Icon && (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
-                                <Icon className={`h-4 w-4 ${color}`} />
+                            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100">
+                                <Icon className="h-4 w-4 text-zinc-600" />
                             </div>
                         )}
                         <div>
-                            <h1 className="text-sm font-semibold text-slate-800">{label}</h1>
+                            <h1 className="text-sm font-semibold text-zinc-900">{label}</h1>
                         </div>
                     </div>
                 </div>
@@ -98,9 +98,9 @@ export function HrisHeader() {
                 {/* Profile Dropdown */}
                 <div className="flex items-center">
                     <DropdownMenu>
-                        <DropdownMenuTrigger className="outline-none focus:ring-2 focus:ring-slate-200 focus:ring-offset-2 rounded-full">
-                            <Avatar className="h-8 w-8 transition-transform hover:scale-105 border border-slate-200 shadow-sm cursor-pointer">
-                                <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-600 text-white text-xs font-semibold">
+                        <DropdownMenuTrigger className="outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-2 rounded-full">
+                            <Avatar className="h-8 w-8 transition-transform hover:scale-105 border border-zinc-200 shadow-sm cursor-pointer">
+                                <AvatarFallback className="bg-zinc-900 text-white text-xs font-semibold">
                                     {getInitials(user?.name)}
                                 </AvatarFallback>
                             </Avatar>
@@ -109,18 +109,18 @@ export function HrisHeader() {
                             <DropdownMenuLabel className="font-normal">
                                 <div className="flex flex-col space-y-1">
                                     <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
-                                    <p className="text-xs leading-none text-slate-500">
+                                    <p className="text-xs leading-none text-zinc-500">
                                         {user?.role || ""}
                                     </p>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="cursor-pointer" onClick={() => setIsChangePasswordOpen(true)}>
-                                <KeyRound className="mr-2 h-4 w-4 text-slate-500" />
+                                <KeyRound className="mr-2 h-4 w-4 text-zinc-500" />
                                 <span>Ganti Password</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50" onClick={handleLogout}>
+                            <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50" onClick={handleLogout}>
                                 <LogOut className="mr-2 h-4 w-4" />
                                 <span>Keluar</span>
                             </DropdownMenuItem>

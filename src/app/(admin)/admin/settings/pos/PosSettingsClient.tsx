@@ -143,7 +143,7 @@ export default function PosSettingsPage() {
     if (loading) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <div className="flex flex-col items-center gap-3 text-slate-400">
+                <div className="flex flex-col items-center gap-3 text-zinc-400">
                     <Settings className="h-8 w-8 animate-spin" />
                     <p className="text-sm font-medium">Memuat Pengaturan...</p>
                 </div>
@@ -154,27 +154,27 @@ export default function PosSettingsPage() {
     return (
         <div className="mx-auto max-w-4xl space-y-6">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-                    <Settings className="h-6 w-6 text-slate-400" />
+                <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-3">
+                    <Settings className="h-6 w-6 text-zinc-400" />
                     Pengaturan Pembayaran POS
                 </h1>
-                <p className="text-sm text-slate-500 mt-1 pl-9">
+                <p className="text-sm text-zinc-500 mt-1 pl-9">
                     Atur metode pembayaran yang tersedia saat checkout di POS.
                 </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-white overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden shadow-sm">
+                <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-bold text-slate-800">Metode Pembayaran</h2>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <h2 className="text-lg font-bold text-zinc-900">Metode Pembayaran</h2>
+                        <p className="text-xs text-zinc-500 mt-1">
                             Aktifkan atau nonaktifkan pilihan pembayaran.
                         </p>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-md bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
                         {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
@@ -184,14 +184,14 @@ export default function PosSettingsPage() {
                 <div className="p-6 space-y-6">
 
                     {/* Cash */}
-                    <div className="flex items-start justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+                    <div className="flex items-start justify-between p-4 rounded-md border border-zinc-200 bg-zinc-50/30">
                         <div className="flex gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-600">
                                 <Banknote className="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-slate-800">Tunai (Cash)</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">
+                                <h3 className="text-sm font-semibold text-zinc-900">Tunai (Cash)</h3>
+                                <p className="text-xs text-zinc-500 mt-0.5">
                                     Terima pembayaran secara tunai di kasir. Secara bawaan metode ini diutamakan.
                                 </p>
                             </div>
@@ -203,14 +203,14 @@ export default function PosSettingsPage() {
                     </div>
 
                     {/* QRIS Midtrans */}
-                    <div className="flex items-start justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+                    <div className="flex items-start justify-between p-4 rounded-md border border-zinc-200 bg-zinc-50/30">
                         <div className="flex gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-600">
                                 <QrCode className="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-slate-800">QRIS (Midtrans)</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">
+                                <h3 className="text-sm font-semibold text-zinc-900">QRIS (Midtrans)</h3>
+                                <p className="text-xs text-zinc-500 mt-0.5">
                                     Generate QRIS dinamis via Midtrans untuk pembayaran otomatis.
                                 </p>
                             </div>
@@ -222,15 +222,15 @@ export default function PosSettingsPage() {
                     </div>
 
                     {/* QRIS Static */}
-                    <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-                        <div className="flex items-start justify-between p-4 bg-slate-50/50">
+                    <div className="border border-zinc-200 rounded-md overflow-hidden shadow-sm">
+                        <div className="flex items-start justify-between p-4 bg-zinc-50/30">
                             <div className="flex gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-600">
                                     <QrCode className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-slate-800">QRIS (Statis)</h3>
-                                    <p className="text-xs text-slate-500 mt-0.5">
+                                    <h3 className="text-sm font-semibold text-zinc-900">QRIS (Statis)</h3>
+                                    <p className="text-xs text-zinc-500 mt-0.5">
                                         Gunakan gambar QRIS toko yang statis. Pelanggan scan, lalu kasir memverifikasi manual.
                                     </p>
                                 </div>
@@ -241,12 +241,12 @@ export default function PosSettingsPage() {
                             />
                         </div>
                         {settings.qrisStatic && (
-                            <div className="p-5 border-t border-slate-100 bg-white flex flex-col sm:flex-row gap-6">
+                            <div className="p-5 border-t border-zinc-100 bg-white flex flex-col sm:flex-row gap-6">
                                 <div className="flex-1">
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    <label className="block text-sm font-semibold text-zinc-700 mb-2">
                                         Upload Foto QRIS
                                     </label>
-                                    <p className="text-xs text-slate-500 mb-4">
+                                    <p className="text-xs text-zinc-500 mb-4">
                                         Gunakan gambar beresolusi jelas agar mudah di-scan oleh aplikasi e-wallet atau m-banking.
                                     </p>
 
@@ -258,14 +258,14 @@ export default function PosSettingsPage() {
                                             disabled={uploading}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                                         />
-                                        <div className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-4 transition-colors hover:border-violet-300 hover:bg-violet-50">
+                                        <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-zinc-200 bg-zinc-50 py-4 transition-colors hover:border-zinc-300 hover:bg-zinc-100">
                                             {uploading ? (
-                                                <div className="flex items-center gap-2 text-violet-500 font-medium text-sm">
-                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+                                                <div className="flex items-center gap-2 text-zinc-500 font-medium text-sm">
+                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-500 border-t-transparent" />
                                                     Mengunggah...
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
+                                                <div className="flex items-center gap-2 text-zinc-500 font-medium text-sm">
                                                     <Upload className="h-4 w-4" />
                                                     Pilih Foto
                                                 </div>
@@ -275,8 +275,8 @@ export default function PosSettingsPage() {
                                 </div>
                                 {settings.qrisStaticImage && (
                                     <div className="shrink-0">
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2 border-b border-transparent">Preview QRIS</label>
-                                        <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm p-2 bg-white flex items-center justify-center">
+                                        <label className="block text-sm font-semibold text-zinc-700 mb-2 border-b border-transparent">Preview QRIS</label>
+                                        <div className="rounded-md border border-zinc-200 overflow-hidden shadow-sm p-2 bg-white flex items-center justify-center">
                                             <img src={getQrisImageUrl(settings.qrisStaticImage)} alt="QRIS Static Preview" className="h-48 w-48 object-contain" />
                                         </div>
                                     </div>
@@ -286,15 +286,15 @@ export default function PosSettingsPage() {
                     </div>
 
                     {/* Bank Transfer */}
-                    <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-                        <div className="flex items-start justify-between p-4 bg-slate-50/50">
+                    <div className="border border-zinc-200 rounded-md overflow-hidden shadow-sm">
+                        <div className="flex items-start justify-between p-4 bg-zinc-50/30">
                             <div className="flex gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-600">
                                     <CreditCard className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-slate-800">Transfer Bank</h3>
-                                    <p className="text-xs text-slate-500 mt-0.5">
+                                    <h3 className="text-sm font-semibold text-zinc-900">Transfer Bank</h3>
+                                    <p className="text-xs text-zinc-500 mt-0.5">
                                         Izinkan pembayaran transfer. Kasir akan memilih bank tujuan dan pelanggan melakukan transfer manual.
                                     </p>
                                 </div>
@@ -306,29 +306,29 @@ export default function PosSettingsPage() {
                         </div>
 
                         {settings.bankTransfer && (
-                            <div className="p-5 border-t border-slate-100 bg-white">
+                            <div className="p-5 border-t border-zinc-100 bg-white">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                                        <Wallet className="h-4 w-4 text-emerald-500" />
+                                    <h4 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+                                        <Wallet className="h-4 w-4 text-zinc-500" />
                                         Daftar Rekening Bank
                                     </h4>
                                 </div>
 
                                 <div className="space-y-3 mb-5">
                                     {settings.bankAccounts.length === 0 ? (
-                                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                                        <div className="rounded-md border border-dashed border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-500">
                                             Belum ada rekening bank yang dikonfigurasi.
                                         </div>
                                     ) : (
                                         settings.bankAccounts.map((acc) => (
-                                            <div key={acc.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+                                            <div key={acc.id} className="flex items-center justify-between rounded-md border border-zinc-200 bg-zinc-50/50 px-4 py-3">
                                                 <div>
-                                                    <p className="text-sm font-bold text-slate-800">{acc.bankName}</p>
-                                                    <p className="text-xs text-slate-500 mt-0.5 font-mono">{acc.accountNumber} A/N {acc.accountName}</p>
+                                                    <p className="text-sm font-semibold text-zinc-900">{acc.bankName}</p>
+                                                    <p className="text-xs text-zinc-500 mt-0.5 font-mono">{acc.accountNumber} A/N {acc.accountName}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleDeleteBankAccount(acc.id)}
-                                                    className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                                    className="text-zinc-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-md transition-colors border border-transparent hover:border-red-200"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </button>
@@ -338,43 +338,43 @@ export default function PosSettingsPage() {
                                 </div>
 
                                 {/* Add Bank Form */}
-                                <div className="rounded-xl border border-emerald-100 bg-emerald-50/30 p-4">
-                                    <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-3">Tambah Rekening Baru</h5>
+                                <div className="rounded-md border border-zinc-200 bg-zinc-50/50 p-4">
+                                    <h5 className="text-xs font-bold uppercase tracking-wider text-zinc-700 mb-3">Tambah Rekening Baru</h5>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
-                                            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Nama Bank</label>
+                                            <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Nama Bank</label>
                                             <input
                                                 type="text"
                                                 placeholder="Contoh: BCA / Mandiri"
                                                 value={newBank.bankName}
                                                 onChange={(e) => setNewBank(p => ({ ...p, bankName: e.target.value }))}
-                                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                                                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">No. Rekening</label>
+                                            <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">No. Rekening</label>
                                             <input
                                                 type="text"
                                                 placeholder="Contoh: 123456789"
                                                 value={newBank.accountNumber}
                                                 onChange={(e) => setNewBank(p => ({ ...p, accountNumber: e.target.value }))}
-                                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                                                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-xs font-semibold text-slate-600 mb-1.5 block">Atas Nama</label>
+                                            <label className="text-xs font-semibold text-zinc-600 mb-1.5 block">Atas Nama</label>
                                             <input
                                                 type="text"
                                                 placeholder="Contoh: PT. Toko Maju"
                                                 value={newBank.accountName}
                                                 onChange={(e) => setNewBank(p => ({ ...p, accountName: e.target.value }))}
-                                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                                                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
                                             />
                                         </div>
                                     </div>
                                     <button
                                         onClick={handleAddBankAccount}
-                                        className="mt-4 flex w-full md:w-auto items-center justify-center gap-2 rounded-lg bg-emerald-100 px-4 py-2 hover:bg-emerald-200 text-sm font-semibold text-emerald-700 transition-colors"
+                                        className="mt-4 flex w-full md:w-auto items-center justify-center gap-2 rounded-md bg-zinc-900 border border-zinc-800 px-4 py-2 hover:bg-zinc-800 text-sm font-semibold text-white transition-colors"
                                     >
                                         <Plus className="h-4 w-4" />
                                         Tambahkan Rekening
