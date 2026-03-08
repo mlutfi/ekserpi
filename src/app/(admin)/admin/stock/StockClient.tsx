@@ -214,37 +214,47 @@ export default function StockManagementPage() {
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-zinc-50/50 border-b border-zinc-200 text-zinc-500">
                                         <tr>
-                                            <th className="px-6 py-4 font-medium">SKU / Code</th>
-                                            <th className="px-6 py-4 font-medium">Nama Produk</th>
-                                            <th className="px-6 py-4 font-medium">Kategori</th>
-                                            <th className="px-6 py-4 font-medium">Qty Saat Ini</th>
-                                            <th className="px-6 py-4 font-medium">Status</th>
+                                            <th className="px-5 py-4 font-medium">Lokasi</th>
+                                            <th className="px-5 py-4 font-medium">SKU / Code</th>
+                                            <th className="px-5 py-4 font-medium">Nama Produk</th>
+                                            <th className="px-5 py-4 font-medium">Kategori</th>
+                                            <th className="px-5 py-4 font-medium">Batch</th>
+                                            <th className="px-5 py-4 font-medium">Kedaluwarsa</th>
+                                            <th className="px-5 py-4 font-medium text-right">HPP</th>
+                                            <th className="px-5 py-4 font-medium text-center">Qty</th>
+                                            <th className="px-5 py-4 font-medium text-center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-zinc-100">
                                         {inventory.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                                                <td colSpan={9} className="px-6 py-12 text-center text-zinc-500">
                                                     Data inventaris kosong
                                                 </td>
                                             </tr>
                                         ) : (
-                                            inventory.map((item) => (
-                                                <tr key={item.productId} className="hover:bg-zinc-50/50">
-                                                    <td className="px-6 py-4 text-zinc-600">{item.sku || '-'}</td>
-                                                    <td className="px-6 py-4 font-medium text-zinc-900">{item.productName}</td>
-                                                    <td className="px-6 py-4 text-zinc-600">{item.category || '-'}</td>
-                                                    <td className="px-6 py-4">
+                                            inventory.map((item, idx) => (
+                                                <tr key={`${item.productId}-${item.locationId}-${idx}`} className="hover:bg-zinc-50/50">
+                                                    <td className="px-5 py-4 whitespace-nowrap text-zinc-600">{item.locationName || '-'}</td>
+                                                    <td className="px-5 py-4 text-zinc-600 font-mono text-xs">{item.sku || '-'}</td>
+                                                    <td className="px-5 py-4 font-medium text-zinc-900">{item.productName}</td>
+                                                    <td className="px-5 py-4 text-zinc-600">{item.category || '-'}</td>
+                                                    <td className="px-5 py-4 text-zinc-600 text-xs">{item.batchNumber || '-'}</td>
+                                                    <td className="px-5 py-4 text-zinc-600 text-sm">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('id-ID') : '-'}</td>
+                                                    <td className="px-5 py-4 text-right text-zinc-900 font-medium">
+                                                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.avgCost || 0)}
+                                                    </td>
+                                                    <td className="px-5 py-4 text-center">
                                                         <span className="font-semibold text-zinc-900">{item.qtyOnHand}</span>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-5 py-4 text-center">
                                                         {item.qtyOnHand <= 5 ? (
                                                             <span className="inline-flex items-center px-2 py-1 rounded-md border border-red-200 bg-red-50 text-[10px] font-semibold tracking-wide uppercase text-red-600">
-                                                                Stok Rendah
+                                                                Rendah
                                                             </span>
                                                         ) : (
                                                             <span className="inline-flex items-center px-2 py-1 rounded-md border border-zinc-200 bg-white text-[10px] font-semibold tracking-wide uppercase text-zinc-700">
-                                                                Stok Aman
+                                                                Aman
                                                             </span>
                                                         )}
                                                     </td>

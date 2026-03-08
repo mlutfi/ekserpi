@@ -8,13 +8,18 @@ import (
 	"hris_backend/app/department"
 	"hris_backend/app/employee"
 	"hris_backend/app/leave"
+	"hris_backend/app/location"
 	"hris_backend/app/payroll"
 	"hris_backend/app/position"
 	"hris_backend/app/product"
+	"hris_backend/app/purchaseorder"
 	"hris_backend/app/report"
 	"hris_backend/app/sale"
 	"hris_backend/app/setting"
 	"hris_backend/app/stock"
+	"hris_backend/app/stockopname"
+	"hris_backend/app/stocktransfer"
+	"hris_backend/app/supplier"
 	"hris_backend/app/user"
 	"hris_backend/middleware"
 
@@ -23,17 +28,22 @@ import (
 )
 
 type RouteConfig struct {
-	App             *fiber.App
-	AuthMiddleware  fiber.Handler
-	AuthHandler     auth.AuthHandler
-	ProductHandler  product.ProductHandler
-	CategoryHandler category.CategoryHandler
-	SaleHandler     sale.SaleHandler
-	SettingHandler  setting.SettingHandler
-	UserHandler     user.UserHandler
-	ReportHandler   report.ReportHandler
-	StockHandler    stock.StockHandler
-	Config          *viper.Viper
+	App                  *fiber.App
+	AuthMiddleware       fiber.Handler
+	AuthHandler          auth.AuthHandler
+	ProductHandler       product.ProductHandler
+	CategoryHandler      category.CategoryHandler
+	SaleHandler          sale.SaleHandler
+	SettingHandler       setting.SettingHandler
+	UserHandler          user.UserHandler
+	ReportHandler        report.ReportHandler
+	StockHandler         stock.StockHandler
+	LocationHandler      location.LocationHandler
+	SupplierHandler      supplier.SupplierHandler
+	PurchaseOrderHandler purchaseorder.PurchaseOrderHandler
+	StockTransferHandler stocktransfer.StockTransferHandler
+	StockOpnameHandler   stockopname.StockOpnameHandler
+	Config               *viper.Viper
 
 	// HRIS Handlers
 	EmployeeHandler    employee.EmployeeHandler
@@ -83,6 +93,11 @@ func (c *RouteConfig) Setup() {
 	c.UserRoutes(protected)
 	c.ReportRoutes(protected)
 	c.StockRoutes(protected)
+	c.LocationRoutes(protected)
+	c.SupplierRoutes(protected)
+	c.PurchaseOrderRoutes(protected)
+	c.StockTransferRoutes(protected)
+	c.StockOpnameRoutes(protected)
 
 	// HRIS Protected routes
 	c.EmployeeRoutes(protected)
@@ -194,6 +209,52 @@ func (c *RouteConfig) StockRoutes(router fiber.Router) {
 
 	// Inventory can be viewed by all authenticated users
 	stockGroup.Get("/inventory", c.StockHandler.GetInventory)
+}
+
+func (c *RouteConfig) LocationRoutes(router fiber.Router) {
+	locationGroup := router.Group("/locations")
+	locationGroup.Get("/", c.LocationHandler.FindAll)
+	locationGroup.Get("/:id", c.LocationHandler.FindByID)
+	locationGroup.Post("/", middleware.RequireRole("OWNER", "OPS"), c.LocationHandler.Create)
+	locationGroup.Put("/:id", middleware.RequireRole("OWNER", "OPS"), c.LocationHandler.Update)
+	locationGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.LocationHandler.Delete)
+}
+
+func (c *RouteConfig) SupplierRoutes(router fiber.Router) {
+	supplierGroup := router.Group("/suppliers")
+	supplierGroup.Get("/", c.SupplierHandler.FindAll)
+	supplierGroup.Get("/:id", c.SupplierHandler.FindByID)
+	supplierGroup.Post("/", middleware.RequireRole("OWNER", "OPS"), c.SupplierHandler.Create)
+	supplierGroup.Put("/:id", middleware.RequireRole("OWNER", "OPS"), c.SupplierHandler.Update)
+	supplierGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.SupplierHandler.Delete)
+}
+
+func (c *RouteConfig) PurchaseOrderRoutes(router fiber.Router) {
+	poGroup := router.Group("/purchase-orders")
+	poGroup.Get("/", c.PurchaseOrderHandler.FindAll)
+	poGroup.Get("/:id", c.PurchaseOrderHandler.FindByID)
+	// Typically MANAGER/OPS could create POs
+	poGroup.Post("/", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.PurchaseOrderHandler.Create)
+	poGroup.Put("/:id/status", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.PurchaseOrderHandler.UpdateStatus)
+	poGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.PurchaseOrderHandler.Delete)
+}
+
+func (c *RouteConfig) StockTransferRoutes(router fiber.Router) {
+	trGroup := router.Group("/stock-transfers")
+	trGroup.Get("/", c.StockTransferHandler.FindAll)
+	trGroup.Get("/:id", c.StockTransferHandler.FindByID)
+	trGroup.Post("/", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.StockTransferHandler.Create)
+	trGroup.Put("/:id/status", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.StockTransferHandler.UpdateStatus)
+	trGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.StockTransferHandler.Delete)
+}
+
+func (c *RouteConfig) StockOpnameRoutes(router fiber.Router) {
+	opGroup := router.Group("/stock-opnames")
+	opGroup.Get("/", c.StockOpnameHandler.FindAll)
+	opGroup.Get("/:id", c.StockOpnameHandler.FindByID)
+	opGroup.Post("/", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.StockOpnameHandler.Create)
+	opGroup.Put("/:id/status", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.StockOpnameHandler.UpdateStatus)
+	opGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.StockOpnameHandler.Delete)
 }
 
 // ============================================================

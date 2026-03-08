@@ -122,6 +122,54 @@ func main() {
 	fmt.Println()
 
 	// ──────────────────────────────────────────────────────────────────
+	// STEP 0.7: Prepare for Multi-Location
+	// ──────────────────────────────────────────────────────────────────
+	fmt.Println("━━━ Step 0.7: Prepare for Multi-Location ━━━")
+	// 1. Create locations table if not exists
+	if err := db.AutoMigrate(&entity.Location{}); err != nil {
+		log.Fatalf("  ✗ Failed to create locations table: %v", err)
+	}
+
+	// 2. Create default location
+	var defaultLoc entity.Location
+	if err := db.Where("name = ?", "Gudang Utama").First(&defaultLoc).Error; err != nil {
+		defaultLoc = entity.Location{
+			Name:     "Gudang Utama",
+			Type:     entity.LocationTypeWarehouse,
+			IsActive: true,
+		}
+		if err := db.Create(&defaultLoc).Error; err != nil {
+			log.Fatalf("  ✗ Failed to create default location: %v", err)
+		}
+		fmt.Printf("  ✓ Created default location: %s (%s)\n", defaultLoc.Name, defaultLoc.ID)
+	} else {
+		fmt.Printf("  - Default location exists: %s (%s)\n", defaultLoc.Name, defaultLoc.ID)
+	}
+
+	// 3. Add location_id column as NULLABLE first to existing tables if missing
+	tablesToUpdate := []string{"sales", "stock_ins", "stock_outs", "inventories", "stock_movements"}
+	for _, table := range tablesToUpdate {
+		if db.Migrator().HasTable(table) && !db.Migrator().HasColumn(table, "location_id") {
+			// Manually add column as nullable
+			query := fmt.Sprintf("ALTER TABLE %s ADD COLUMN location_id VARCHAR(255)", table)
+			if err := db.Exec(query).Error; err != nil {
+				fmt.Printf("  ⚠ Failed to add location_id to %s: %v\n", table, err)
+			} else {
+				fmt.Printf("  ✓ Added location_id column to %s\n", table)
+			}
+		}
+
+		// 4. Update NULL location_id with default
+		query := fmt.Sprintf("UPDATE %s SET location_id = '%s' WHERE location_id IS NULL", table, defaultLoc.ID)
+		if err := db.Exec(query).Error; err != nil {
+			fmt.Printf("  ⚠ Failed to update location_id in %s: %v\n", table, err)
+		} else {
+			fmt.Printf("  ✓ Updated existing records in %s with default location\n", table)
+		}
+	}
+	fmt.Println()
+
+	// ──────────────────────────────────────────────────────────────────
 	// STEP 1: Run AutoMigrate (adds tables & missing columns safely)
 	// ──────────────────────────────────────────────────────────────────
 	fmt.Println("━━━ Step 1: Schema Migration (AutoMigrate) ━━━")
@@ -139,6 +187,14 @@ func main() {
 		&entity.StockMovement{},
 		&entity.ReceiptTemplate{},
 		&entity.Setting{},
+		&entity.Location{},
+		&entity.Supplier{},
+		&entity.PurchaseOrder{},
+		&entity.PurchaseOrderItem{},
+		&entity.StockTransfer{},
+		&entity.StockTransferItem{},
+		&entity.StockOpname{},
+		&entity.StockOpnameItem{},
 		// HRIS Entities
 		&entity.Department{},
 		&entity.Position{},

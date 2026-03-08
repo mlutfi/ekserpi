@@ -40,6 +40,9 @@ func (r *stockRepository) GetStockIns(ctx context.Context, limit int, offset int
 
 	err := query.
 		Preload("Product").
+		Preload("Location").
+		Preload("Supplier").
+		Preload("PurchaseOrder").
 		Preload("CreatedBy").
 		Order("created_at DESC").
 		Limit(limit).
@@ -62,6 +65,7 @@ func (r *stockRepository) GetStockOuts(ctx context.Context, limit int, offset in
 
 	err := query.
 		Preload("Product").
+		Preload("Location").
 		Preload("CreatedBy").
 		Order("created_at DESC").
 		Limit(limit).
@@ -73,8 +77,8 @@ func (r *stockRepository) GetStockOuts(ctx context.Context, limit int, offset in
 
 func (r *stockRepository) UpsertInventory(ctx context.Context, inventory *entity.Inventory) error {
 	return r.DB.WithContext(ctx).Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "product_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"qty_on_hand", "updated_at"}),
+		Columns:   []clause.Column{{Name: "product_id"}, {Name: "location_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"qty_on_hand", "updated_at", "total_cost", "avg_cost"}),
 	}).Create(inventory).Error
 }
 
@@ -85,7 +89,8 @@ func (r *stockRepository) InsertStockMovement(ctx context.Context, movement *ent
 func (r *stockRepository) GetAllInventory(ctx context.Context) ([]entity.Inventory, error) {
 	var inventories []entity.Inventory
 	err := r.DB.WithContext(ctx).
-		Preload("Product.Category"). // Need category name
+		Preload("Product.Category").
+		Preload("Location").
 		Joins("JOIN products ON products.id = inventories.product_id AND products.deleted_at IS NULL").
 		Find(&inventories).Error
 	return inventories, err

@@ -6,6 +6,7 @@ type SaleItemRequest struct {
 }
 
 type CreateSaleRequest struct {
+	LocationID   string            `json:"locationId" validate:"required"`
 	CustomerName *string           `json:"customerName"`
 	Items        []SaleItemRequest `json:"items" validate:"required,dive"`
 }
@@ -31,6 +32,8 @@ type SaleResponse struct {
 	ID           string             `json:"id"`
 	CashierID    string             `json:"cashierId"`
 	CashierName  string             `json:"cashierName"`
+	LocationID   string             `json:"locationId"`
+	LocationName string             `json:"locationName"`
 	CustomerName *string            `json:"customerName"`
 	Status       string             `json:"status"`
 	Total        int                `json:"total"`

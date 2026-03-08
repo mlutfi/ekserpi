@@ -21,6 +21,7 @@ func (SaleStatus) GormDataType() string {
 type Sale struct {
 	ID           string         `gorm:"column:id;primaryKey;type:varchar(255);default:gen_random_uuid()" json:"id"`
 	CashierID    string         `gorm:"column:cashier_id;type:varchar(255);not null;index:idx_sales_cashier_created" json:"cashierId"`
+	LocationID   string         `gorm:"column:location_id;type:varchar(255);not null;index" json:"locationId"`
 	CustomerName *string        `gorm:"column:customer_name;type:varchar(255)" json:"customerName"`
 	Status       SaleStatus     `gorm:"column:status;type:varchar(20);default:'PENDING';index:idx_sales_status_created" json:"status"`
 	Total        int            `gorm:"column:total;default:0" json:"total"`
@@ -30,6 +31,7 @@ type Sale struct {
 
 	// Relations
 	Cashier  *User      `gorm:"foreignKey:CashierID;constraint:OnDelete:Restrict" json:"cashier,omitempty"`
+	Location *Location  `gorm:"foreignKey:LocationID;constraint:OnDelete:Restrict" json:"location,omitempty"`
 	Items    []SaleItem `gorm:"foreignKey:SaleID;constraint:OnDelete:Cascade" json:"items,omitempty"`
 	Payments []Payment  `gorm:"foreignKey:SaleID;constraint:OnDelete:Cascade" json:"payments,omitempty"`
 }
@@ -44,6 +46,7 @@ type SaleItem struct {
 	ProductID string `gorm:"column:product_id;type:varchar(255);not null;index;index:idx_sale_items_sale_product" json:"productId"`
 	Qty       int    `gorm:"column:qty;not null" json:"qty"`
 	Price     int    `gorm:"column:price;not null" json:"price"`
+	HPP       int    `gorm:"column:hpp;not null;default:0" json:"hpp"`
 	Subtotal  int    `gorm:"column:subtotal;not null" json:"subtotal"`
 
 	// Relations

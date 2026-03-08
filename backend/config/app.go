@@ -8,13 +8,18 @@ import (
 	"hris_backend/app/department"
 	"hris_backend/app/employee"
 	"hris_backend/app/leave"
+	"hris_backend/app/location"
 	"hris_backend/app/payroll"
 	"hris_backend/app/position"
 	"hris_backend/app/product"
+	"hris_backend/app/purchaseorder"
 	"hris_backend/app/report"
 	"hris_backend/app/sale"
 	"hris_backend/app/setting"
 	"hris_backend/app/stock"
+	"hris_backend/app/stockopname"
+	"hris_backend/app/stocktransfer"
+	"hris_backend/app/supplier"
 	"hris_backend/app/user"
 	"hris_backend/middleware"
 	"hris_backend/route"
@@ -44,6 +49,11 @@ func Bootstrap(config *BootstrapConfig) {
 	reportRepository := report.NewReportRepository(config.DB)
 	stockRepository := stock.NewStockRepository(config.DB)
 	settingRepository := setting.NewSettingRepository(config.DB)
+	locationRepository := location.NewLocationRepository(config.DB)
+	supplierRepository := supplier.NewSupplierRepository(config.DB)
+	purchaseOrderRepository := purchaseorder.NewPurchaseOrderRepository(config.DB)
+	stockTransferRepository := stocktransfer.NewStockTransferRepository(config.DB)
+	stockOpnameRepository := stockopname.NewStockOpnameRepository(config.DB)
 
 	// HRIS Repositories
 	employeeRepository := employee.NewEmployeeRepository(config.DB)
@@ -63,6 +73,11 @@ func Bootstrap(config *BootstrapConfig) {
 	reportUseCase := report.NewReportUseCase(config.DB, reportRepository)
 	stockUseCase := stock.NewStockUseCase(config.DB, stockRepository)
 	settingUseCase := setting.NewSettingUseCase(settingRepository)
+	locationUseCase := location.NewLocationUseCase(locationRepository)
+	supplierUseCase := supplier.NewSupplierUseCase(supplierRepository)
+	purchaseOrderUseCase := purchaseorder.NewPurchaseOrderUseCase(purchaseOrderRepository, stockUseCase)
+	stockTransferUseCase := stocktransfer.NewStockTransferUseCase(stockTransferRepository, stockUseCase)
+	stockOpnameUseCase := stockopname.NewStockOpnameUseCase(stockOpnameRepository, stockUseCase)
 
 	// HRIS Use Cases
 	employeeUseCase := employee.NewEmployeeUseCase(config.DB, employeeRepository)
@@ -82,6 +97,11 @@ func Bootstrap(config *BootstrapConfig) {
 	reportHandler := report.NewReportHandler(reportUseCase)
 	stockHandler := stock.NewStockHandler(stockUseCase)
 	settingHandler := setting.NewSettingHandler(settingUseCase, config.Validate)
+	locationHandler := location.NewLocationHandler(locationUseCase)
+	supplierHandler := supplier.NewSupplierHandler(supplierUseCase)
+	purchaseOrderHandler := purchaseorder.NewPurchaseOrderHandler(purchaseOrderUseCase)
+	stockTransferHandler := stocktransfer.NewStockTransferHandler(stockTransferUseCase)
+	stockOpnameHandler := stockopname.NewStockOpnameHandler(stockOpnameUseCase)
 
 	// HRIS Handlers
 	employeeHandler := employee.NewEmployeeHandler(employeeUseCase)
@@ -97,17 +117,22 @@ func Bootstrap(config *BootstrapConfig) {
 
 	// Routes
 	routeConfig := route.RouteConfig{
-		App:             config.App,
-		AuthMiddleware:  authMiddleware,
-		AuthHandler:     authHandler,
-		ProductHandler:  productHandler,
-		CategoryHandler: categoryHandler,
-		SaleHandler:     saleHandler,
-		UserHandler:     userHandler,
-		ReportHandler:   reportHandler,
-		StockHandler:    stockHandler,
-		SettingHandler:  settingHandler,
-		Config:          config.Config,
+		App:                  config.App,
+		AuthMiddleware:       authMiddleware,
+		AuthHandler:          authHandler,
+		ProductHandler:       productHandler,
+		CategoryHandler:      categoryHandler,
+		SaleHandler:          saleHandler,
+		UserHandler:          userHandler,
+		ReportHandler:        reportHandler,
+		StockHandler:         stockHandler,
+		SettingHandler:       settingHandler,
+		LocationHandler:      locationHandler,
+		SupplierHandler:      supplierHandler,
+		PurchaseOrderHandler: purchaseOrderHandler,
+		StockTransferHandler: stockTransferHandler,
+		StockOpnameHandler:   stockOpnameHandler,
+		Config:               config.Config,
 		// HRIS Handlers
 		EmployeeHandler:    employeeHandler,
 		AttendanceHandler:  attendanceHandler,

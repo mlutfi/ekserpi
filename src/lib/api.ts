@@ -246,8 +246,8 @@ export const categoriesApi = {
 
 // Sales API
 export const salesApi = {
-    create: async (items: { productId: string; qty: number }[], customerName?: string): Promise<Sale> => {
-        const response = await api.post('/sales', { items, customerName })
+    create: async (locationId: string, items: { productId: string; qty: number }[], customerName?: string): Promise<Sale> => {
+        const response = await api.post('/sales', { locationId, items, customerName })
         return response.data.data
     },
 
@@ -468,5 +468,192 @@ export const usersApi = {
     },
     delete: async (id: string): Promise<void> => {
         await api.delete(`/users/${id}`)
+    },
+}
+
+// Location API
+export interface Location {
+    id: string
+    name: string
+    address?: string
+    isDefault: boolean
+}
+
+export const locationsApi = {
+    getAll: async (): Promise<Location[]> => {
+        const response = await api.get('/locations')
+        return response.data.data ?? []
+    },
+    create: async (data: Partial<Location>): Promise<Location> => {
+        const response = await api.post('/locations', data)
+        return response.data.data
+    },
+    update: async (id: string, data: Partial<Location>): Promise<Location> => {
+        const response = await api.put(`/locations/${id}`, data)
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/locations/${id}`)
+    },
+}
+
+// Supplier API
+export interface Supplier {
+    id: string
+    name: string
+    contactPerson?: string
+    phone?: string
+    address?: string
+}
+
+export const suppliersApi = {
+    getAll: async (): Promise<Supplier[]> => {
+        const response = await api.get('/suppliers')
+        return response.data.data ?? []
+    },
+    create: async (data: Partial<Supplier>): Promise<Supplier> => {
+        const response = await api.post('/suppliers', data)
+        return response.data.data
+    },
+    update: async (id: string, data: Partial<Supplier>): Promise<Supplier> => {
+        const response = await api.put(`/suppliers/${id}`, data)
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/suppliers/${id}`)
+    },
+}
+
+// Purchase Order API
+export interface PurchaseOrderItem {
+    id?: string
+    productId: string
+    productName?: string
+    qtyOrdered: number
+    qtyReceived?: number
+    costPerUnit: number
+    subtotal?: number
+}
+
+export interface PurchaseOrder {
+    id: string
+    poNumber: string
+    supplierId: string
+    supplierName?: string
+    locationId: string
+    locationName?: string
+    status: string
+    totalAmount: number
+    note?: string
+    orderDate?: string
+    items: PurchaseOrderItem[]
+    createdAt: string
+}
+
+export const purchaseOrdersApi = {
+    getAll: async (): Promise<PurchaseOrder[]> => {
+        const response = await api.get('/purchase-orders')
+        return response.data.data ?? []
+    },
+    getById: async (id: string): Promise<PurchaseOrder> => {
+        const response = await api.get(`/purchase-orders/${id}`)
+        return response.data.data
+    },
+    create: async (data: Partial<PurchaseOrder>): Promise<PurchaseOrder> => {
+        const response = await api.post('/purchase-orders', data)
+        return response.data.data
+    },
+    updateStatus: async (id: string, status: string): Promise<PurchaseOrder> => {
+        const response = await api.put(`/purchase-orders/${id}/status`, { status })
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/purchase-orders/${id}`)
+    },
+}
+
+// Stock Transfer API
+export interface StockTransferItem {
+    id?: string
+    productId: string
+    productName?: string
+    qty: number
+}
+
+export interface StockTransfer {
+    id: string
+    transferNumber: string
+    sourceLocationId: string
+    sourceLocationName?: string
+    destLocationId: string
+    destLocationName?: string
+    status: string
+    note?: string
+    items: StockTransferItem[]
+    createdAt: string
+}
+
+export const stockTransfersApi = {
+    getAll: async (): Promise<StockTransfer[]> => {
+        const response = await api.get('/stock-transfers')
+        return response.data.data ?? []
+    },
+    getById: async (id: string): Promise<StockTransfer> => {
+        const response = await api.get(`/stock-transfers/${id}`)
+        return response.data.data
+    },
+    create: async (data: Partial<StockTransfer>): Promise<StockTransfer> => {
+        const response = await api.post('/stock-transfers', data)
+        return response.data.data
+    },
+    updateStatus: async (id: string, status: string): Promise<StockTransfer> => {
+        const response = await api.put(`/stock-transfers/${id}/status`, { status })
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/stock-transfers/${id}`)
+    },
+}
+
+// Stock Opname API
+export interface StockOpnameItem {
+    id?: string
+    productId: string
+    productName?: string
+    qtySystem: number
+    qtyActual: number
+    qtyDelta?: number
+}
+
+export interface StockOpname {
+    id: string
+    opnameNumber: string
+    locationId: string
+    locationName?: string
+    status: string
+    note?: string
+    items: StockOpnameItem[]
+    createdAt: string
+}
+
+export const stockOpnamesApi = {
+    getAll: async (): Promise<StockOpname[]> => {
+        const response = await api.get('/stock-opnames')
+        return response.data.data ?? []
+    },
+    getById: async (id: string): Promise<StockOpname> => {
+        const response = await api.get(`/stock-opnames/${id}`)
+        return response.data.data
+    },
+    create: async (data: Partial<StockOpname>): Promise<StockOpname> => {
+        const response = await api.post('/stock-opnames', data)
+        return response.data.data
+    },
+    updateStatus: async (id: string, status: string): Promise<StockOpname> => {
+        const response = await api.put(`/stock-opnames/${id}/status`, { status })
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/stock-opnames/${id}`)
     },
 }

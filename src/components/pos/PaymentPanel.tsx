@@ -24,6 +24,7 @@ interface PaymentPanelProps {
   onClear: () => void
   onPaidSuccess: () => void
   customerName: string
+  locationId: string
 }
 
 export function PaymentPanel({
@@ -34,6 +35,7 @@ export function PaymentPanel({
   onClear,
   onPaidSuccess,
   customerName,
+  locationId,
 }: PaymentPanelProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -209,6 +211,7 @@ export function PaymentPanel({
 
     try {
       const saleData = await salesApi.create(
+        locationId,
         cartItems.map((item) => ({
           productId: item.productId,
           qty: item.qty,

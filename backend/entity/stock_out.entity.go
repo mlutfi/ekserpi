@@ -22,6 +22,7 @@ func (StockOutReason) GormDataType() string {
 type StockOut struct {
 	ID          string         `gorm:"column:id;primaryKey;type:varchar(255);default:gen_random_uuid()" json:"id"`
 	ProductID   string         `gorm:"column:product_id;type:varchar(255);not null;index" json:"productId"`
+	LocationID  string         `gorm:"column:location_id;type:varchar(255);not null;index" json:"locationId"`
 	Qty         int            `gorm:"column:qty;not null;default:0" json:"qty"`
 	Reason      StockOutReason `gorm:"column:reason;type:varchar(20);not null;index" json:"reason"`
 	Note        *string        `gorm:"column:note;type:text" json:"note"`
@@ -31,8 +32,9 @@ type StockOut struct {
 	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;index" json:"-"`
 
 	// Relations
-	Product   *Product `gorm:"foreignKey:ProductID;constraint:OnDelete:Restrict" json:"product,omitempty"`
-	CreatedBy *User    `gorm:"foreignKey:CreatedByID;constraint:OnDelete:Restrict" json:"createdBy,omitempty"`
+	Product   *Product  `gorm:"foreignKey:ProductID;constraint:OnDelete:Restrict" json:"product,omitempty"`
+	Location  *Location `gorm:"foreignKey:LocationID;constraint:OnDelete:Restrict" json:"location,omitempty"`
+	CreatedBy *User     `gorm:"foreignKey:CreatedByID;constraint:OnDelete:Restrict" json:"createdBy,omitempty"`
 }
 
 func (StockOut) TableName() string {

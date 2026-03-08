@@ -65,6 +65,7 @@ func (u *saleUseCase) Create(ctx context.Context, cashierId string, request *Cre
 
 	sale := &entity.Sale{
 		CashierID:    cashierId,
+		LocationID:   request.LocationID,
 		CustomerName: request.CustomerName,
 		Status:       entity.SaleStatusPending,
 		Total:        0,
@@ -78,6 +79,9 @@ func (u *saleUseCase) Create(ctx context.Context, cashierId string, request *Cre
 			return nil, errors.New("product not found: " + item.ProductID)
 		}
 
+		var inv entity.Inventory
+		u.DB.WithContext(ctx).First(&inv, "product_id = ? AND location_id = ?", item.ProductID, request.LocationID)
+
 		subtotal := product.Price * item.Qty
 		total += subtotal
 
@@ -85,6 +89,7 @@ func (u *saleUseCase) Create(ctx context.Context, cashierId string, request *Cre
 			ProductID: item.ProductID,
 			Qty:       item.Qty,
 			Price:     product.Price,
+			HPP:       inv.AvgCost,
 			Subtotal:  subtotal,
 		})
 	}
@@ -142,16 +147,8 @@ func (u *saleUseCase) PayCash(ctx context.Context, id string, request *PayCashRe
 	}
 
 	// Deduct inventory and record stock movement for each item
-	for _, item := range sale.Items {
-		u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
-
-		movement := &entity.StockMovement{
-			ProductID: item.ProductID,
-			Type:      entity.StockMovementTypeSale,
-			QtyDelta:  -item.Qty,
-			RefSaleID: &sale.ID,
-		}
-		u.DB.Create(movement)
+	if err := u.deductStockForSale(ctx, sale); err != nil {
+		return nil, err
 	}
 
 	return &PaymentResponse{
@@ -307,16 +304,8 @@ func (u *saleUseCase) PayQRISStatic(ctx context.Context, id string) (*PaymentRes
 		return nil, err
 	}
 
-	for _, item := range sale.Items {
-		u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
-
-		movement := &entity.StockMovement{
-			ProductID: item.ProductID,
-			Type:      entity.StockMovementTypeSale,
-			QtyDelta:  -item.Qty,
-			RefSaleID: &sale.ID,
-		}
-		u.DB.Create(movement)
+	if err := u.deductStockForSale(ctx, sale); err != nil {
+		return nil, err
 	}
 
 	return &PaymentResponse{
@@ -360,16 +349,8 @@ func (u *saleUseCase) PayTransfer(ctx context.Context, id string, request *PayTr
 		return nil, err
 	}
 
-	for _, item := range sale.Items {
-		u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
-
-		movement := &entity.StockMovement{
-			ProductID: item.ProductID,
-			Type:      entity.StockMovementTypeSale,
-			QtyDelta:  -item.Qty,
-			RefSaleID: &sale.ID,
-		}
-		u.DB.Create(movement)
+	if err := u.deductStockForSale(ctx, sale); err != nil {
+		return nil, err
 	}
 
 	return &PaymentResponse{
@@ -539,16 +520,7 @@ func (u *saleUseCase) GetQRISStatus(ctx context.Context, saleId string) (*QRISSt
 				sale.Status = entity.SaleStatusPaid
 				u.DB.Save(&sale)
 
-				for _, item := range sale.Items {
-					u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
-					movement := &entity.StockMovement{
-						ProductID: item.ProductID,
-						Type:      entity.StockMovementTypeSale,
-						QtyDelta:  -item.Qty,
-						RefSaleID: &sale.ID,
-					}
-					u.DB.Create(movement)
-				}
+				u.deductStockForSale(ctx, &sale)
 			}
 		}
 	}
@@ -643,16 +615,7 @@ func (u *saleUseCase) MidtransNotification(ctx context.Context, payload map[stri
 				sale.Status = entity.SaleStatusPaid
 				u.DB.Save(&sale)
 
-				for _, item := range sale.Items {
-					u.DB.Exec("UPDATE inventories SET qty_on_hand = qty_on_hand - ?, updated_at = NOW() WHERE product_id = ?", item.Qty, item.ProductID)
-					movement := &entity.StockMovement{
-						ProductID: item.ProductID,
-						Type:      entity.StockMovementTypeSale,
-						QtyDelta:  -item.Qty,
-						RefSaleID: &sale.ID,
-					}
-					u.DB.Create(movement)
-				}
+				u.deductStockForSale(ctx, &sale)
 			}
 		}
 	}
@@ -681,14 +644,65 @@ func (u *saleUseCase) toResponse(sale *entity.Sale) *SaleResponse {
 		cashierName = sale.Cashier.Name
 	}
 
+	locationName := ""
+	if sale.Location != nil {
+		locationName = sale.Location.Name
+	}
+
 	return &SaleResponse{
 		ID:           sale.ID,
 		CashierID:    sale.CashierID,
 		CashierName:  cashierName,
+		LocationID:   sale.LocationID,
+		LocationName: locationName,
 		CustomerName: sale.CustomerName,
 		Status:       string(sale.Status),
 		Total:        sale.Total,
 		Items:        items,
 		CreatedAt:    sale.CreatedAt.Format(time.RFC3339),
 	}
+}
+
+func (u *saleUseCase) deductStockForSale(ctx context.Context, sale *entity.Sale) error {
+	return u.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		for _, item := range sale.Items {
+			var inv entity.Inventory
+			if err := tx.First(&inv, "product_id = ? AND location_id = ?", item.ProductID, sale.LocationID).Error; err != nil {
+				// Create empty inventory to deduct from if not exists
+				inv = entity.Inventory{
+					ProductID:  item.ProductID,
+					LocationID: sale.LocationID,
+					QtyOnHand:  0,
+					TotalCost:  0,
+					AvgCost:    0,
+				}
+			}
+
+			deductedCost := inv.AvgCost * item.Qty
+			inv.QtyOnHand -= item.Qty
+			inv.TotalCost -= deductedCost
+			if inv.QtyOnHand > 0 {
+				inv.AvgCost = inv.TotalCost / inv.QtyOnHand
+			} else {
+				inv.AvgCost = 0
+				inv.TotalCost = 0
+			}
+
+			if err := tx.Save(&inv).Error; err != nil {
+				return err
+			}
+
+			movement := &entity.StockMovement{
+				ProductID:  item.ProductID,
+				LocationID: sale.LocationID,
+				Type:       entity.StockMovementTypeSale,
+				QtyDelta:   -item.Qty,
+				RefSaleID:  &sale.ID,
+			}
+			if err := tx.Create(movement).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

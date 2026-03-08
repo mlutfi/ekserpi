@@ -23,6 +23,8 @@ export default function PosClient() {
   const [sale, setSale] = useState<Sale | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [customerName, setCustomerName] = useState("")
+  const [locationId, setLocationId] = useState("")
+  const [locations, setLocations] = useState<{ id: string, name: string }[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
   const [mobileCartOpen, setMobileCartOpen] = useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
@@ -37,19 +39,32 @@ export default function PosClient() {
         if (parsed.cartItems) setCartItems(parsed.cartItems)
         if (parsed.customerName) setCustomerName(parsed.customerName)
         if (parsed.sale) setSale(parsed.sale)
+        if (parsed.locationId) setLocationId(parsed.locationId)
       } catch (e) {
         console.error("Failed to parse local cart:", e)
       }
     }
+
+    // Fetch locations
+    import("@/lib/api").then(api => {
+      api.locationsApi.getAll().then(locs => {
+        setLocations(locs)
+        if (locs.length > 0 && !(saved && JSON.parse(saved).locationId)) {
+          const def = locs.find(l => l.isDefault)
+          setLocationId(def ? def.id : locs[0].id)
+        }
+      })
+    })
+
     setIsLoaded(true)
   }, [])
 
   // Save to localStorage on state change
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem("ekserpi_pos_cart", JSON.stringify({ cartItems, customerName, sale }))
+      localStorage.setItem("ekserpi_pos_cart", JSON.stringify({ cartItems, customerName, locationId, sale }))
     }
-  }, [cartItems, customerName, sale, isLoaded])
+  }, [cartItems, customerName, locationId, sale, isLoaded])
 
   function addToCart(product: Product) {
     setCartItems((prev) => {
@@ -146,6 +161,20 @@ export default function PosClient() {
 
             <ScrollArea className="flex-1">
               <div className="px-4 py-3 space-y-3">
+                {/* Location Selection */}
+                <div className="relative">
+                  <select
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-sm text-zinc-900 outline-none transition-all focus:border-zinc-400 focus:bg-white focus:ring-4 focus:ring-zinc-100/50"
+                    value={locationId}
+                    onChange={(e) => setLocationId(e.target.value)}
+                  >
+                    <option value="" disabled>Pilih Lokasi & Gudang</option>
+                    {locations.map(l => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Customer Name */}
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
@@ -165,7 +194,7 @@ export default function PosClient() {
             <div className="p-4 border-t border-zinc-100 bg-zinc-50/50">
               <Button
                 onClick={() => setIsPaymentModalOpen(true)}
-                disabled={cartItems.length === 0}
+                disabled={cartItems.length === 0 || !locationId}
                 className="w-full h-12 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 flex items-center justify-center gap-2 group transition-all"
               >
                 <div className="flex flex-col items-start mr-auto">
@@ -209,6 +238,7 @@ export default function PosClient() {
                 // Based on PaymentPanel.tsx, it shows a success overlay.
               }}
               customerName={customerName}
+              locationId={locationId}
             />
           </div>
         </DialogContent>
@@ -268,6 +298,19 @@ export default function PosClient() {
 
             <div className="px-4 pb-8 space-y-4">
               <div className="relative">
+                <select
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-sm text-zinc-900 outline-none transition-all focus:border-zinc-400 focus:bg-white focus:ring-4 focus:ring-zinc-100/50"
+                  value={locationId}
+                  onChange={(e) => setLocationId(e.target.value)}
+                >
+                  <option value="" disabled>Pilih Lokasi & Gudang</option>
+                  {locations.map(l => (
+                    <option key={l.id} value={l.id}>{l.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
                 <User className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
@@ -286,7 +329,7 @@ export default function PosClient() {
                     setMobileCartOpen(false)
                     setIsPaymentModalOpen(true)
                   }}
-                  disabled={cartItems.length === 0}
+                  disabled={cartItems.length === 0 || !locationId}
                   className="w-full h-14 rounded-2xl bg-zinc-900 text-white hover:bg-zinc-800 flex items-center justify-center gap-3 shadow-xl"
                 >
                   <div className="flex flex-col items-start mr-auto">

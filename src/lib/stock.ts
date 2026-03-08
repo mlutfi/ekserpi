@@ -40,4 +40,7 @@ export interface Inventory {
     category: string
     sku: string
     qtyOnHand: number
+    avgCost: number
+    locationId: string
+    locationName: string
 }
