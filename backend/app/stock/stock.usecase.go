@@ -16,7 +16,7 @@ type StockUseCase interface {
 	GetStockIns(ctx context.Context, page, limit int) ([]StockInResponse, int64, error)
 	AddStockOut(ctx context.Context, userId string, request *StockOutRequest) (*StockOutResponse, error)
 	GetStockOuts(ctx context.Context, page, limit int) ([]StockOutResponse, int64, error)
-	GetInventory(ctx context.Context) ([]InventoryResponse, error)
+	GetInventory(ctx context.Context, locationId string) ([]InventoryResponse, error)
 	TransferStock(ctx context.Context, userId string, req *TransferStockRequest) error
 	AdjustStock(ctx context.Context, userId string, req *AdjustStockRequest) error
 }
@@ -231,8 +231,8 @@ func (u *stockUseCase) GetStockOuts(ctx context.Context, page, limit int) ([]Sto
 	return res, total, nil
 }
 
-func (u *stockUseCase) GetInventory(ctx context.Context) ([]InventoryResponse, error) {
-	inventories, err := u.Repository.GetAllInventory(ctx)
+func (u *stockUseCase) GetInventory(ctx context.Context, locationId string) ([]InventoryResponse, error) {
+	inventories, err := u.Repository.GetAllInventory(ctx, locationId)
 	if err != nil {
 		return nil, err
 	}

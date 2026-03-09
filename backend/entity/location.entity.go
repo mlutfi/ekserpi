@@ -23,6 +23,7 @@ type Location struct {
 	Type      LocationType   `gorm:"column:type;type:varchar(20);not null;default:'OUTLET'" json:"type"`
 	Address   *string        `gorm:"column:address;type:text" json:"address"`
 	IsActive  bool           `gorm:"column:is_active;default:true" json:"isActive"`
+	IsDefault bool           `gorm:"column:is_default;default:false" json:"isDefault"`
 	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index" json:"-"`

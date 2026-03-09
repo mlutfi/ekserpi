@@ -29,6 +29,7 @@ func toResponse(loc *entity.Location) LocationResponse {
 		Type:      loc.Type,
 		Address:   loc.Address,
 		IsActive:  loc.IsActive,
+		IsDefault: loc.IsDefault,
 		CreatedAt: loc.CreatedAt,
 	}
 }
@@ -62,11 +63,22 @@ func (u *locationUseCase) Create(ctx context.Context, req *CreateLocationRequest
 		isActive = *req.IsActive
 	}
 
+	isDefault := false
+	if req.IsDefault != nil {
+		isDefault = *req.IsDefault
+	}
+
+	locType := entity.LocationTypeOutlet
+	if req.Type != nil {
+		locType = *req.Type
+	}
+
 	loc := &entity.Location{
-		Name:     req.Name,
-		Type:     req.Type,
-		Address:  req.Address,
-		IsActive: isActive,
+		Name:      req.Name,
+		Type:      locType,
+		Address:   req.Address,
+		IsActive:  isActive,
+		IsDefault: isDefault,
 	}
 
 	if err := u.Repo.Create(ctx, loc); err != nil {
@@ -94,6 +106,9 @@ func (u *locationUseCase) Update(ctx context.Context, id string, req *UpdateLoca
 	}
 	if req.IsActive != nil {
 		loc.IsActive = *req.IsActive
+	}
+	if req.IsDefault != nil {
+		loc.IsDefault = *req.IsDefault
 	}
 
 	if err := u.Repo.Update(ctx, loc); err != nil {

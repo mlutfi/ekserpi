@@ -47,5 +47,5 @@ type CreatePORequest struct {
 }
 
 type UpdatePOStatusRequest struct {
-	Status entity.POStatus `json:"status" validate:"required,oneof=DRAFT PENDING COMPLETED CANCELLED"`
+	Status entity.POStatus `json:"status" validate:"required,oneof=DRAFT SENT COMPLETED CANCELLED"`
 }

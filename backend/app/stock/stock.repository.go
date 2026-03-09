@@ -16,7 +16,7 @@ type StockRepository interface {
 	GetStockOuts(ctx context.Context, limit int, offset int) ([]entity.StockOut, int64, error)
 	UpsertInventory(ctx context.Context, inventory *entity.Inventory) error
 	InsertStockMovement(ctx context.Context, movement *entity.StockMovement) error
-	GetAllInventory(ctx context.Context) ([]entity.Inventory, error)
+	GetAllInventory(ctx context.Context, locationId string) ([]entity.Inventory, error)
 }
 
 type stockRepository struct {
@@ -86,12 +86,17 @@ func (r *stockRepository) InsertStockMovement(ctx context.Context, movement *ent
 	return r.DB.WithContext(ctx).Create(movement).Error
 }
 
-func (r *stockRepository) GetAllInventory(ctx context.Context) ([]entity.Inventory, error) {
+func (r *stockRepository) GetAllInventory(ctx context.Context, locationId string) ([]entity.Inventory, error) {
 	var inventories []entity.Inventory
-	err := r.DB.WithContext(ctx).
+	query := r.DB.WithContext(ctx).
 		Preload("Product.Category").
 		Preload("Location").
-		Joins("JOIN products ON products.id = inventories.product_id AND products.deleted_at IS NULL").
-		Find(&inventories).Error
+		Joins("JOIN products ON products.id = inventories.product_id AND products.deleted_at IS NULL")
+
+	if locationId != "" {
+		query = query.Where("inventories.location_id = ?", locationId)
+	}
+
+	err := query.Find(&inventories).Error
 	return inventories, err
 }

@@ -10,7 +10,7 @@ type POStatus string
 
 const (
 	POStatusDraft     POStatus = "DRAFT"
-	POStatusPending   POStatus = "PENDING"
+	POStatusSent      POStatus = "SENT"
 	POStatusCompleted POStatus = "COMPLETED"
 	POStatusCancelled POStatus = "CANCELLED"
 )

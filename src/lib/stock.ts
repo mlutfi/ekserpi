@@ -43,4 +43,6 @@ export interface Inventory {
     avgCost: number
     locationId: string
     locationName: string
+    batchNumber?: string
+    expiryDate?: string
 }

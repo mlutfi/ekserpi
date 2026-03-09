@@ -376,8 +376,8 @@ export const stockApi = {
         const response = await api.get('/stock/out', { params: { page, limit } })
         return { data: response.data.data ?? [], meta: response.data.meta }
     },
-    getInventory: async (): Promise<Inventory[]> => {
-        const response = await api.get('/stock/inventory')
+    getInventory: async (locationId?: string): Promise<Inventory[]> => {
+        const response = await api.get('/stock/inventory', { params: { locationId } })
         return response.data.data ?? []
     }
 }

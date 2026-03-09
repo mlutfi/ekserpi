@@ -52,8 +52,7 @@ func (h *purchaseOrderHandler) Create(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, err.Error())
 	}
 
-	userSession := ctx.Locals("user").(map[string]interface{})
-	userID := userSession["id"].(string)
+	userID := ctx.Locals("userId").(string)
 
 	po, err := h.UseCase.Create(ctx.Context(), &req, userID)
 	if err != nil {
@@ -73,8 +72,7 @@ func (h *purchaseOrderHandler) UpdateStatus(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, err.Error())
 	}
 
-	userSession := ctx.Locals("user").(map[string]interface{})
-	userID := userSession["id"].(string)
+	userID := ctx.Locals("userId").(string)
 
 	po, err := h.UseCase.UpdateStatus(ctx.Context(), id, &req, userID)
 	if err != nil {

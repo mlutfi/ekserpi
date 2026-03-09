@@ -23,6 +23,10 @@ export default function PurchaseOrdersClient() {
     // Form State
     const [supplierId, setSupplierId] = useState("")
     const [locationId, setLocationId] = useState("")
+    const [orderDate, setOrderDate] = useState(() => {
+        const now = new Date()
+        return now.toISOString().split('T')[0]
+    })
     const [note, setNote] = useState("")
     const [orderItems, setOrderItems] = useState<{ productId: string; qty: number; cost: number; product?: Product }[]>([])
 
@@ -85,6 +89,7 @@ export default function PurchaseOrdersClient() {
             await purchaseOrdersApi.create({
                 supplierId,
                 locationId,
+                orderDate: orderDate + "T00:00:00Z",
                 note,
                 items: orderItems.map(i => ({
                     productId: i.productId,
@@ -98,6 +103,7 @@ export default function PurchaseOrdersClient() {
             setSupplierId("")
             setNote("")
             setOrderItems([])
+            setOrderDate(new Date().toISOString().split('T')[0])
         } catch (error: any) {
             toast.error("Gagal", { description: error.response?.data?.message || "Kesalahan server" })
         } finally {
@@ -250,6 +256,16 @@ export default function PurchaseOrdersClient() {
                             >
                                 {locations.map(l => <option key={l.id} value={l.id}>{l.name} {l.isDefault ? '(Default)' : ''}</option>)}
                             </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Tanggal Order *</label>
+                            <input
+                                type="date"
+                                required
+                                value={orderDate}
+                                onChange={e => setOrderDate(e.target.value)}
+                                className="w-full border rounded-md p-2 text-sm"
+                            />
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium mb-1">Catatan Tambahan</label>

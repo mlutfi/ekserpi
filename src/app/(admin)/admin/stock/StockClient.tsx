@@ -32,16 +32,8 @@ export default function StockManagementPage() {
 
     // UI State
     const [isLoading, setIsLoading] = useState(true)
-    const [isSubmitLoading, setIsSubmitLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
-
-    // Form State
-    const [selectedProduct, setSelectedProduct] = useState('')
-    const [qty, setQty] = useState('')
-    const [costPerUnit, setCostPerUnit] = useState('')
-    const [reason, setReason] = useState('REFUND')
-    const [note, setNote] = useState('')
 
     useEffect(() => {
         fetchData()
@@ -73,75 +65,6 @@ export default function StockManagementPage() {
         }
     }
 
-    const handleStockInSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!selectedProduct || !qty || !costPerUnit) {
-            setError('Mohon isi semua field wajib')
-            return
-        }
-
-        setIsSubmitLoading(true)
-        setError(null)
-        setSuccess(null)
-
-        try {
-            await stockApi.addStockIn({
-                productId: selectedProduct,
-                qty: parseInt(qty),
-                costPerUnit: parseInt(costPerUnit),
-                note: note || undefined
-            })
-
-            setSuccess('Stok masuk berhasil dicatat')
-            resetForm()
-            fetchData()
-
-            setTimeout(() => setSuccess(null), 3000)
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Gagal menyimpan stok masuk')
-        } finally {
-            setIsSubmitLoading(false)
-        }
-    }
-
-    const handleStockOutSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!selectedProduct || !qty || !reason) {
-            setError('Mohon isi semua field wajib')
-            return
-        }
-
-        setIsSubmitLoading(true)
-        setError(null)
-        setSuccess(null)
-
-        try {
-            await stockApi.addStockOut({
-                productId: selectedProduct,
-                qty: parseInt(qty),
-                reason: reason as any,
-                note: note || undefined
-            })
-
-            setSuccess('Stok keluar berhasil dicatat')
-            resetForm()
-            fetchData()
-
-            setTimeout(() => setSuccess(null), 3000)
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Gagal menyimpan stok keluar')
-        } finally {
-            setIsSubmitLoading(false)
-        }
-    }
-
-    const resetForm = () => {
-        setSelectedProduct('')
-        setQty('')
-        setCostPerUnit('')
-        setReason('REFUND')
-        setNote('')
-    }
 
     return (
         <div className="space-y-6">
@@ -268,80 +191,9 @@ export default function StockManagementPage() {
 
                         {/* STOCK IN TAB */}
                         {activeTab === 'STOCK_IN' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-zinc-100">
-                                {/* Form */}
-                                <div className="p-6 bg-zinc-50/30">
-                                    <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-5">Input Stok Masuk</h3>
-                                    <form onSubmit={handleStockInSubmit} className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Pilih Produk *</label>
-                                            <Select
-                                                value={selectedProduct}
-                                                onValueChange={setSelectedProduct}
-                                                required
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="-- Pilih Produk --" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {products.map(p => (
-                                                        <SelectItem key={p.id} value={p.id}>
-                                                            {p.name} {p.sku ? `(${p.sku})` : ''}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Jumlah Masuk (Qty) *</label>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                value={qty}
-                                                onChange={(e) => setQty(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all text-zinc-900"
-                                                placeholder="Contoh: 50"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Harga Beli Per Item (Rp) *</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                value={costPerUnit}
-                                                onChange={(e) => setCostPerUnit(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all text-zinc-900"
-                                                placeholder="Harga modal"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Catatan</label>
-                                            <textarea
-                                                value={note}
-                                                onChange={(e) => setNote(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all resize-none h-24 text-zinc-900"
-                                                placeholder="Catatan dari supplier/gudang..."
-                                            />
-                                        </div>
-
-                                        <Button
-                                            type="submit"
-                                            loading={isSubmitLoading}
-                                            className="w-full"
-                                        >
-                                            Simpan Stok Masuk
-                                            {!isSubmitLoading && <Plus className="w-4 h-4 ml-2" />}
-                                        </Button>
-                                    </form>
-                                </div>
-
+                            <div>
                                 {/* History */}
-                                <div className="lg:col-span-2">
+                                <div>
                                     <div className="p-6 border-b border-zinc-100 flex justify-between items-center">
                                         <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Riwayat Terakhir</h3>
                                     </div>
@@ -386,91 +238,9 @@ export default function StockManagementPage() {
 
                         {/* STOCK OUT TAB */}
                         {activeTab === 'STOCK_OUT' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-zinc-100">
-                                {/* Form */}
-                                <div className="p-6 bg-zinc-50/30">
-                                    <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-5">Input Stok Keluar</h3>
-                                    <form onSubmit={handleStockOutSubmit} className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Pilih Produk *</label>
-                                            <Select
-                                                value={selectedProduct}
-                                                onValueChange={setSelectedProduct}
-                                                required
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="-- Pilih Produk --" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {products.map(p => {
-                                                        const invMatch = inventory.find(i => i.productId === p.id)
-                                                        const stock = invMatch ? invMatch.qtyOnHand : 0
-                                                        return (
-                                                            <SelectItem key={p.id} value={p.id}>
-                                                                {p.name} (Stok: {stock})
-                                                            </SelectItem>
-                                                        )
-                                                    })}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Jumlah Keluar (Qty) *</label>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                value={qty}
-                                                onChange={(e) => setQty(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all text-zinc-900"
-                                                placeholder="Contoh: 2"
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Alasan Pengeluaran *</label>
-                                            <Select
-                                                value={reason}
-                                                onValueChange={setReason}
-                                                required
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Pilih Alasan" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="REFUND">Barang Dikembalikan (Refund)</SelectItem>
-                                                    <SelectItem value="EXPIRED">Kadaluarsa (Expired)</SelectItem>
-                                                    <SelectItem value="DAMAGED">Rusak / Cacat</SelectItem>
-                                                    <SelectItem value="OTHER">Lainnya</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-zinc-700 mb-1">Catatan Tambahan</label>
-                                            <textarea
-                                                value={note}
-                                                onChange={(e) => setNote(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-md border border-zinc-200 focus:ring-2 focus:ring-zinc-100 focus:border-zinc-300 outline-none transition-all resize-none h-24 text-zinc-900"
-                                                placeholder="Catatan penyebab rusak/expired..."
-                                            />
-                                        </div>
-
-                                        <Button
-                                            type="submit"
-                                            loading={isSubmitLoading}
-                                            variant="outline"
-                                            className="w-full border-zinc-200"
-                                        >
-                                            Simpan Stok Keluar
-                                            {!isSubmitLoading && <PackageMinus className="w-4 h-4 ml-2" />}
-                                        </Button>
-                                    </form>
-                                </div>
-
+                            <div>
                                 {/* History */}
-                                <div className="lg:col-span-2">
+                                <div>
                                     <div className="p-6 border-b border-zinc-100 flex justify-between items-center">
                                         <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Riwayat Terakhir</h3>
                                     </div>

@@ -5,7 +5,7 @@ import { useAuthStore } from "@/lib/store"
 import { useSidebarState } from "@/lib/useSidebarState"
 import { getAccessibleApps, getCurrentApp } from "@/lib/appSwitcher"
 import Link from "next/link"
-import { adminNavItems } from "@/lib/sidebar"
+import { adminNavItems, NavItem } from "@/lib/sidebar"
 import {
     LogOut,
     ChevronRight,
@@ -28,6 +28,15 @@ export function AppSidebar() {
     const activeModules = useAuthStore((state) => state.activeModules)
     const { collapsed } = useSidebarState()
     const [appSwitcherOpen, setAppSwitcherOpen] = useState(false)
+    const [expandedMenus, setExpandedMenus] = useState<string[]>([])
+
+    const toggleMenu = (href: string) => {
+        setExpandedMenus(prev =>
+            prev.includes(href)
+                ? prev.filter(h => h !== href)
+                : [...prev, href]
+        )
+    }
 
     const accessibleApps = getAccessibleApps(user?.role, activeModules)
     const currentApp = getCurrentApp("admin")
@@ -37,9 +46,12 @@ export function AppSidebar() {
         router.replace("/login")
     }
 
-    const isActive = (href: string) => {
-        if (href === "/admin") return pathname === "/admin"
-        return pathname.startsWith(href)
+    const isActive = (item: NavItem) => {
+        if (item.href === "/admin") return pathname === "/admin"
+        if (item.subItems) {
+            return item.subItems.some(sub => pathname === sub.href || pathname.startsWith(sub.href + "/"))
+        }
+        return pathname === item.href || pathname.startsWith(item.href + "/")
     }
 
     const initials = (name?: string) => {
@@ -147,54 +159,122 @@ export function AppSidebar() {
                         if (item.requiredRole && user?.role !== item.requiredRole) {
                             return null
                         }
-                        const active = isActive(item.href)
+                        const active = isActive(item)
                         const Icon = item.icon
+                        const hasSubItems = item.subItems && item.subItems.length > 0
+                        const isExpanded = expandedMenus.includes(item.href)
+
                         return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                title={collapsed ? item.label : undefined}
-                                className={cn(
-                                    "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200",
-                                    collapsed ? "justify-center p-2" : "px-3 py-2",
-                                    active
-                                        ? `${item.activeBg} ${item.activeText}`
-                                        : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
-                                )}
-                            >
-                                {/* Active left border accent — only in expanded mode */}
-                                {active && !collapsed && (
-                                    <span className={cn(
-                                        "absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full",
-                                        item.activeBorder
-                                    )} />
-                                )}
-
-                                <span className={cn(
-                                    "flex items-center justify-center rounded-md shrink-0 transition-all duration-200",
-                                    collapsed ? "h-9 w-9" : "h-6 w-6",
-                                    active ? item.activeIconBg : "bg-transparent"
-                                )}>
-                                    <Icon className={cn(
-                                        "h-4 w-4 transition-all",
-                                        active ? "text-white" : item.iconColor
-                                    )} />
-                                </span>
-
-                                {!collapsed && (
+                            <div key={item.href}>
+                                {hasSubItems && !collapsed ? (
                                     <>
-                                        <span className="flex-1 truncate">{item.label}</span>
-                                        {item.badge && (
-                                            <Badge className="bg-zinc-900 text-white rounded-full text-[10px] px-1.5 py-0 h-4 font-medium hover:bg-zinc-800">
-                                                {item.badge}
-                                            </Badge>
-                                        )}
-                                        {active && (
-                                            <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", item.iconColor)} />
+                                        <button
+                                            onClick={() => toggleMenu(item.href)}
+                                            className={cn(
+                                                "w-full group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200 px-3 py-2",
+                                                active
+                                                    ? `${item.activeBg} ${item.activeText}`
+                                                    : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
+                                            )}
+                                        >
+                                            {/* Active left border accent */}
+                                            {active && !collapsed && (
+                                                <span className={cn(
+                                                    "absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full",
+                                                    item.activeBorder
+                                                )} />
+                                            )}
+
+                                            <span className={cn(
+                                                "flex items-center justify-center rounded-md shrink-0 transition-all duration-200 h-6 w-6",
+                                                active ? item.activeIconBg : "bg-transparent"
+                                            )}>
+                                                <Icon className={cn(
+                                                    "h-4 w-4 transition-all",
+                                                    active ? "text-white" : item.iconColor
+                                                )} />
+                                            </span>
+
+                                            <span className="flex-1 truncate text-left">{item.label}</span>
+                                            <ChevronDown className={cn(
+                                                "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+                                                active ? "text-zinc-900" : "text-zinc-400",
+                                                isExpanded && "rotate-180"
+                                            )} />
+                                        </button>
+
+                                        {/* Submenu */}
+                                        {isExpanded && item.subItems && (
+                                            <div className="ml-4 mt-1 space-y-1 border-l-2 border-zinc-100 pl-3">
+                                                {item.subItems.map((subItem) => {
+                                                    const SubIcon = subItem.icon
+                                                    const subActive = pathname === subItem.href || pathname.startsWith(subItem.href + "/")
+                                                    return (
+                                                        <Link
+                                                            key={subItem.href}
+                                                            href={subItem.href}
+                                                            className={cn(
+                                                                "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-all",
+                                                                subActive
+                                                                    ? "bg-zinc-100/80 text-zinc-900 font-medium"
+                                                                    : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                                                            )}
+                                                        >
+                                                            <SubIcon className="h-4 w-4" />
+                                                            <span>{subItem.label}</span>
+                                                        </Link>
+                                                    )
+                                                })}
+                                            </div>
                                         )}
                                     </>
+                                ) : (
+                                    <Link
+                                        href={item.href}
+                                        title={collapsed ? item.label : undefined}
+                                        className={cn(
+                                            "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200",
+                                            collapsed ? "justify-center p-2" : "px-3 py-2",
+                                            active
+                                                ? `${item.activeBg} ${item.activeText}`
+                                                : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
+                                        )}
+                                    >
+                                        {/* Active left border accent */}
+                                        {active && !collapsed && (
+                                            <span className={cn(
+                                                "absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full",
+                                                item.activeBorder
+                                            )} />
+                                        )}
+
+                                        <span className={cn(
+                                            "flex items-center justify-center rounded-md shrink-0 transition-all duration-200",
+                                            collapsed ? "h-9 w-9" : "h-6 w-6",
+                                            active ? item.activeIconBg : "bg-transparent"
+                                        )}>
+                                            <Icon className={cn(
+                                                "h-4 w-4 transition-all",
+                                                active ? "text-white" : item.iconColor
+                                            )} />
+                                        </span>
+
+                                        {!collapsed && (
+                                            <>
+                                                <span className="flex-1 truncate">{item.label}</span>
+                                                {item.badge && (
+                                                    <Badge className="bg-zinc-900 text-white rounded-full text-[10px] px-1.5 py-0 h-4 font-medium hover:bg-zinc-800">
+                                                        {item.badge}
+                                                    </Badge>
+                                                )}
+                                                {active && (
+                                                    <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", item.iconColor)} />
+                                                )}
+                                            </>
+                                        )}
+                                    </Link>
                                 )}
-                            </Link>
+                            </div>
                         )
                     })}
                 </nav>

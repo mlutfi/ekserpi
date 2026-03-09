@@ -112,7 +112,8 @@ func (h *stockHandler) GetStockOuts(ctx *fiber.Ctx) error {
 }
 
 func (h *stockHandler) GetInventory(ctx *fiber.Ctx) error {
-	inventory, err := h.UseCase.GetInventory(ctx.Context())
+	locationId := ctx.Query("locationId")
+	inventory, err := h.UseCase.GetInventory(ctx.Context(), locationId)
 	if err != nil {
 		return helper.InternalServerErrorResponse(ctx, err.Error())
 	}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { stockTransfersApi, StockTransfer, locationsApi, Location, productsApi, Product } from "@/lib/api"
+import { stockTransfersApi, StockTransfer, locationsApi, Location, productsApi, Product, stockApi, Inventory } from "@/lib/api"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Plus, Eye, ArrowLeft, Trash2, Search, ArrowRightLeft } from "lucide-react"
@@ -14,6 +14,7 @@ export default function StockTransfersClient() {
 
     const [locations, setLocations] = useState<Location[]>([])
     const [products, setProducts] = useState<Product[]>([])
+    const [inventory, setInventory] = useState<Inventory[]>([])
     const [searchQuery, setSearchQuery] = useState("")
 
     const [selectedTransfer, setSelectedTransfer] = useState<StockTransfer | null>(null)
@@ -22,7 +23,7 @@ export default function StockTransfersClient() {
     const [sourceLocationId, setSourceLocationId] = useState("")
     const [destLocationId, setDestLocationId] = useState("")
     const [note, setNote] = useState("")
-    const [transferItems, setTransferItems] = useState<{ productId: string; qty: number; product?: Product }[]>([])
+    const [transferItems, setTransferItems] = useState<{ productId: string; qty: number; product?: Product; availableStock?: number }[]>([])
 
     useEffect(() => {
         fetchTransfers()
@@ -31,6 +32,12 @@ export default function StockTransfersClient() {
     useEffect(() => {
         if (view === "form") fetchDependencies()
     }, [view])
+
+    useEffect(() => {
+        if (view === "form" && sourceLocationId) {
+            fetchInventory()
+        }
+    }, [view, sourceLocationId])
 
     async function fetchTransfers() {
         setLoading(true)
@@ -61,6 +68,15 @@ export default function StockTransfersClient() {
             }
         } catch (error) {
             toast.error("Gagal memuat dependensi")
+        }
+    }
+
+    async function fetchInventory() {
+        try {
+            const data = await stockApi.getInventory(sourceLocationId)
+            setInventory(data ?? [])
+        } catch (error) {
+            console.error("Failed to fetch inventory", error)
         }
     }
 
@@ -115,12 +131,18 @@ export default function StockTransfersClient() {
 
     const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku?.toLowerCase().includes(searchQuery.toLowerCase()))
 
-    const addProductToTransfer = (product: Product) => {
+    // Map products with their available stock at source location
+    const productsWithStock = filteredProducts.map(p => {
+        const inv = inventory.find(i => i.productId === p.id)
+        return { ...p, availableStock: inv?.qtyOnHand ?? 0 }
+    })
+
+    const addProductToTransfer = (product: Product & { availableStock?: number }) => {
         const existing = transferItems.find(i => i.productId === product.id)
         if (existing) {
             setTransferItems(transferItems.map(i => i.productId === product.id ? { ...i, qty: i.qty + 1 } : i))
         } else {
-            setTransferItems([...transferItems, { productId: product.id, qty: 1, product }])
+            setTransferItems([...transferItems, { productId: product.id, qty: 1, product, availableStock: product.availableStock }])
         }
         setSearchQuery("")
     }
@@ -255,9 +277,12 @@ export default function StockTransfersClient() {
                             <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Cari produk..." className="block w-full pl-10 pr-3 py-2 border rounded-md text-sm" />
                             {searchQuery && (
                                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                    {filteredProducts.map(p => (
+                                    {productsWithStock.map(p => (
                                         <div key={p.id} onClick={() => addProductToTransfer(p)} className="p-3 hover:bg-zinc-50 cursor-pointer border-b">
                                             <div className="font-medium text-sm text-zinc-900">{p.name}</div>
+                                            <div className={`text-xs mt-1 ${p.availableStock > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                Stok tersedia: {p.availableStock}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -269,6 +294,7 @@ export default function StockTransfersClient() {
                                 <thead className="text-xs text-zinc-500 uppercase bg-zinc-100 border-b">
                                     <tr>
                                         <th className="px-4 py-3">Produk</th>
+                                        <th className="px-4 py-3 w-32 text-center">Stok Tersedia</th>
                                         <th className="px-4 py-3 w-32 text-center">Qty Transfer</th>
                                         <th className="px-4 py-3 w-16"></th>
                                     </tr>
@@ -277,6 +303,11 @@ export default function StockTransfersClient() {
                                     {transferItems.map((item, idx) => (
                                         <tr key={idx} className="border-b bg-white">
                                             <td className="px-4 py-3 font-medium">{item.product?.name}</td>
+                                            <td className="px-4 py-3 text-center text-sm">
+                                                <span className={item.availableStock && item.availableStock > 0 ? 'text-emerald-600' : 'text-red-500'}>
+                                                    {item.availableStock ?? 0}
+                                                </span>
+                                            </td>
                                             <td className="px-4 py-3 text-center">
                                                 <input type="number" min="1" value={item.qty} onChange={e => {
                                                     const newItems = [...transferItems];
@@ -292,7 +323,7 @@ export default function StockTransfersClient() {
                                         </tr>
                                     ))}
                                     {transferItems.length === 0 && (
-                                        <tr><td colSpan={3} className="px-4 py-6 text-center text-zinc-400 bg-white">Belum ada barang dipilih</td></tr>
+                                        <tr><td colSpan={4} className="px-4 py-6 text-center text-zinc-400 bg-white">Belum ada barang dipilih</td></tr>
                                     )}
                                 </tbody>
                             </table>
