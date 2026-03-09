@@ -39,7 +39,7 @@ export const appSwitcherItems: AppSwitcherItem[] = [
     },
     {
         key: "admin",
-        label: "Admin",
+        label: "ADMIN",
         description: "Management Panel",
         href: "/admin",
         icon: ChevronsDownUp,

@@ -77,7 +77,7 @@ func (h *authHandler) Me(ctx *fiber.Ctx) error {
 				DepartmentID: ptrToStr(employee.DepartmentID),
 				PositionID:   ptrToStr(employee.PositionID),
 				JoinDate:     joinDateStr,
-				EmployeeType: string(employee.EmployeeType),
+				EmployeeType: string(entity.NormalizeEmployeeType(string(employee.EmployeeType))),
 				Status:       string(employee.Status),
 			}
 		}

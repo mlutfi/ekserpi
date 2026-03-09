@@ -306,26 +306,6 @@ export function AppSidebar() {
             {/* ── Divider ── */}
             <div className="mx-3 h-px bg-slate-100" />
 
-            {/* ── Go to POS ── */}
-            <div className={cn("py-3", collapsed ? "px-2" : "px-3")}>
-                <button
-                    onClick={() => router.push("/pos")}
-                    title={collapsed ? "Buka POS" : undefined}
-                    className={cn(
-                        "flex w-full items-center rounded-md bg-zinc-900 text-white border border-transparent shadow-sm text-sm font-medium transition-all duration-200 hover:bg-zinc-800",
-                        collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
-                    )}
-                >
-                    <ShoppingCart className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                        <>
-                            <span className="flex-1 text-left">Buka POS</span>
-                            <ChevronRight className="h-3.5 w-3.5" />
-                        </>
-                    )}
-                </button>
-            </div>
-
             {/* ── User Footer ── */}
             <div className={cn(
                 "border-t border-zinc-200 py-3",

@@ -32,16 +32,18 @@ export interface Employee {
     department?: Department
     position?: Position
     joinDate: string
-    employeeType?: 'PKWTT' | 'PKWT' | 'PROBATION' | 'HARIAN_LEPAS'
-    status: 'active' | 'inactive'
+    employeeType?: 'FREELANCE_BURUH' | 'PKWT' | 'KARYAWAN_TETAP' | 'PKWTT' | 'HARIAN_LEPAS'
+    status: 'ACTIVE' | 'INACTIVE' | 'RESIGNED' | 'active' | 'inactive'
     photo?: string
     managerId?: string
     manager?: Employee
     teamLeaderId?: string
     teamLeader?: Employee
     teamLeaderName?: string
+    basicSalary?: number
     baseSalary?: number
     allowance?: number
+    dailyRate?: number
     salary?: number
 }
 
@@ -115,11 +117,14 @@ export interface LeaveRequest {
 export interface Payroll {
     id: string
     employeeId: string
+    employeeName?: string
+    employeeType?: 'FREELANCE_BURUH' | 'PKWT' | 'KARYAWAN_TETAP' | 'PKWTT' | 'HARIAN_LEPAS'
     employee?: Employee
     period: string
     basicSalary: number
     allowance: number
     bonus: number
+    commission?: number
     overtime: number
     absentDeduction: number
     lateDeduction: number
@@ -440,6 +445,25 @@ export const payrollApi = {
     getMyPayroll: async (): Promise<Payroll[]> => {
         const response = await api.get('/payroll/my')
         return response.data.data ?? []
+    },
+
+    create: async (data: {
+        employeeId: string
+        period: string
+        workDays?: number
+        bonus?: number
+        commission?: number
+        overtime?: number
+        lateDeduction?: number
+        absentDeduction?: number
+        bpjs?: number
+        tht?: number
+        tax?: number
+        otherDeduction?: number
+        notes?: string
+    }): Promise<Payroll> => {
+        const response = await api.post('/payroll', data)
+        return response.data.data
     },
 
     calculate: async (period: string, employeeId?: string): Promise<Payroll[]> => {

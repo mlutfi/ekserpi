@@ -10,12 +10,15 @@ type Payroll struct {
 	ID         string `gorm:"column:id;primaryKey;type:varchar(255);default:gen_random_uuid()" json:"id"`
 	EmployeeID string `gorm:"column:employee_id;type:varchar(255);index;not null" json:"employeeId"`
 	Period     string `gorm:"column:period;type:varchar(7);index;not null" json:"period"` // Format: YYYY-MM
+	// Keep employee type at payroll time for audit/snapshot in payslip.
+	EmployeeType string `gorm:"column:employee_type;type:varchar(30);default:'KARYAWAN_TETAP'" json:"employeeType"`
 
 	// Pendapatan / Income
 	BasicSalary float64 `gorm:"column:basic_salary;type:decimal(15,2);default:0" json:"basicSalary"`
-	Allowance   float64 `gorm:"column:allowance;type:decimal(15,2);default:0" json:"allowance"` // Tunjangan
-	Bonus       float64 `gorm:"column:bonus;type:decimal(15,2);default:0" json:"bonus"`         // Bonus
-	Overtime    float64 `gorm:"column:overtime;type:decimal(15,2);default:0" json:"overtime"`   // Lembur
+	Allowance   float64 `gorm:"column:allowance;type:decimal(15,2);default:0" json:"allowance"`   // Tunjangan
+	Bonus       float64 `gorm:"column:bonus;type:decimal(15,2);default:0" json:"bonus"`           // Bonus
+	Commission  float64 `gorm:"column:commission;type:decimal(15,2);default:0" json:"commission"` // Komisi
+	Overtime    float64 `gorm:"column:overtime;type:decimal(15,2);default:0" json:"overtime"`     // Lembur
 
 	// Potongan / Deductions
 	LateDeduction   float64 `gorm:"column:late_deduction;type:decimal(15,2);default:0" json:"lateDeduction"`     // Potongan Terlambat

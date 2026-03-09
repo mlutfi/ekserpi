@@ -132,7 +132,7 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 			DepartmentID: ptrToStr(user.DepartmentID),
 			PositionID:   ptrToStr(user.PositionID),
 			JoinDate:     joinDateStr,
-			EmployeeType: string(user.EmployeeType),
+			EmployeeType: string(entity.NormalizeEmployeeType(string(user.EmployeeType))),
 			Status:       string(user.Status),
 		}
 	}

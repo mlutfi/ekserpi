@@ -19,6 +19,16 @@ type PayTransferRequest struct {
 	BankDetails string `json:"bankDetails" validate:"required"`
 }
 
+type SplitPaymentItemRequest struct {
+	Method      string  `json:"method" validate:"required,oneof=cash qris_static transfer"`
+	Amount      int     `json:"amount" validate:"required,gt=0"`
+	BankDetails *string `json:"bankDetails,omitempty"`
+}
+
+type PaySplitRequest struct {
+	Payments []SplitPaymentItemRequest `json:"payments" validate:"required,min=2,dive"`
+}
+
 type UpdateSaleStatusRequest struct {
 	Status string `json:"status" validate:"required,oneof=CANCELLED"`
 }
@@ -77,4 +87,16 @@ type DailyReportResponse struct {
 type SnapTokenResponse struct {
 	Token       string `json:"token"`
 	RedirectURL string `json:"redirectUrl"`
+}
+
+type SplitPaymentItemResponse struct {
+	Method      string  `json:"method"`
+	Amount      int     `json:"amount"`
+	BankDetails *string `json:"bankDetails,omitempty"`
+}
+
+type SplitPaymentResponse struct {
+	SaleID   string                     `json:"saleId"`
+	Total    int                        `json:"total"`
+	Payments []SplitPaymentItemResponse `json:"payments"`
 }

@@ -23,6 +23,7 @@ type EmployeeResponse struct {
 	TeamLeaderName string  `json:"teamLeaderName"`
 	BasicSalary    float64 `json:"basicSalary"`
 	Allowance      float64 `json:"allowance"`
+	DailyRate      float64 `json:"dailyRate"`
 	Salary         float64 `json:"salary"` // Combined salary (BasicSalary + Allowance)
 }
 
@@ -41,6 +42,7 @@ type CreateEmployeeRequest struct {
 	TeamLeaderID *string `json:"teamLeaderId"`
 	BasicSalary  float64 `json:"basicSalary"`
 	Allowance    float64 `json:"allowance"`
+	DailyRate    float64 `json:"dailyRate"`
 	Salary       float64 `json:"salary"` // Combined salary for HR_ADMIN/OWNER to set
 }
 
@@ -58,6 +60,7 @@ type UpdateEmployeeRequest struct {
 	TeamLeaderID *string  `json:"teamLeaderId,omitempty"`
 	BasicSalary  *float64 `json:"basicSalary,omitempty"`
 	Allowance    *float64 `json:"allowance,omitempty"`
+	DailyRate    *float64 `json:"dailyRate,omitempty"`
 	Salary       *float64 `json:"salary,omitempty"` // Combined salary for HR_ADMIN/OWNER to set
 }
 

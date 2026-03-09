@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
-import { salesApi, Sale, settingsApi, PosPaymentSettings, BankAccount } from "@/lib/api"
+import { salesApi, Sale, settingsApi, PosPaymentSettings, BankAccount, SplitPaymentLine, SplitPaymentMethod } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
 import { Banknote, QrCode, Loader2, CheckCircle, XCircle, Sparkles, ArrowRight, Printer, RefreshCw, AlertCircle, Clock, ChevronDown, ChevronUp, Info, CreditCard } from "lucide-react"
 import { createPortal } from "react-dom"
@@ -14,6 +14,15 @@ interface CartItem {
   name: string
   price: number
   qty: number
+}
+
+type PosPaymentMethod = "cash" | "qris" | "qris_static" | "transfer" | "split"
+
+interface SplitPaymentPart {
+  id: string
+  method: SplitPaymentMethod
+  amount: string
+  bankId: string
 }
 
 interface PaymentPanelProps {
@@ -39,11 +48,13 @@ export function PaymentPanel({
 }: PaymentPanelProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "qris" | "qris_static" | "transfer" | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<PosPaymentMethod | null>(null)
   const [cashAmount, setCashAmount] = useState("")
   const [showSuccess, setShowSuccess] = useState(false)
   const [showReceipt, setShowReceipt] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [splitParts, setSplitParts] = useState<SplitPaymentPart[]>([])
+  const [splitReceiptParts, setSplitReceiptParts] = useState<Array<{ label: string; amount: number }>>([])
 
   const [posSettings, setPosSettings] = useState<PosPaymentSettings | null>(null)
   const [selectedBank, setSelectedBank] = useState<BankAccount | null>(null)
@@ -199,6 +210,98 @@ export function PaymentPanel({
     }).format(price)
   }
 
+  const splitMethodOptions = useMemo<Array<{ value: SplitPaymentMethod; label: string }>>(() => {
+    const options: Array<{ value: SplitPaymentMethod; label: string }> = []
+    if (!posSettings || posSettings.cash) options.push({ value: "cash", label: "Tunai" })
+    if (posSettings?.qrisStatic) options.push({ value: "qris_static", label: "QRIS Statis" })
+    if (posSettings?.bankTransfer) options.push({ value: "transfer", label: "Transfer Bank" })
+    return options
+  }, [posSettings])
+
+  const canUseSplitBill = splitMethodOptions.length >= 2
+
+  const getSplitMethodLabel = (method: SplitPaymentMethod) => {
+    if (method === "cash") return "Tunai"
+    if (method === "qris_static") return "QRIS Statis"
+    return "Transfer Bank"
+  }
+
+  const getBankById = (bankId: string) => {
+    return posSettings?.bankAccounts.find((bank) => bank.id === bankId) || null
+  }
+
+  const formatBankDetails = (bank: BankAccount) => {
+    return `${bank.bankName} - ${bank.accountNumber} a/n ${bank.accountName}`
+  }
+
+  const getSplitDefaultMethod = (): SplitPaymentMethod => {
+    return splitMethodOptions[0]?.value || "cash"
+  }
+
+  const initSplitParts = () => {
+    const firstMethod = getSplitDefaultMethod()
+    const secondMethod = splitMethodOptions[1]?.value || firstMethod
+    setSplitParts([
+      {
+        id: `${Date.now()}-1`,
+        method: firstMethod,
+        amount: total.toString(),
+        bankId: "",
+      },
+      {
+        id: `${Date.now()}-2`,
+        method: secondMethod,
+        amount: "0",
+        bankId: "",
+      },
+    ])
+    setSplitReceiptParts([])
+  }
+
+  const toSafeAmount = (rawAmount: string) => {
+    const parsed = Number.parseInt(rawAmount, 10)
+    if (Number.isNaN(parsed) || parsed < 0) return 0
+    return parsed
+  }
+
+  const splitAllocated = useMemo(() => {
+    return splitParts.reduce((sum, part) => sum + toSafeAmount(part.amount), 0)
+  }, [splitParts])
+
+  const splitRemaining = total - splitAllocated
+  const isSplitLineValid = splitParts.every((part) => {
+    if (toSafeAmount(part.amount) <= 0) return false
+    if (part.method === "transfer") {
+      return !!getBankById(part.bankId)
+    }
+    return true
+  })
+  const isSplitReady = splitParts.length >= 2 && splitRemaining === 0 && isSplitLineValid
+
+  const updateSplitPart = (partId: string, updater: (part: SplitPaymentPart) => SplitPaymentPart) => {
+    setSplitParts((prev) => prev.map((part) => (part.id === partId ? updater(part) : part)))
+  }
+
+  const addSplitPart = () => {
+    const method = getSplitDefaultMethod()
+    setSplitParts((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${prev.length + 1}`,
+        method,
+        amount: "0",
+        bankId: "",
+      },
+    ])
+  }
+
+  const removeSplitPart = (partId: string) => {
+    setSplitParts((prev) => {
+      if (prev.length <= 2) return prev
+      return prev.filter((part) => part.id !== partId)
+    })
+  }
+
   const handleCreateSale = async () => {
     if (cartItems.length === 0) {
       toast({
@@ -339,7 +442,7 @@ export function PaymentPanel({
     }
   }
 
-  const handleStartPayment = async (method: "cash" | "qris" | "qris_static" | "transfer") => {
+  const handleStartPayment = async (method: PosPaymentMethod) => {
     setPaymentMethod(method)
     const currentSale = sale || (await handleCreateSale())
     if (!currentSale) {
@@ -349,6 +452,79 @@ export function PaymentPanel({
 
     if (method === "qris") {
       await handleQRISPayment(currentSale)
+    } else if (method === "split") {
+      initSplitParts()
+    }
+  }
+
+  const handleSplitPayment = async () => {
+    if (!sale) return
+    if (!isSplitReady) {
+      toast({
+        title: "Split Bill Belum Valid",
+        description: "Pastikan total split sesuai tagihan dan semua data pembayaran sudah lengkap.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const payload: SplitPaymentLine[] = []
+    const receiptParts: Array<{ label: string; amount: number }> = []
+
+    for (const part of splitParts) {
+      const amount = toSafeAmount(part.amount)
+      if (amount <= 0) continue
+
+      if (part.method === "transfer") {
+        const bank = getBankById(part.bankId)
+        if (!bank) {
+          toast({
+            title: "Data Rekening Belum Dipilih",
+            description: "Pilih rekening tujuan untuk pembayaran transfer.",
+            variant: "destructive",
+          })
+          return
+        }
+        payload.push({
+          method: "transfer",
+          amount,
+          bankDetails: formatBankDetails(bank),
+        })
+        receiptParts.push({
+          label: `Transfer (${bank.bankName})`,
+          amount,
+        })
+        continue
+      }
+
+      payload.push({
+        method: part.method,
+        amount,
+      })
+      receiptParts.push({
+        label: getSplitMethodLabel(part.method),
+        amount,
+      })
+    }
+
+    setLoading(true)
+    try {
+      await salesApi.paySplit(sale.id, payload)
+      setSplitReceiptParts(receiptParts)
+      setShowSuccess(true)
+      toast({
+        title: "Berhasil",
+        description: "Pembayaran split bill berhasil diproses",
+      })
+      onPaidSuccess()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Gagal memproses split bill",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -395,6 +571,8 @@ export function PaymentPanel({
     setQrisCountdown(null)
     setShowMidtransInfo(false)
     setSelectedBank(null)
+    setSplitParts([])
+    setSplitReceiptParts([])
     onClear()
   }
 
@@ -406,10 +584,28 @@ export function PaymentPanel({
     await handleQRISPayment(sale)
   }
 
-  const change = parseInt(cashAmount) - total
+  const cashAmountNumber = Number.parseInt(cashAmount, 10)
+  const change = (Number.isNaN(cashAmountNumber) ? 0 : cashAmountNumber) - total
+  const paymentSummaryLabel = paymentMethod === "cash"
+    ? "Tunai"
+    : paymentMethod === "qris"
+      ? "QRIS Midtrans"
+      : paymentMethod === "qris_static"
+        ? "QRIS Statis"
+        : paymentMethod === "transfer"
+          ? "Transfer Bank"
+          : "Split Bill"
 
   // ===== Success Screen =====
   if (showSuccess) {
+    const receiptPaymentMethod = paymentMethod === "cash"
+      ? "cash"
+      : paymentMethod === "transfer"
+        ? "transfer"
+        : paymentMethod === "split"
+          ? "split"
+          : "qris"
+
     const receiptData = {
       saleId: sale?.id || "",
       items: cartItems.map((item) => ({
@@ -419,9 +615,10 @@ export function PaymentPanel({
         subtotal: item.price * item.qty,
       })),
       total,
-      cashAmount: parseInt(cashAmount) || total,
-      change: Math.max(0, (parseInt(cashAmount) || total) - total),
-      paymentMethod: (paymentMethod === "cash" ? "cash" : "qris") as "cash" | "qris",
+      cashAmount: paymentMethod === "cash" ? (Number.isNaN(cashAmountNumber) ? total : cashAmountNumber) : total,
+      change: paymentMethod === "cash" ? Math.max(0, change) : 0,
+      paymentMethod: receiptPaymentMethod as "cash" | "qris" | "transfer" | "split",
+      splitPayments: paymentMethod === "split" ? splitReceiptParts : undefined,
       cashierName: sale?.cashierName || "",
       customerName: customerName || "",
       createdAt: sale?.createdAt || new Date().toISOString(),
@@ -449,7 +646,7 @@ export function PaymentPanel({
 
           {/* Content card */}
           <div className="-mt-8 mx-4 rounded-2xl bg-white border border-slate-100 shadow-lg px-5 pt-5 pb-4 space-y-3">
-            {change > 0 && (
+            {paymentMethod === "cash" && change > 0 && (
               <div className="rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 px-4 py-3 text-center">
                 <p className="text-xs font-semibold text-amber-500 uppercase tracking-wide">Kembalian</p>
                 <p className="text-2xl font-extrabold text-amber-700 mt-0.5">{formatPrice(change)}</p>
@@ -468,12 +665,22 @@ export function PaymentPanel({
               <div className="flex justify-between">
                 <span>Metode Bayar</span>
                 <span className="font-semibold capitalize text-right">
-                  {paymentMethod === 'cash' ? 'Tunai' : paymentMethod === 'qris' ? 'QRIS Midtrans' : paymentMethod === 'qris_static' ? 'QRIS Statis' : 'Transfer Bank'}
+                  {paymentSummaryLabel}
                   {paymentMethod === 'transfer' && selectedBank && (
                     <span className="block text-[10px] text-slate-400 font-normal">{selectedBank.bankName}</span>
                   )}
                 </span>
               </div>
+              {paymentMethod === "split" && splitReceiptParts.length > 0 && (
+                <div className="space-y-0.5 border-t border-slate-200 pt-2 mt-2">
+                  {splitReceiptParts.map((part, index) => (
+                    <div key={`${part.label}-${index}`} className="flex justify-between text-[11px] text-slate-500">
+                      <span>{part.label}</span>
+                      <span className="font-medium text-slate-700">{formatPrice(part.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -894,6 +1101,112 @@ export function PaymentPanel({
         </div>
       )}
 
+      {paymentMethod === "split" && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 animate-fade-in space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-800">Split Bill</h3>
+            <button
+              onClick={() => setPaymentMethod(null)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 border border-slate-200 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600"
+            >
+              <XCircle className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {splitParts.map((part, index) => (
+              <div key={part.id} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Bagian {index + 1}</span>
+                  <button
+                    onClick={() => removeSplitPart(part.id)}
+                    disabled={splitParts.length <= 2}
+                    className="text-[11px] font-semibold text-red-500 disabled:text-slate-300"
+                  >
+                    Hapus
+                  </button>
+                </div>
+
+                <select
+                  value={part.method}
+                  onChange={(e) => {
+                    const method = e.target.value as SplitPaymentMethod
+                    updateSplitPart(part.id, (currentPart) => ({
+                      ...currentPart,
+                      method,
+                      bankId: method === "transfer" ? currentPart.bankId : "",
+                    }))
+                  }}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                >
+                  {splitMethodOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  min={0}
+                  value={part.amount}
+                  onChange={(e) => updateSplitPart(part.id, (currentPart) => ({ ...currentPart, amount: e.target.value }))}
+                  placeholder="Nominal"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                />
+
+                {part.method === "transfer" && (
+                  <select
+                    value={part.bankId}
+                    onChange={(e) => updateSplitPart(part.id, (currentPart) => ({ ...currentPart, bankId: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  >
+                    <option value="">Pilih rekening transfer</option>
+                    {posSettings?.bankAccounts.map((bank) => (
+                      <option key={bank.id} value={bank.id}>
+                        {bank.bankName} - {bank.accountNumber}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 space-y-1.5 text-xs">
+            <div className="flex justify-between text-slate-500">
+              <span>Total Tagihan</span>
+              <span className="font-semibold text-slate-700">{formatPrice(total)}</span>
+            </div>
+            <div className="flex justify-between text-slate-500">
+              <span>Terbagi</span>
+              <span className="font-semibold text-slate-700">{formatPrice(splitAllocated)}</span>
+            </div>
+            <div className={`flex justify-between font-bold ${splitRemaining === 0 ? "text-emerald-600" : "text-amber-600"}`}>
+              <span>{splitRemaining === 0 ? "Sisa" : "Selisih"}</span>
+              <span>{formatPrice(Math.abs(splitRemaining))}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={addSplitPart}
+              className="rounded-xl bg-white border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50"
+            >
+              Tambah Bagian
+            </button>
+            <button
+              onClick={handleSplitPayment}
+              disabled={loading || !isSplitReady}
+              className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white transition-all hover:bg-slate-800 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+              Proses Split
+            </button>
+          </div>
+        </div>
+      )}
+
       {!paymentMethod && (
         <div className="grid grid-cols-1 gap-3">
           {(!posSettings || posSettings.cash) && (
@@ -943,6 +1256,21 @@ export function PaymentPanel({
               <span className="text-base font-bold text-slate-600 group-hover:text-emerald-700">Transfer Bank</span>
             </button>
           )}
+
+          {canUseSplitBill && (
+            <button
+              onClick={() => handleStartPayment("split")}
+              className="group flex flex-row items-center justify-start gap-4 rounded-2xl bg-white border border-slate-100 p-4 transition-all duration-200 hover:bg-slate-100 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100/40 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-lg shadow-slate-300/40 transition-transform group-hover:scale-110">
+                <CreditCard className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-left">
+                <span className="block text-base font-bold text-slate-700">Split Bill</span>
+                <span className="block text-[11px] text-slate-400">Gabungkan beberapa metode bayar</span>
+              </div>
+            </button>
+          )}
         </div>
       )}
 
@@ -952,9 +1280,6 @@ export function PaymentPanel({
       >
         Batalkan Transaksi
       </button>
-
-      {/* Render the QRIS portal modal if active */}
-      {qrisModal}
     </div>
   )
 }

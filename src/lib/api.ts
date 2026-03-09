@@ -99,6 +99,26 @@ export interface Sale {
     createdAt: string
 }
 
+export type SplitPaymentMethod = 'cash' | 'qris_static' | 'transfer'
+
+export interface SplitPaymentLine {
+    method: SplitPaymentMethod
+    amount: number
+    bankDetails?: string
+}
+
+export interface SplitPaymentResult {
+    method: SplitPaymentMethod
+    amount: number
+    bankDetails?: string
+}
+
+export interface SplitPaymentResponse {
+    saleId: string
+    total: number
+    payments: SplitPaymentResult[]
+}
+
 import {
     ReportFilter,
     ReportSummary,
@@ -272,6 +292,11 @@ export const salesApi = {
 
     payCash: async (id: string, amount: number): Promise<void> => {
         await api.post(`/sales/${id}/pay-cash`, { amount })
+    },
+
+    paySplit: async (id: string, payments: SplitPaymentLine[]): Promise<SplitPaymentResponse> => {
+        const response = await api.post(`/sales/${id}/pay-split`, { payments })
+        return response.data.data
     },
 
     payQRIS: async (id: string): Promise<{ id: string; qrisUrl: string | null; providerRef: string | null; status: string }> => {

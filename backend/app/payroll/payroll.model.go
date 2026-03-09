@@ -3,6 +3,7 @@ package payroll
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"hris_backend/entity"
@@ -16,10 +17,12 @@ type PayrollResponse struct {
 	ID              string  `json:"id"`
 	EmployeeID      string  `json:"employeeId"`
 	EmployeeName    string  `json:"employeeName"`
+	EmployeeType    string  `json:"employeeType"`
 	Period          string  `json:"period"`
 	BasicSalary     float64 `json:"basicSalary"`
 	Allowance       float64 `json:"allowance"`
 	Bonus           float64 `json:"bonus"`
+	Commission      float64 `json:"commission"`
 	Overtime        float64 `json:"overtime"`
 	LateDeduction   float64 `json:"lateDeduction"`
 	AbsentDeduction float64 `json:"absentDeduction"`
@@ -44,7 +47,9 @@ type PayrollResponse struct {
 type CreatePayrollRequest struct {
 	EmployeeID      string  `json:"employeeId" validate:"required"`
 	Period          string  `json:"period" validate:"required"`
+	WorkDays        int     `json:"workDays"`
 	Bonus           float64 `json:"bonus"`
+	Commission      float64 `json:"commission"`
 	Overtime        float64 `json:"overtime"`
 	LateDeduction   float64 `json:"lateDeduction"`
 	AbsentDeduction float64 `json:"absentDeduction"`
@@ -216,16 +221,42 @@ func (u *payrollUseCase) Create(ctx context.Context, request *CreatePayrollReque
 		return nil, errors.New("employee not found")
 	}
 
-	totalIncome := employee.BasicSalary + employee.Allowance + request.Bonus + request.Overtime
+	if request.WorkDays < 0 {
+		return nil, errors.New("workDays must be zero or greater")
+	}
+
+	employeeType := entity.NormalizeEmployeeType(string(employee.EmployeeType))
+	basicSalary := employee.BasicSalary
+	allowance := employee.Allowance
+	workDays := request.WorkDays
+	presentDays := request.WorkDays
+
+	if entity.IsFreelanceEmployeeType(employeeType) {
+		if employee.DailyRate <= 0 {
+			return nil, errors.New("daily rate for freelance employee is not configured")
+		}
+		if workDays <= 0 {
+			return nil, errors.New("workDays is required for freelance employee payroll")
+		}
+		basicSalary = float64(workDays) * employee.DailyRate
+		allowance = 0
+	} else {
+		workDays = 22
+		presentDays = 22
+	}
+
+	totalIncome := basicSalary + allowance + request.Bonus + request.Commission + request.Overtime
 	totalDeduction := request.LateDeduction + request.AbsentDeduction + request.BPJS + request.THT + request.Tax + request.OtherDeduction
 	netSalary := totalIncome - totalDeduction
 
 	payroll := &entity.Payroll{
 		EmployeeID:      request.EmployeeID,
 		Period:          request.Period,
-		BasicSalary:     employee.BasicSalary,
-		Allowance:       employee.Allowance,
+		EmployeeType:    string(employeeType),
+		BasicSalary:     basicSalary,
+		Allowance:       allowance,
 		Bonus:           request.Bonus,
+		Commission:      request.Commission,
 		Overtime:        request.Overtime,
 		LateDeduction:   request.LateDeduction,
 		AbsentDeduction: request.AbsentDeduction,
@@ -236,8 +267,8 @@ func (u *payrollUseCase) Create(ctx context.Context, request *CreatePayrollReque
 		TotalIncome:     totalIncome,
 		TotalDeduction:  totalDeduction,
 		NetSalary:       netSalary,
-		WorkDays:        22,
-		PresentDays:     20,
+		WorkDays:        workDays,
+		PresentDays:     presentDays,
 		Notes:           request.Notes,
 	}
 
@@ -262,21 +293,30 @@ func (u *payrollUseCase) CalculatePayroll(ctx context.Context, employeeID, perio
 		return nil, errors.New("employee not found")
 	}
 
+	employeeType := entity.NormalizeEmployeeType(string(employee.EmployeeType))
+	if entity.IsFreelanceEmployeeType(employeeType) {
+		return nil, errors.New("freelance payroll requires manual input workDays and should be created via create payroll endpoint")
+	}
+
+	bpjs := employee.BasicSalary * 0.01
+	tht := employee.BasicSalary * 0.02
 	totalIncome := employee.BasicSalary + employee.Allowance
-	totalDeduction := 500000.0
+	totalDeduction := bpjs + tht
 	netSalary := totalIncome - totalDeduction
 
 	payroll := &entity.Payroll{
 		EmployeeID:      employeeID,
 		Period:          period,
+		EmployeeType:    string(employeeType),
 		BasicSalary:     employee.BasicSalary,
 		Allowance:       employee.Allowance,
 		Bonus:           0,
+		Commission:      0,
 		Overtime:        0,
 		LateDeduction:   0,
 		AbsentDeduction: 0,
-		BPJS:            300000,
-		THT:             200000,
+		BPJS:            bpjs,
+		THT:             tht,
 		Tax:             0,
 		OtherDeduction:  0,
 		TotalIncome:     totalIncome,
@@ -330,10 +370,12 @@ func (u *payrollUseCase) toResponse(payroll *entity.Payroll) *PayrollResponse {
 	resp := &PayrollResponse{
 		ID:              payroll.ID,
 		EmployeeID:      payroll.EmployeeID,
+		EmployeeType:    "",
 		Period:          payroll.Period,
 		BasicSalary:     payroll.BasicSalary,
 		Allowance:       payroll.Allowance,
 		Bonus:           payroll.Bonus,
+		Commission:      payroll.Commission,
 		Overtime:        payroll.Overtime,
 		LateDeduction:   payroll.LateDeduction,
 		AbsentDeduction: payroll.AbsentDeduction,
@@ -361,6 +403,13 @@ func (u *payrollUseCase) toResponse(payroll *entity.Payroll) *PayrollResponse {
 
 	if payroll.Employee.Name != "" {
 		resp.EmployeeName = payroll.Employee.Name
+	}
+	if strings.TrimSpace(payroll.EmployeeType) != "" {
+		resp.EmployeeType = string(entity.NormalizeEmployeeType(payroll.EmployeeType))
+	} else if payroll.Employee.EmployeeType != "" {
+		resp.EmployeeType = string(entity.NormalizeEmployeeType(string(payroll.Employee.EmployeeType)))
+	} else {
+		resp.EmployeeType = string(entity.EmployeeTypePermanent)
 	}
 	if payroll.PaidAt != nil {
 		paidAt := payroll.PaidAt.Format("2006-01-02 15:04:05")

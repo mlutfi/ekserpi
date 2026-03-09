@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/lib/store"
-import { payrollApi, Payroll } from "@/lib/hris"
+import { employeesApi, Employee, payrollApi, Payroll } from "@/lib/hris"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -32,7 +32,8 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
+    DialogTrigger,
+    DialogFooter
 } from "@/components/ui/dialog"
 import {
     Select,
@@ -41,6 +42,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { PageLoading } from "@/components/ui/page-loading"
@@ -51,13 +53,36 @@ export default function PayrollClient() {
 
     const [payrolls, setPayrolls] = useState<Payroll[]>([])
     const [myPayrolls, setMyPayrolls] = useState<Payroll[]>([])
+    const [employees, setEmployees] = useState<Employee[]>([])
     const [loading, setLoading] = useState(true)
     const [period, setPeriod] = useState("")
     const [calculating, setCalculating] = useState(false)
     const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null)
+    const [isManualDialogOpen, setIsManualDialogOpen] = useState(false)
+    const [creatingPayroll, setCreatingPayroll] = useState(false)
+    const [manualForm, setManualForm] = useState({
+        employeeId: "",
+        period: "",
+        workDays: 0,
+        bonus: 0,
+        commission: 0,
+        overtime: 0,
+        lateDeduction: 0,
+        absentDeduction: 0,
+        bpjs: 0,
+        tht: 0,
+        tax: 0,
+        otherDeduction: 0,
+        notes: "",
+    })
 
     useEffect(() => {
         loadPayroll()
+    }, [period])
+
+    useEffect(() => {
+        if (!period) return
+        setManualForm((prev) => (prev.period ? prev : { ...prev, period }))
     }, [period])
 
     const loadPayroll = async () => {
@@ -68,8 +93,12 @@ export default function PayrollClient() {
                 const data = await payrollApi.getMyPayroll()
                 setMyPayrolls(data)
             } else {
-                const data = await payrollApi.getAll(period)
-                setPayrolls(data)
+                const [payrollData, employeesData] = await Promise.all([
+                    payrollApi.getAll(period),
+                    employeesApi.getAll(),
+                ])
+                setPayrolls(payrollData)
+                setEmployees(employeesData)
             }
         } catch (err: any) {
             console.error("Failed to load payroll:", err)
@@ -120,6 +149,93 @@ export default function PayrollClient() {
         }
     }
 
+    const normalizeEmployeeType = (value?: string) => {
+        switch ((value || "").toUpperCase()) {
+            case "FREELANCE_BURUH":
+            case "HARIAN_LEPAS":
+                return "FREELANCE_BURUH"
+            case "PKWT":
+                return "PKWT"
+            default:
+                return "KARYAWAN_TETAP"
+        }
+    }
+
+    const employeeTypeLabel = (value?: string) => {
+        switch (normalizeEmployeeType(value)) {
+            case "FREELANCE_BURUH":
+                return "Freelance / Buruh"
+            case "PKWT":
+                return "PKWT"
+            default:
+                return "Karyawan Tetap"
+        }
+    }
+
+    const selectedEmployee = employees.find((employee) => employee.id === manualForm.employeeId)
+    const selectedEmployeeType = normalizeEmployeeType(selectedEmployee?.employeeType)
+
+    const handleCreateManualPayroll = async () => {
+        if (!manualForm.employeeId || !manualForm.period) {
+            toast.error("Error", {
+                description: "Pegawai dan periode wajib diisi",
+            })
+            return
+        }
+
+        if (selectedEmployeeType === "FREELANCE_BURUH" && manualForm.workDays <= 0) {
+            toast.error("Error", {
+                description: "Hari kerja wajib diisi untuk pegawai freelance/buruh",
+            })
+            return
+        }
+
+        try {
+            setCreatingPayroll(true)
+            await payrollApi.create({
+                employeeId: manualForm.employeeId,
+                period: manualForm.period,
+                workDays: manualForm.workDays,
+                bonus: manualForm.bonus,
+                commission: manualForm.commission,
+                overtime: manualForm.overtime,
+                lateDeduction: manualForm.lateDeduction,
+                absentDeduction: manualForm.absentDeduction,
+                bpjs: manualForm.bpjs,
+                tht: manualForm.tht,
+                tax: manualForm.tax,
+                otherDeduction: manualForm.otherDeduction,
+                notes: manualForm.notes,
+            })
+            toast.success("Berhasil", {
+                description: "Payroll manual berhasil dibuat",
+            })
+            setIsManualDialogOpen(false)
+            setManualForm({
+                employeeId: "",
+                period: period || "",
+                workDays: 0,
+                bonus: 0,
+                commission: 0,
+                overtime: 0,
+                lateDeduction: 0,
+                absentDeduction: 0,
+                bpjs: 0,
+                tht: 0,
+                tax: 0,
+                otherDeduction: 0,
+                notes: "",
+            })
+            loadPayroll()
+        } catch (err: any) {
+            toast.error("Gagal", {
+                description: err.response?.data?.message || "Gagal membuat payroll manual",
+            })
+        } finally {
+            setCreatingPayroll(false)
+        }
+    }
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
@@ -151,12 +267,22 @@ export default function PayrollClient() {
             <div className="space-y-2">
                 <div className="flex justify-between">
                     <span className="text-slate-600">Nama</span>
-                    <span className="font-medium">{payroll.employee?.name}</span>
+                    <span className="font-medium">{payroll.employee?.name || payroll.employeeName || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-slate-600">NIP</span>
                     <span className="font-medium">{payroll.employee?.nip}</span>
                 </div>
+                <div className="flex justify-between">
+                    <span className="text-slate-600">Jenis Karyawan</span>
+                    <span className="font-medium">{employeeTypeLabel(payroll.employeeType || payroll.employee?.employeeType)}</span>
+                </div>
+                {normalizeEmployeeType(payroll.employeeType || payroll.employee?.employeeType) === "FREELANCE_BURUH" && (
+                    <div className="flex justify-between">
+                        <span className="text-slate-600">Hari Kerja</span>
+                        <span className="font-medium">{payroll.workDays} hari</span>
+                    </div>
+                )}
                 <div className="flex justify-between">
                     <span className="text-slate-600">Departemen</span>
                     <span className="font-medium">{payroll.employee?.department?.name}</span>
@@ -178,6 +304,12 @@ export default function PayrollClient() {
                         <span className="text-slate-600">Bonus</span>
                         <span>{formatCurrency(payroll.bonus)}</span>
                     </div>
+                    {(payroll.commission || 0) > 0 && (
+                        <div className="flex justify-between">
+                            <span className="text-slate-600">Komisi</span>
+                            <span>{formatCurrency(payroll.commission || 0)}</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -195,6 +327,10 @@ export default function PayrollClient() {
                     <div className="flex justify-between">
                         <span className="text-slate-600">BPJS</span>
                         <span>- {formatCurrency(payroll.bpjs)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-slate-600">THT</span>
+                        <span>- {formatCurrency(payroll.tht)}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-slate-600">Pajak</span>
@@ -239,7 +375,7 @@ export default function PayrollClient() {
                                     <TableHead>Periode</TableHead>
                                     <TableHead>Gaji Pokok</TableHead>
                                     <TableHead>Tunjangan</TableHead>
-                                    <TableHead>Bonus</TableHead>
+                                    <TableHead>Bonus/Komisi</TableHead>
                                     <TableHead>Potongan</TableHead>
                                     <TableHead>Gaji Bersih</TableHead>
                                     <TableHead>Status</TableHead>
@@ -258,12 +394,13 @@ export default function PayrollClient() {
                                             </TableCell>
                                             <TableCell>{formatCurrency(payroll.basicSalary)}</TableCell>
                                             <TableCell>{formatCurrency(payroll.allowance)}</TableCell>
-                                            <TableCell>{formatCurrency(payroll.bonus)}</TableCell>
+                                            <TableCell>{formatCurrency(payroll.bonus + (payroll.commission || 0))}</TableCell>
                                             <TableCell>
                                                 {formatCurrency(
                                                     payroll.absentDeduction +
                                                     payroll.lateDeduction +
                                                     payroll.bpjs +
+                                                    payroll.tht +
                                                     payroll.tax +
                                                     payroll.otherDeduction
                                                 )}
@@ -320,6 +457,144 @@ export default function PayrollClient() {
                     <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Payroll</h1>
                     <p className="text-sm text-zinc-500 mt-1">Kelola dan hitung gaji karyawan</p>
                 </div>
+                <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            className="border-zinc-300"
+                            onClick={() => setManualForm((prev) => ({ ...prev, period: prev.period || period }))}
+                        >
+                            Input Payroll Manual
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle>Input Payroll Manual</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>Pegawai</Label>
+                                    <Select
+                                        value={manualForm.employeeId}
+                                        onValueChange={(value) => setManualForm((prev) => ({ ...prev, employeeId: value }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Pilih pegawai" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {employees.map((employee) => (
+                                                <SelectItem key={employee.id} value={employee.id}>
+                                                    {employee.name} - {employeeTypeLabel(employee.employeeType)}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Periode</Label>
+                                    <Input
+                                        type="month"
+                                        value={manualForm.period}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, period: e.target.value }))}
+                                    />
+                                </div>
+                            </div>
+
+                            {selectedEmployeeType === "FREELANCE_BURUH" && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid gap-2">
+                                        <Label>Hari Kerja (Freelance)</Label>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            value={manualForm.workDays}
+                                            onChange={(e) => setManualForm((prev) => ({ ...prev, workDays: parseInt(e.target.value) || 0 }))}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>Bonus</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.bonus}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, bonus: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Lembur</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.overtime}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, overtime: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Komisi</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.commission}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, commission: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Pajak</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.tax}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, tax: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>BPJS</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.bpjs}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, bpjs: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>THT</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.tht}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, tht: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Potongan Lain</Label>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={manualForm.otherDeduction}
+                                        onChange={(e) => setManualForm((prev) => ({ ...prev, otherDeduction: parseInt(e.target.value) || 0 }))}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsManualDialogOpen(false)}>
+                                Batal
+                            </Button>
+                            <Button onClick={handleCreateManualPayroll} disabled={creatingPayroll}>
+                                {creatingPayroll && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Simpan Payroll
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             {/* Calculate Payroll */}
@@ -422,6 +697,7 @@ export default function PayrollClient() {
                         <TableHeader>
                             <TableRow className="bg-zinc-50/50 hover:bg-zinc-50/50">
                                 <TableHead className="font-semibold text-zinc-900">Pegawai</TableHead>
+                                <TableHead className="font-semibold text-zinc-900">Jenis</TableHead>
                                 <TableHead className="font-semibold text-zinc-900">Periode</TableHead>
                                 <TableHead className="font-semibold text-zinc-900">Gaji Pokok</TableHead>
                                 <TableHead className="font-semibold text-zinc-900">Tunjangan</TableHead>
@@ -438,9 +714,10 @@ export default function PayrollClient() {
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <User className="h-4 w-4 text-slate-400" />
-                                                {payroll.employee?.name || "-"}
+                                                {payroll.employee?.name || payroll.employeeName || "-"}
                                             </div>
                                         </TableCell>
+                                        <TableCell>{employeeTypeLabel(payroll.employeeType || payroll.employee?.employeeType)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-4 w-4 text-slate-400" />
@@ -449,13 +726,14 @@ export default function PayrollClient() {
                                         </TableCell>
                                         <TableCell>{formatCurrency(payroll.basicSalary)}</TableCell>
                                         <TableCell>
-                                            {formatCurrency(payroll.allowance + payroll.bonus)}
+                                            {formatCurrency(payroll.allowance + payroll.bonus + (payroll.commission || 0))}
                                         </TableCell>
                                         <TableCell>
                                             {formatCurrency(
                                                 payroll.absentDeduction +
                                                 payroll.lateDeduction +
                                                 payroll.bpjs +
+                                                payroll.tht +
                                                 payroll.tax +
                                                 payroll.otherDeduction
                                             )}
@@ -499,7 +777,7 @@ export default function PayrollClient() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8">
+                                    <TableCell colSpan={9} className="text-center py-8">
                                         <div className="flex flex-col items-center gap-2">
                                             <DollarSign className="h-8 w-8 text-slate-300" />
                                             <p className="text-slate-500">Belum ada payroll</p>

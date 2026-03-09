@@ -73,8 +73,11 @@ export default function EmployeesClient() {
         departmentId: string
         positionId: string
         joinDate: string
-        status: "active" | "inactive"
-        baseSalary: number
+        employeeType: "FREELANCE_BURUH" | "PKWT" | "KARYAWAN_TETAP"
+        status: "ACTIVE" | "INACTIVE" | "RESIGNED"
+        basicSalary: number
+        allowance: number
+        dailyRate: number
     }
 
     // Form state
@@ -87,8 +90,11 @@ export default function EmployeesClient() {
         departmentId: "",
         positionId: "",
         joinDate: "",
-        status: "active",
-        baseSalary: 0,
+        employeeType: "KARYAWAN_TETAP",
+        status: "ACTIVE",
+        basicSalary: 0,
+        allowance: 0,
+        dailyRate: 0,
     })
 
     useEffect(() => {
@@ -132,11 +138,14 @@ export default function EmployeesClient() {
                 email: employee.email,
                 phone: employee.phone,
                 address: employee.address,
-                departmentId: employee.departmentId,
-                positionId: employee.positionId,
-                joinDate: employee.joinDate.split("T")[0],
-                status: employee.status,
-                baseSalary: employee.baseSalary || 0,
+                departmentId: employee.departmentId || "",
+                positionId: employee.positionId || "",
+                joinDate: (employee.joinDate || "").split("T")[0],
+                employeeType: normalizeEmployeeType(employee.employeeType),
+                status: normalizeEmployeeStatus(employee.status),
+                basicSalary: employee.basicSalary || employee.baseSalary || 0,
+                allowance: employee.allowance || 0,
+                dailyRate: employee.dailyRate || 0,
             })
         } else {
             setEditingEmployee(null)
@@ -149,8 +158,11 @@ export default function EmployeesClient() {
                 departmentId: "",
                 positionId: "",
                 joinDate: "",
-                status: "active",
-                baseSalary: 0,
+                employeeType: "KARYAWAN_TETAP",
+                status: "ACTIVE",
+                basicSalary: 0,
+                allowance: 0,
+                dailyRate: 0,
             })
         }
         setIsDialogOpen(true)
@@ -160,13 +172,25 @@ export default function EmployeesClient() {
         try {
             setSaving(true)
 
+            const payload = {
+                ...formData,
+                departmentId: formData.departmentId || undefined,
+                positionId: formData.positionId || undefined,
+                basicSalary: formData.employeeType === "FREELANCE_BURUH" ? 0 : formData.basicSalary,
+                allowance: formData.employeeType === "FREELANCE_BURUH" ? 0 : formData.allowance,
+                dailyRate: formData.employeeType === "FREELANCE_BURUH" ? formData.dailyRate : 0,
+                salary: formData.employeeType === "FREELANCE_BURUH"
+                    ? formData.dailyRate
+                    : formData.basicSalary + formData.allowance,
+            }
+
             if (editingEmployee) {
-                await employeesApi.update(editingEmployee.id, formData)
+                await employeesApi.update(editingEmployee.id, payload)
                 toast.success("Berhasil", {
                     description: "Datapegawai berhasil diperbarui",
                 })
             } else {
-                await employeesApi.create(formData)
+                await employeesApi.create(payload)
                 toast.success("Berhasil", {
                     description: "Pegawai baru berhasil ditambahkan",
                 })
@@ -203,6 +227,40 @@ export default function EmployeesClient() {
 
     const initials = (name: string) => {
         return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    }
+
+    const normalizeEmployeeType = (value?: string): "FREELANCE_BURUH" | "PKWT" | "KARYAWAN_TETAP" => {
+        switch ((value || "").toUpperCase()) {
+            case "FREELANCE_BURUH":
+            case "HARIAN_LEPAS":
+                return "FREELANCE_BURUH"
+            case "PKWT":
+                return "PKWT"
+            default:
+                return "KARYAWAN_TETAP"
+        }
+    }
+
+    const normalizeEmployeeStatus = (value?: string): "ACTIVE" | "INACTIVE" | "RESIGNED" => {
+        switch ((value || "").toUpperCase()) {
+            case "INACTIVE":
+                return "INACTIVE"
+            case "RESIGNED":
+                return "RESIGNED"
+            default:
+                return "ACTIVE"
+        }
+    }
+
+    const employeeTypeLabel = (value?: string) => {
+        switch (normalizeEmployeeType(value)) {
+            case "FREELANCE_BURUH":
+                return "Freelance / Buruh"
+            case "PKWT":
+                return "PKWT"
+            default:
+                return "Karyawan Tetap"
+        }
     }
 
     if (loading) {
@@ -325,31 +383,75 @@ export default function EmployeesClient() {
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Status</Label>
+                                    <Label>Jenis Karyawan</Label>
                                     <Select
-                                        value={formData.status}
-                                        onValueChange={(value: "active" | "inactive") => setFormData({ ...formData, status: value })}
+                                        value={formData.employeeType}
+                                        onValueChange={(value: "FREELANCE_BURUH" | "PKWT" | "KARYAWAN_TETAP") => setFormData({ ...formData, employeeType: value })}
                                     >
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="active">Aktif</SelectItem>
-                                            <SelectItem value="inactive">Nonaktif</SelectItem>
+                                            <SelectItem value="FREELANCE_BURUH">Freelance / Buruh</SelectItem>
+                                            <SelectItem value="PKWT">PKWT</SelectItem>
+                                            <SelectItem value="KARYAWAN_TETAP">Karyawan Tetap</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="baseSalary">Gaji Pokok</Label>
-                                <Input
-                                    id="baseSalary"
-                                    type="number"
-                                    value={formData.baseSalary}
-                                    onChange={(e) => setFormData({ ...formData, baseSalary: parseInt(e.target.value) || 0 })}
-                                    placeholder="Contoh: 5000000"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label>Status</Label>
+                                    <Select
+                                        value={formData.status}
+                                        onValueChange={(value: "ACTIVE" | "INACTIVE" | "RESIGNED") => setFormData({ ...formData, status: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ACTIVE">Aktif</SelectItem>
+                                            <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+                                            <SelectItem value="RESIGNED">Resign</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {formData.employeeType === "FREELANCE_BURUH" ? (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="dailyRate">Upah Harian</Label>
+                                        <Input
+                                            id="dailyRate"
+                                            type="number"
+                                            value={formData.dailyRate}
+                                            onChange={(e) => setFormData({ ...formData, dailyRate: parseInt(e.target.value) || 0 })}
+                                            placeholder="Contoh: 150000"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="allowance">Tunjangan</Label>
+                                        <Input
+                                            id="allowance"
+                                            type="number"
+                                            value={formData.allowance}
+                                            onChange={(e) => setFormData({ ...formData, allowance: parseInt(e.target.value) || 0 })}
+                                            placeholder="Contoh: 1000000"
+                                        />
+                                    </div>
+                                )}
                             </div>
+                            {formData.employeeType !== "FREELANCE_BURUH" && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="basicSalary">Gaji Pokok</Label>
+                                    <Input
+                                        id="basicSalary"
+                                        type="number"
+                                        value={formData.basicSalary}
+                                        onChange={(e) => setFormData({ ...formData, basicSalary: parseInt(e.target.value) || 0 })}
+                                        placeholder="Contoh: 5000000"
+                                    />
+                                </div>
+                            )}
                         </div>
                         <DialogFooter>
                             <Button variant="outline" className="border-zinc-200" onClick={() => setIsDialogOpen(false)}>
@@ -393,6 +495,7 @@ export default function EmployeesClient() {
                                 <TableHead>Departemen</TableHead>
                                 <TableHead>Jabatan</TableHead>
                                 <TableHead>Tanggal Masuk</TableHead>
+                                <TableHead>Jenis Karyawan</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Aksi</TableHead>
                             </TableRow>
@@ -417,14 +520,19 @@ export default function EmployeesClient() {
                                         <TableCell className="text-zinc-600">{employee.department?.name || "-"}</TableCell>
                                         <TableCell className="text-zinc-600">{employee.position?.name || "-"}</TableCell>
                                         <TableCell className="text-zinc-600">{employee.joinDate ? new Date(employee.joinDate).toLocaleDateString("id-ID") : "-"}</TableCell>
+                                        <TableCell className="text-zinc-600">{employeeTypeLabel(employee.employeeType)}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={cn(
                                                 "rounded-md font-medium",
-                                                employee.status === "active"
+                                                normalizeEmployeeStatus(employee.status) === "ACTIVE"
                                                     ? "bg-emerald-50 border-emerald-200 text-emerald-700"
                                                     : "bg-zinc-50 border-zinc-200 text-zinc-700"
                                             )}>
-                                                {employee.status === "active" ? "Aktif" : "Nonaktif"}
+                                                {normalizeEmployeeStatus(employee.status) === "ACTIVE"
+                                                    ? "Aktif"
+                                                    : normalizeEmployeeStatus(employee.status) === "RESIGNED"
+                                                        ? "Resign"
+                                                        : "Nonaktif"}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -451,7 +559,7 @@ export default function EmployeesClient() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8">
+                                    <TableCell colSpan={7} className="text-center py-8">
                                         <div className="flex flex-col items-center gap-2">
                                             <Users className="h-8 w-8 text-zinc-300" />
                                             <p className="text-zinc-500">Tidak ada data</p>

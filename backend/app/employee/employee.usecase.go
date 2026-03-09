@@ -165,12 +165,29 @@ func (u *employeeUseCase) Create(ctx context.Context, request *CreateEmployeeReq
 		return nil, errors.New("invalid join date format")
 	}
 
-	employeeType := entity.EmployeeTypePKWTT
-	if request.EmployeeType != "" {
-		employeeType = entity.EmployeeType(request.EmployeeType)
+	employeeType := entity.NormalizeEmployeeType(request.EmployeeType)
+	if !isSupportedEmployeeType(employeeType) {
+		return nil, errors.New("employee type must be FREELANCE_BURUH, PKWT, or KARYAWAN_TETAP")
 	}
 
-	salary := request.BasicSalary + request.Allowance
+	basicSalary := request.BasicSalary
+	allowance := request.Allowance
+	dailyRate := request.DailyRate
+
+	if entity.IsFreelanceEmployeeType(employeeType) {
+		if dailyRate <= 0 && basicSalary > 0 {
+			dailyRate = basicSalary
+		}
+		basicSalary = 0
+		allowance = 0
+	} else {
+		dailyRate = 0
+	}
+
+	salary := basicSalary + allowance
+	if entity.IsFreelanceEmployeeType(employeeType) {
+		salary = dailyRate
+	}
 	if request.Salary > 0 {
 		salary = request.Salary
 	}
@@ -199,8 +216,9 @@ func (u *employeeUseCase) Create(ctx context.Context, request *CreateEmployeeReq
 		Photo:              request.Photo,
 		ManagerID:          request.ManagerID,
 		TeamLeaderID:       request.TeamLeaderID,
-		BasicSalary:        request.BasicSalary,
-		Allowance:          request.Allowance,
+		BasicSalary:        basicSalary,
+		Allowance:          allowance,
+		DailyRate:          dailyRate,
 	}
 
 	err = u.Repository.Create(ctx, employee)
@@ -243,7 +261,11 @@ func (u *employeeUseCase) Update(ctx context.Context, id string, request *Update
 		employee.PositionID = request.PositionID
 	}
 	if request.EmployeeType != nil {
-		employee.EmployeeType = entity.EmployeeType(*request.EmployeeType)
+		normalizedType := entity.NormalizeEmployeeType(*request.EmployeeType)
+		if !isSupportedEmployeeType(normalizedType) {
+			return nil, errors.New("employee type must be FREELANCE_BURUH, PKWT, or KARYAWAN_TETAP")
+		}
+		employee.EmployeeType = normalizedType
 	}
 	if request.Status != nil {
 		employee.Status = entity.EmployeeStatus(*request.Status)
@@ -263,6 +285,19 @@ func (u *employeeUseCase) Update(ctx context.Context, id string, request *Update
 	if request.Allowance != nil {
 		employee.Allowance = *request.Allowance
 	}
+	if request.DailyRate != nil {
+		employee.DailyRate = *request.DailyRate
+	}
+
+	if entity.IsFreelanceEmployeeType(employee.EmployeeType) {
+		if employee.DailyRate <= 0 && request.BasicSalary != nil && *request.BasicSalary > 0 {
+			employee.DailyRate = *request.BasicSalary
+		}
+		employee.BasicSalary = 0
+		employee.Allowance = 0
+	} else {
+		employee.DailyRate = 0
+	}
 
 	err = u.Repository.Update(ctx, employee)
 	if err != nil {
@@ -275,8 +310,8 @@ func (u *employeeUseCase) Update(ctx context.Context, id string, request *Update
 	}
 
 	resp := u.toResponse(employee)
-	if request.BasicSalary != nil || request.Allowance != nil {
-		resp.Salary = employee.BasicSalary + employee.Allowance
+	if request.BasicSalary != nil || request.Allowance != nil || request.DailyRate != nil || request.EmployeeType != nil {
+		resp.Salary = calculateEmployeeSalary(employee)
 	}
 	return resp, nil
 }
@@ -349,12 +384,13 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 		Phone:        employee.Phone,
 		Address:      employee.Address,
 		JoinDate:     joinDateStr,
-		EmployeeType: string(employee.EmployeeType),
+		EmployeeType: string(entity.NormalizeEmployeeType(string(employee.EmployeeType))),
 		Status:       string(employee.Status),
 		Photo:        employee.Photo,
 		BasicSalary:  employee.BasicSalary,
 		Allowance:    employee.Allowance,
-		Salary:       employee.BasicSalary + employee.Allowance,
+		DailyRate:    employee.DailyRate,
+		Salary:       calculateEmployeeSalary(employee),
 	}
 
 	if employee.DepartmentID != nil {
@@ -386,4 +422,20 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 	}
 
 	return resp
+}
+
+func isSupportedEmployeeType(employeeType entity.EmployeeType) bool {
+	switch entity.NormalizeEmployeeType(string(employeeType)) {
+	case entity.EmployeeTypePermanent, entity.EmployeeTypePKWT, entity.EmployeeTypeFreelance:
+		return true
+	default:
+		return false
+	}
+}
+
+func calculateEmployeeSalary(employee *entity.User) float64 {
+	if entity.IsFreelanceEmployeeType(employee.EmployeeType) {
+		return employee.DailyRate
+	}
+	return employee.BasicSalary + employee.Allowance
 }

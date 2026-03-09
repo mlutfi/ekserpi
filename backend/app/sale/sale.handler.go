@@ -13,6 +13,7 @@ type SaleHandler interface {
 	GetByID(ctx *fiber.Ctx) error
 	UpdateStatus(ctx *fiber.Ctx) error
 	PayCash(ctx *fiber.Ctx) error
+	PaySplit(ctx *fiber.Ctx) error
 	PayQRIS(ctx *fiber.Ctx) error
 	PayQRISStatic(ctx *fiber.Ctx) error
 	PayTransfer(ctx *fiber.Ctx) error
@@ -89,6 +90,20 @@ func (h *saleHandler) PayCash(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, err.Error())
 	}
 	return helper.SuccessResponse(ctx, sale)
+}
+
+func (h *saleHandler) PaySplit(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	request := new(PaySplitRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return helper.BadRequestResponse(ctx, "Invalid request body")
+	}
+
+	resp, err := h.UseCase.PaySplit(ctx.Context(), id, request)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+	return helper.SuccessResponse(ctx, resp)
 }
 
 func (h *saleHandler) PayQRIS(ctx *fiber.Ctx) error {

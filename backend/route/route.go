@@ -164,6 +164,7 @@ func (c *RouteConfig) SaleRoutes(router fiber.Router) {
 	saleGroup.Get("/:id", c.SaleHandler.GetByID)
 	saleGroup.Put("/:id/status", c.SaleHandler.UpdateStatus)
 	saleGroup.Post("/:id/pay-cash", c.SaleHandler.PayCash)
+	saleGroup.Post("/:id/pay-split", c.SaleHandler.PaySplit)
 	saleGroup.Post("/:id/pay-qris", c.SaleHandler.PayQRIS)
 	saleGroup.Post("/:id/pay-qris-static", c.SaleHandler.PayQRISStatic)
 	saleGroup.Post("/:id/pay-transfer", c.SaleHandler.PayTransfer)
@@ -359,7 +360,7 @@ func (c *RouteConfig) DailyReportRoutes(router fiber.Router) {
 func (c *RouteConfig) PayrollRoutes(router fiber.Router) {
 	payGroup := router.Group("/payroll")
 	payGroup.Get("/", middleware.RequireRole("OWNER", "HR_ADMIN", "MANAGER"), c.PayrollHandler.GetAll)
-	payGroup.Post("/", middleware.RequireRole("OWNER", "HR_ADMIN"), c.PayrollHandler.Create)
+	payGroup.Post("/", middleware.RequireRole("OWNER", "HR_ADMIN", "MANAGER"), c.PayrollHandler.Create)
 	payGroup.Get("/my", c.PayrollHandler.GetMyOwnPayrolls)
 	payGroup.Get("/employee/:employeeId", c.PayrollHandler.GetMyPayrolls)
 	// Calculate for all employees (no employeeId in path)

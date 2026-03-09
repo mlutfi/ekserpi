@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"hris_backend/entity"
@@ -21,6 +22,7 @@ type SaleUseCase interface {
 	GetByID(ctx context.Context, id string) (*SaleResponse, error)
 	UpdateStatus(ctx context.Context, id string, request *UpdateSaleStatusRequest) (*SaleResponse, error)
 	PayCash(ctx context.Context, id string, request *PayCashRequest) (*PaymentResponse, error)
+	PaySplit(ctx context.Context, id string, request *PaySplitRequest) (*SplitPaymentResponse, error)
 	PayQRIS(ctx context.Context, id string) (*PaymentResponse, error)
 	PayQRISStatic(ctx context.Context, id string) (*PaymentResponse, error)
 	PayTransfer(ctx context.Context, id string, request *PayTransferRequest) (*PaymentResponse, error)
@@ -202,6 +204,98 @@ func (u *saleUseCase) PayCash(ctx context.Context, id string, request *PayCashRe
 		Amount:    payment.Amount,
 		Status:    string(payment.Status),
 		CreatedAt: payment.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+func (u *saleUseCase) PaySplit(ctx context.Context, id string, request *PaySplitRequest) (*SplitPaymentResponse, error) {
+	sale, err := u.Repository.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if sale.Status != entity.SaleStatusPending {
+		return nil, errors.New("sale is not pending")
+	}
+
+	if len(request.Payments) < 2 {
+		return nil, errors.New("split bill requires at least 2 payment lines")
+	}
+
+	for _, existingPayment := range sale.Payments {
+		if existingPayment.Status == entity.PaymentStatusPending || existingPayment.Status == entity.PaymentStatusPaid {
+			return nil, errors.New("sale already has payment record")
+		}
+	}
+
+	var totalAmount int
+	preparedPayments := make([]entity.Payment, 0, len(request.Payments))
+	splitItems := make([]SplitPaymentItemResponse, 0, len(request.Payments))
+
+	for _, item := range request.Payments {
+		if item.Amount <= 0 {
+			return nil, errors.New("split payment amount must be greater than 0")
+		}
+
+		totalAmount += item.Amount
+
+		method := strings.ToLower(strings.TrimSpace(item.Method))
+		payment := entity.Payment{
+			SaleID:   sale.ID,
+			Provider: entity.PaymentProviderNone,
+			Amount:   item.Amount,
+			Status:   entity.PaymentStatusPaid,
+		}
+
+		responseItem := SplitPaymentItemResponse{
+			Method: method,
+			Amount: item.Amount,
+		}
+
+		switch method {
+		case "cash":
+			payment.Method = entity.PaymentMethodCash
+		case "qris_static":
+			payment.Method = entity.PaymentMethodQRIS
+		case "transfer":
+			payment.Method = entity.PaymentMethodTransfer
+			bankDetails := strings.TrimSpace(derefString(item.BankDetails))
+			if bankDetails == "" {
+				return nil, errors.New("bank details are required for transfer split payment")
+			}
+			payment.ProviderRef = &bankDetails
+			responseItem.BankDetails = &bankDetails
+		default:
+			return nil, errors.New("unsupported split payment method")
+		}
+
+		preparedPayments = append(preparedPayments, payment)
+		splitItems = append(splitItems, responseItem)
+	}
+
+	if totalAmount != sale.Total {
+		return nil, fmt.Errorf("total split amount must equal sale total (%d)", sale.Total)
+	}
+
+	for i := range preparedPayments {
+		payment := preparedPayments[i]
+		if err := u.Repository.CreatePayment(ctx, &payment); err != nil {
+			return nil, err
+		}
+	}
+
+	sale.Status = entity.SaleStatusPaid
+	if err := u.Repository.Update(ctx, sale); err != nil {
+		return nil, err
+	}
+
+	if err := u.deductStockForSale(ctx, sale); err != nil {
+		return nil, err
+	}
+
+	return &SplitPaymentResponse{
+		SaleID:   sale.ID,
+		Total:    sale.Total,
+		Payments: splitItems,
 	}, nil
 }
 
@@ -663,6 +757,13 @@ func (u *saleUseCase) MidtransNotification(ctx context.Context, payload map[stri
 		}
 	}
 	return nil
+}
+
+func derefString(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
 }
 
 func (u *saleUseCase) toResponse(sale *entity.Sale) *SaleResponse {

@@ -17,7 +17,8 @@ interface ReceiptData {
   total: number
   cashAmount: number
   change: number
-  paymentMethod: "cash" | "qris"
+  paymentMethod: "cash" | "qris" | "transfer" | "split"
+  splitPayments?: Array<{ label: string; amount: number }>
   cashierName: string
   customerName: string
   createdAt: string
@@ -59,6 +60,13 @@ export function ReceiptModal({ open, onClose, data }: ReceiptModalProps) {
   }
 
   const shortId = data.saleId.slice(0, 8).toUpperCase()
+  const paymentLabel = data.paymentMethod === "cash"
+    ? "Tunai"
+    : data.paymentMethod === "qris"
+      ? "QRIS"
+      : data.paymentMethod === "transfer"
+        ? "Transfer"
+        : "Split Bill"
 
   const handlePrint = () => {
     if (!receiptRef.current) return
@@ -203,9 +211,7 @@ export function ReceiptModal({ open, onClose, data }: ReceiptModalProps) {
               )}
               <div className="flex justify-between">
                 <span className="text-slate-400">Bayar</span>
-                <span className="uppercase font-bold">
-                  {data.paymentMethod === "cash" ? "Tunai" : "QRIS"}
-                </span>
+                <span className="uppercase font-bold">{paymentLabel}</span>
               </div>
             </div>
 
@@ -246,6 +252,17 @@ export function ReceiptModal({ open, onClose, data }: ReceiptModalProps) {
                     <span>{formatPrice(data.change)}</span>
                   </div>
                 </>
+              )}
+
+              {data.paymentMethod === "split" && data.splitPayments && data.splitPayments.length > 0 && (
+                <div className="space-y-1">
+                  {data.splitPayments.map((payment, idx) => (
+                    <div key={`${payment.label}-${idx}`} className="flex justify-between text-slate-500">
+                      <span>{payment.label}</span>
+                      <span>{formatPrice(payment.amount)}</span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
 
