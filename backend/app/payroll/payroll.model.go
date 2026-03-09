@@ -415,7 +415,7 @@ func (h *payrollHandler) GetMyOwnPayrolls(ctx *fiber.Ctx) error {
 	}
 
 	var employee entity.User
-	err := h.DB.WithContext(ctx.Context()).First(&employee, "user_id = ?", userID.(string)).Error
+	err := h.DB.WithContext(ctx.Context()).First(&employee, "id = ?", userID.(string)).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return helper.BadRequestResponse(ctx, "Employee record not found for this user")

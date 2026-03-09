@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"
 import { HRISSidebar } from "@/components/hris/HRISSidebar"
 import { HrisHeader } from "@/components/hris/HrisHeader"
 import { FloatingBottomNav } from "@/components/ui/FloatingBottomNav"
+import { PageLoading } from "@/components/ui/page-loading"
 import { useAuthStore } from "@/lib/store"
-import { Loader2 } from "lucide-react"
 
 export default function HRISLayout({
     children,
@@ -16,7 +16,7 @@ export default function HRISLayout({
     const router = useRouter()
     const { user, token, _hasHydrated, activeModules } = useAuthStore()
 
-    const allowedRoles = ["OWNER", "HR_ADMIN", "MANAGER", "EMPLOYEE"]
+    const allowedRoles = ["OWNER", "HR_ADMIN", "MANAGER", "TEAM_LEADER", "EMPLOYEE", "STAFF"]
     const hrisModuleActive = activeModules.includes("HRIS")
 
     useEffect(() => {
@@ -47,11 +47,7 @@ export default function HRISLayout({
 
     // Show loading spinner while store is hydrating or auth check is pending
     if (!_hasHydrated || !token || !user || !hrisModuleActive || !allowedRoles.includes(user.role)) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-slate-50">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-            </div>
-        )
+        return <PageLoading fullScreen label="Memuat..." className="bg-slate-50" />
     }
 
     return (

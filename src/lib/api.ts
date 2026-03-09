@@ -45,6 +45,7 @@ export interface User {
     name: string
     email: string
     role: string
+    permissions?: string[]
     mustChangePassword: boolean
     teamLeaderId?: string | null
     twoFactorEnabled: boolean
@@ -462,6 +463,27 @@ export interface UpdateUserRequest {
     teamLeaderId?: string | null
 }
 
+export interface RoleSummary {
+    role: string
+    label: string
+    userCount: number
+}
+
+export interface RolePermission {
+    id: string
+    resource: string
+    action: string
+    code: string
+    isAllowed: boolean
+    description: string
+}
+
+export interface RolePermissionsResponse {
+    role: string
+    label: string
+    permissions: RolePermission[]
+}
+
 export const usersApi = {
     getAll: async (): Promise<User[]> => {
         const response = await api.get('/users')
@@ -481,6 +503,31 @@ export const usersApi = {
     },
     delete: async (id: string): Promise<void> => {
         await api.delete(`/users/${id}`)
+    },
+}
+
+export const rolesApi = {
+    getAll: async (): Promise<RoleSummary[]> => {
+        const response = await api.get('/roles')
+        return response.data.data ?? []
+    },
+    getPermissions: async (role: string): Promise<RolePermissionsResponse> => {
+        const response = await api.get(`/roles/${encodeURIComponent(role)}/permissions`)
+        return response.data.data
+    },
+    updatePermissions: async (
+        role: string,
+        permissions: Array<{
+            resource: string
+            action: string
+            isAllowed: boolean
+            description?: string
+        }>
+    ): Promise<RolePermissionsResponse> => {
+        const response = await api.put(`/roles/${encodeURIComponent(role)}/permissions`, {
+            permissions,
+        })
+        return response.data.data
     },
 }
 

@@ -15,6 +15,7 @@ import (
 	"hris_backend/app/product"
 	"hris_backend/app/purchaseorder"
 	"hris_backend/app/report"
+	"hris_backend/app/role"
 	"hris_backend/app/sale"
 	"hris_backend/app/setting"
 	"hris_backend/app/stock"
@@ -47,6 +48,7 @@ func Bootstrap(config *BootstrapConfig) {
 	categoryRepository := category.NewCategoryRepository(config.DB)
 	saleRepository := sale.NewSaleRepository(config.DB)
 	userRepository := user.NewUserRepository(config.DB)
+	roleRepository := role.NewRoleRepository(config.DB)
 	reportRepository := report.NewReportRepository(config.DB)
 	stockRepository := stock.NewStockRepository(config.DB)
 	assetRepository := asset.NewAssetRepository(config.DB)
@@ -72,6 +74,7 @@ func Bootstrap(config *BootstrapConfig) {
 	categoryUseCase := category.NewCategoryUseCase(config.DB, categoryRepository)
 	saleUseCase := sale.NewSaleUseCase(config.DB, saleRepository, config.Config)
 	userUseCase := user.NewUserUseCase(config.DB, userRepository)
+	roleUseCase := role.NewRoleUseCase(roleRepository)
 	reportUseCase := report.NewReportUseCase(config.DB, reportRepository)
 	stockUseCase := stock.NewStockUseCase(config.DB, stockRepository)
 	assetUseCase := asset.NewAssetUseCase(config.DB, assetRepository)
@@ -97,6 +100,7 @@ func Bootstrap(config *BootstrapConfig) {
 	categoryHandler := category.NewCategoryHandler(categoryUseCase)
 	saleHandler := sale.NewSaleHandler(saleUseCase)
 	userHandler := user.NewUserHandler(userUseCase)
+	roleHandler := role.NewRoleHandler(roleUseCase)
 	reportHandler := report.NewReportHandler(reportUseCase)
 	stockHandler := stock.NewStockHandler(stockUseCase)
 	assetHandler := asset.NewAssetHandler(assetUseCase)
@@ -128,6 +132,7 @@ func Bootstrap(config *BootstrapConfig) {
 		CategoryHandler:      categoryHandler,
 		SaleHandler:          saleHandler,
 		UserHandler:          userHandler,
+		RoleHandler:          roleHandler,
 		ReportHandler:        reportHandler,
 		StockHandler:         stockHandler,
 		AssetHandler:         assetHandler,

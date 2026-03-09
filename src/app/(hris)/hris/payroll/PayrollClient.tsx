@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function PayrollClient() {
     const user = useAuthStore((state) => state.user)
@@ -218,14 +219,7 @@ export default function PayrollClient() {
     )
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <p className="text-slate-500">Memuat data...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     // Employee View - See own salary slips

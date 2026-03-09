@@ -179,6 +179,9 @@ export function AppSidebar() {
                         if (item.requiredRole && user?.role !== item.requiredRole) {
                             return null
                         }
+                        if (item.requiredPermission && !user?.permissions?.includes(item.requiredPermission)) {
+                            return null
+                        }
                         const active = isActive(item)
                         const Icon = item.icon
                         const hasSubItems = item.subItems && item.subItems.length > 0

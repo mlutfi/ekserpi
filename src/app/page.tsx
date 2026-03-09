@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
+import { PageLoading } from "@/components/ui/page-loading";
 
 export default function HomePage() {
   const router = useRouter();
@@ -18,7 +19,9 @@ export default function HomePage() {
       } else if (
         user.role === "HR_ADMIN" ||
         user.role === "MANAGER" ||
-        user.role === "EMPLOYEE"
+        user.role === "TEAM_LEADER" ||
+        user.role === "EMPLOYEE" ||
+        user.role === "STAFF"
       ) {
         router.replace("/hris");
       } else {
@@ -29,12 +32,5 @@ export default function HomePage() {
     }
   }, [isAuthenticated, user, router]);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
-        <p className="text-sm text-slate-500">Memuat...</p>
-      </div>
-    </div>
-  );
+  return <PageLoading fullScreen label="Memuat..." className="bg-slate-50" />;
 }

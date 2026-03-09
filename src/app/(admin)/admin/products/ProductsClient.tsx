@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageLoading } from "@/components/ui/page-loading";
 
 // Helper to resolve image URL with backend base
 const getImageUrl = (url?: string | null) => {
@@ -229,11 +230,7 @@ export default function ProductsAdminPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    );
+    return <PageLoading />;
   }
 
   return (

@@ -12,6 +12,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Plus, Edit, Trash2, FolderTree } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function CategoriesAdminPage() {
   // const { toast } = useToast()
@@ -95,11 +96,7 @@ export default function CategoriesAdminPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

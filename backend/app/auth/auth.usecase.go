@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"sort"
 	"time"
 
 	"hris_backend/entity"
@@ -64,8 +65,13 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 		return nil, errors.New("invalid email or password")
 	}
 
+	permissions, err := u.getPermissionsByRole(ctx, user.Role)
+	if err != nil {
+		return nil, errors.New("failed to load role permissions")
+	}
+
 	if user.TwoFactorEnabled {
-		token, err := u.generateToken(user, true)
+		token, err := u.generateToken(user, permissions, true)
 		if err != nil {
 			return nil, errors.New("failed to generate 2fa token")
 		}
@@ -77,13 +83,14 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 				Name:               user.Name,
 				Email:              user.Email,
 				Role:               string(user.Role),
+				Permissions:        permissions,
 				MustChangePassword: user.MustChangePassword,
 				TwoFactorEnabled:   user.TwoFactorEnabled,
 			},
 		}, nil
 	}
 
-	token, err := u.generateToken(user, false)
+	token, err := u.generateToken(user, permissions, false)
 	if err != nil {
 		return nil, errors.New("failed to generate token")
 	}
@@ -95,6 +102,7 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 			Name:               user.Name,
 			Email:              user.Email,
 			Role:               string(user.Role),
+			Permissions:        permissions,
 			MustChangePassword: user.MustChangePassword,
 			TwoFactorEnabled:   user.TwoFactorEnabled,
 		},
@@ -156,7 +164,12 @@ func (u *authUseCase) Verify2FALogin(ctx context.Context, request *Verify2FALogi
 		return nil, errors.New("invalid 2fa code")
 	}
 
-	newToken, err := u.generateToken(user, false)
+	permissions, err := u.getPermissionsByRole(ctx, user.Role)
+	if err != nil {
+		return nil, errors.New("failed to load role permissions")
+	}
+
+	newToken, err := u.generateToken(user, permissions, false)
 	if err != nil {
 		return nil, errors.New("failed to generate token")
 	}
@@ -168,6 +181,7 @@ func (u *authUseCase) Verify2FALogin(ctx context.Context, request *Verify2FALogi
 			Name:               user.Name,
 			Email:              user.Email,
 			Role:               string(user.Role),
+			Permissions:        permissions,
 			MustChangePassword: user.MustChangePassword,
 			TwoFactorEnabled:   user.TwoFactorEnabled,
 		},
@@ -228,11 +242,17 @@ func (u *authUseCase) GetMe(ctx context.Context, userId string) (*UserResponse, 
 		return nil, err
 	}
 
+	permissions, err := u.getPermissionsByRole(ctx, user.Role)
+	if err != nil {
+		return nil, errors.New("failed to load role permissions")
+	}
+
 	return &UserResponse{
 		ID:                 user.ID,
 		Name:               user.Name,
 		Email:              user.Email,
 		Role:               string(user.Role),
+		Permissions:        permissions,
 		MustChangePassword: user.MustChangePassword,
 		TwoFactorEnabled:   user.TwoFactorEnabled,
 	}, nil
@@ -261,7 +281,7 @@ func (u *authUseCase) ChangePassword(ctx context.Context, userId string, request
 	return u.Repository.UpdatePassword(ctx, userId, string(hashedPassword))
 }
 
-func (u *authUseCase) generateToken(user *entity.User, is2faPending bool) (string, error) {
+func (u *authUseCase) generateToken(user *entity.User, permissions []string, is2faPending bool) (string, error) {
 	secret := u.Config.GetString("jwt.secret")
 	expiration := u.Config.GetInt("jwt.expiration")
 
@@ -274,6 +294,7 @@ func (u *authUseCase) generateToken(user *entity.User, is2faPending bool) (strin
 		Email:        user.Email,
 		Role:         string(user.Role),
 		Name:         user.Name,
+		Permissions:  permissions,
 		Is2FAPending: is2faPending,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiration) * time.Hour)),
@@ -283,4 +304,33 @@ func (u *authUseCase) generateToken(user *entity.User, is2faPending bool) (strin
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
+}
+
+func (u *authUseCase) getPermissionsByRole(ctx context.Context, role entity.Role) ([]string, error) {
+	var rolePermissions []entity.RolePermission
+	err := u.DB.WithContext(ctx).
+		Where("role = ? AND is_allowed = ?", role, true).
+		Find(&rolePermissions).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rolePermissions) == 0 {
+		permissions := entity.DefaultPermissionCodesByRole(role)
+		sort.Strings(permissions)
+		return permissions, nil
+	}
+
+	permissionSet := map[string]struct{}{}
+	for _, permission := range rolePermissions {
+		code := entity.PermissionCode(permission.Resource, permission.Action)
+		permissionSet[code] = struct{}{}
+	}
+
+	permissions := make([]string, 0, len(permissionSet))
+	for code := range permissionSet {
+		permissions = append(permissions, code)
+	}
+	sort.Strings(permissions)
+	return permissions, nil
 }

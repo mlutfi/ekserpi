@@ -7,6 +7,7 @@ import {
     Settings, Save, Upload, Plus, Trash2, HelpCircle, AlertCircle, CreditCard, Wallet, Banknote, QrCode
 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function PosSettingsPage() {
     const [loading, setLoading] = useState(true)
@@ -141,14 +142,7 @@ export default function PosSettingsPage() {
     }
 
     if (loading) {
-        return (
-            <div className="flex h-64 items-center justify-center">
-                <div className="flex flex-col items-center gap-3 text-zinc-400">
-                    <Settings className="h-8 w-8 animate-spin" />
-                    <p className="text-sm font-medium">Memuat Pengaturan...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     return (

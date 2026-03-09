@@ -49,6 +49,7 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function EmployeesClient() {
     const [employees, setEmployees] = useState<Employee[]>([])
@@ -205,14 +206,7 @@ export default function EmployeesClient() {
     }
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
-                    <p className="text-zinc-500">Memuat data...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     return (

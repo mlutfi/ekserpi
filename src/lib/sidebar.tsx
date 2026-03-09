@@ -23,6 +23,7 @@ import {
     ClipboardCheck,
     Store,
     Banknote,
+    Shield,
     LucideIcon,
 } from "lucide-react"
 
@@ -44,6 +45,7 @@ export interface NavItem {
     activeText: string
     badge: string | null
     requiredRole?: string
+    requiredPermission?: string
     subItems?: SubNavItem[]
 }
 
@@ -301,6 +303,7 @@ export const adminNavItems: NavItem[] = [
         activeText: "text-zinc-900 font-semibold",
         badge: null,
         requiredRole: "OWNER",
+        requiredPermission: "modules:edit",
     },
     {
         href: "/admin/users",
@@ -313,6 +316,20 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredPermission: "users:view",
+    },
+    {
+        href: "/admin/roles",
+        label: "Role & Akses",
+        icon: Shield,
+        iconBg: "bg-zinc-50",
+        iconColor: "text-zinc-500",
+        activeIconBg: "bg-zinc-900",
+        activeBg: "bg-zinc-100/50",
+        activeBorder: "bg-zinc-900",
+        activeText: "text-zinc-900 font-semibold",
+        badge: null,
+        requiredPermission: "roles:view",
     },
 ]
 

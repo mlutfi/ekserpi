@@ -24,6 +24,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function HRISDashboardClient() {
     const user = useAuthStore((state) => state.user)
@@ -538,14 +539,7 @@ export default function HRISDashboardClient() {
     )
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
-                    <p className="text-zinc-500">Memuat dashboard...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     if (error) {

@@ -5,6 +5,7 @@ import { purchaseOrdersApi, PurchaseOrder, stockApi, StockIn } from "@/lib/api"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CheckCircle2, ClipboardCheck, Eye, RefreshCw } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function GoodsReceiptsClient() {
   const [view, setView] = useState<"list" | "detail">("list")
@@ -72,11 +73,7 @@ export default function GoodsReceiptsClient() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

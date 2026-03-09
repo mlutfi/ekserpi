@@ -5,6 +5,7 @@ import { Product, Sale, StockIn, productsApi, salesApi, stockApi } from "@/lib/a
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { RefreshCw, RotateCcw } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function SalesReturnsClient() {
   const [loading, setLoading] = useState(true)
@@ -107,11 +108,7 @@ export default function SalesReturnsClient() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

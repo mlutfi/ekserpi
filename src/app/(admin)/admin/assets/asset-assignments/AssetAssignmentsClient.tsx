@@ -5,6 +5,7 @@ import { Asset, AssetAssignment, assetAssignmentsApi, assetsApi } from "@/lib/ap
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function AssetAssignmentsClient() {
   const [view, setView] = useState<"list" | "form">("list")
@@ -114,11 +115,7 @@ export default function AssetAssignmentsClient() {
   const availableAssets = assets.filter((asset) => asset.status === "AVAILABLE")
 
   if (loading && view === "list") {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

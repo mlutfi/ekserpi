@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Plus, Edit, Trash2, Users, Shield, UserCog, User, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { api } from "@/lib/api"
+import { rolesApi, type RoleSummary, usersApi, type User as ApiUser } from "@/lib/api"
+import { PageLoading } from "@/components/ui/page-loading"
 import {
   Dialog,
   DialogContent,
@@ -20,19 +21,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: string
-  mustChangePassword: boolean
-  teamLeaderId?: string | null
-  createdAt: string
+interface User extends ApiUser {
+  createdAt?: string
 }
 
 export default function UsersAdminPage() {
   // const { toast } = useToast()
   const [users, setUsers] = useState<User[]>([])
+  const [availableRoles, setAvailableRoles] = useState<RoleSummary[]>([])
   const [teamLeaders, setTeamLeaders] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -47,48 +43,52 @@ export default function UsersAdminPage() {
   })
 
   useEffect(() => {
-    fetchUsers()
+    void loadInitialData()
   }, [])
 
-  useEffect(() => {
-    // Fetch team leaders when modal opens
-    if (showModal) {
-      fetchTeamLeaders()
-    }
-  }, [showModal])
-
-  async function fetchUsers() {
+  async function loadInitialData() {
     try {
-      const response = await api.get("/users")
-      setUsers(response.data.data ?? [])
-    } catch (error) {
-      toast.error("Error", {
-        description: "Gagal memuat data pengguna",
-      })
+      setLoading(true)
+      await Promise.all([fetchUsers(), fetchRoles()])
     } finally {
       setLoading(false)
     }
   }
 
-  async function fetchTeamLeaders() {
+  async function fetchUsers() {
     try {
-      const response = await api.get("/users")
-      const allUsers = response.data.data ?? []
-      // Filter only TEAM_LEADER role
-      const leaders = allUsers.filter((u: User) => u.role === "TEAM_LEADER")
-      setTeamLeaders(leaders)
+      const data = await usersApi.getAll()
+      setUsers(data ?? [])
+      setTeamLeaders((data ?? []).filter((user) => user.role === "TEAM_LEADER"))
     } catch (error) {
-      console.error("Failed to fetch team leaders:", error)
+      toast.error("Error", {
+        description: "Gagal memuat data pengguna",
+      })
+    }
+  }
+
+  async function fetchRoles() {
+    try {
+      const data = await rolesApi.getAll()
+      setAvailableRoles(data ?? [])
+    } catch (error) {
+      toast.error("Error", {
+        description: "Gagal memuat data role",
+      })
     }
   }
 
   function openCreateModal() {
+    const defaultRole = availableRoles.find((role) => role.role === "STAFF")?.role
+      ?? availableRoles[0]?.role
+      ?? "STAFF"
+
     setEditingUser(null)
     setFormData({
       name: "",
       email: "",
       password: "",
-      role: "STAFF",
+      role: defaultRole,
       teamLeaderId: "",
     })
     setShowModal(true)
@@ -126,13 +126,13 @@ export default function UsersAdminPage() {
         if (formData.password) {
           payload.password = formData.password
         }
-        await api.put(`/users/${editingUser.id}`, payload)
+        await usersApi.update(editingUser.id, payload)
         toast.success("Berhasil", {
           description: "Pengguna berhasil diperbarui",
         })
       } else {
         payload.password = formData.password
-        await api.post("/users", payload)
+        await usersApi.create(payload)
         toast.success("Berhasil", {
           description: "Pengguna berhasil dibuat",
         })
@@ -152,7 +152,7 @@ export default function UsersAdminPage() {
     if (!confirm(`Hapus pengguna "${user.name}"?`)) return
 
     try {
-      await api.delete(`/users/${user.id}`)
+      await usersApi.delete(user.id)
       toast.success("Berhasil", {
         description: "Pengguna berhasil dihapus",
       })
@@ -179,6 +179,10 @@ export default function UsersAdminPage() {
     return styles[role] || "border border-zinc-200 bg-white text-zinc-700"
   }
 
+  const getRoleLabel = (roleCode: string) => {
+    return availableRoles.find((role) => role.role === roleCode)?.label ?? roleCode
+  }
+
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "OWNER":
@@ -201,11 +205,7 @@ export default function UsersAdminPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (
@@ -279,7 +279,7 @@ export default function UsersAdminPage() {
                         )}`}
                       >
                         <RoleIcon className="h-3 w-3" />
-                        {user.role}
+                        {getRoleLabel(user.role)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -400,11 +400,11 @@ export default function UsersAdminPage() {
                   <SelectValue placeholder="Pilih Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="OWNER">Owner</SelectItem>
-                  <SelectItem value="HR_ADMIN">HR Admin</SelectItem>
-                  <SelectItem value="MANAGER">Manager</SelectItem>
-                  <SelectItem value="TEAM_LEADER">Team Leader</SelectItem>
-                  <SelectItem value="STAFF">Staff</SelectItem>
+                  {availableRoles.map((role) => (
+                    <SelectItem key={role.role} value={role.role}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

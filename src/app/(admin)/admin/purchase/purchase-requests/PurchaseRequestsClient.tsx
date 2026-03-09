@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ClipboardList, Eye, Plus, Search, Trash2, X } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function PurchaseRequestsClient() {
   const router = useRouter()
@@ -213,11 +214,7 @@ export default function PurchaseRequestsClient() {
   }
 
   if (loading && view === "list") {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

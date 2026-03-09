@@ -46,7 +46,7 @@ export default function ErpModulePage({ title, description, modules = [] }: ErpM
             <p className="font-medium">Modul sedang disiapkan</p>
           </div>
           <p className="mt-2 text-sm text-zinc-500">
-            Halaman ini sudah masuk struktur ERP dan siap dilanjutkan ke implementasi fitur detail.
+            Halaman ini sudah masuk struktur dan siap dilanjutkan ke implementasi fitur detail.
           </p>
         </div>
       )}

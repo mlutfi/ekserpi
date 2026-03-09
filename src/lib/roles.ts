@@ -5,7 +5,9 @@ export type Role =
     | 'CASHIER'
     | 'HR_ADMIN'
     | 'MANAGER'
+    | 'TEAM_LEADER'
     | 'EMPLOYEE'
+    | 'STAFF'
     | 'BACKEND'
     | 'FRONTEND'
 
@@ -14,7 +16,7 @@ export const RoleGroups = {
     // Admin roles (can access admin panel)
     ADMIN: ['OWNER', 'OPS'],
     // HRIS roles
-    HRIS: ['HR_ADMIN', 'MANAGER', 'EMPLOYEE'],
+    HRIS: ['HR_ADMIN', 'MANAGER', 'TEAM_LEADER', 'EMPLOYEE', 'STAFF'],
     // POS roles
     POS: ['CASHIER', 'OWNER', 'OPS'],
     // Technical roles
@@ -28,7 +30,9 @@ export const RoleLabels: Record<Role, string> = {
     CASHIER: 'Cashier',
     HR_ADMIN: 'HR Admin',
     MANAGER: 'Manager',
+    TEAM_LEADER: 'Team Leader',
     EMPLOYEE: 'Employee',
+    STAFF: 'Staff',
     BACKEND: 'Backend Developer',
     FRONTEND: 'Frontend Developer',
 }
@@ -55,7 +59,9 @@ export function getDefaultRoute(role: string): string {
             return '/pos'
         case 'HR_ADMIN':
         case 'MANAGER':
+        case 'TEAM_LEADER':
         case 'EMPLOYEE':
+        case 'STAFF':
             return '/hris'
         case 'BACKEND':
         case 'FRONTEND':

@@ -15,6 +15,7 @@ import (
 	"hris_backend/app/product"
 	"hris_backend/app/purchaseorder"
 	"hris_backend/app/report"
+	"hris_backend/app/role"
 	"hris_backend/app/sale"
 	"hris_backend/app/setting"
 	"hris_backend/app/stock"
@@ -37,6 +38,7 @@ type RouteConfig struct {
 	SaleHandler          sale.SaleHandler
 	SettingHandler       setting.SettingHandler
 	UserHandler          user.UserHandler
+	RoleHandler          role.RoleHandler
 	ReportHandler        report.ReportHandler
 	StockHandler         stock.StockHandler
 	AssetHandler         asset.AssetHandler
@@ -93,6 +95,7 @@ func (c *RouteConfig) Setup() {
 	c.SaleRoutes(protected)
 	c.SettingRoutes(protected)
 	c.UserRoutes(protected)
+	c.RoleRoutes(protected)
 	c.ReportRoutes(protected)
 	c.StockRoutes(protected)
 	c.AssetRoutes(protected)
@@ -179,11 +182,18 @@ func (c *RouteConfig) SettingRoutes(router fiber.Router) {
 
 func (c *RouteConfig) UserRoutes(router fiber.Router) {
 	userGroup := router.Group("/users")
-	userGroup.Get("/", middleware.RequireRole("OWNER", "OPS"), c.UserHandler.GetAll)
-	userGroup.Get("/:id", middleware.RequireRole("OWNER", "OPS"), c.UserHandler.GetByID)
-	userGroup.Post("/", middleware.RequireRole("OWNER"), c.UserHandler.Create)
-	userGroup.Put("/:id", middleware.RequireRole("OWNER"), c.UserHandler.Update)
-	userGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.UserHandler.Delete)
+	userGroup.Get("/", middleware.RequirePermission("users:view"), c.UserHandler.GetAll)
+	userGroup.Get("/:id", middleware.RequirePermission("users:view"), c.UserHandler.GetByID)
+	userGroup.Post("/", middleware.RequirePermission("users:create"), c.UserHandler.Create)
+	userGroup.Put("/:id", middleware.RequirePermission("users:edit"), c.UserHandler.Update)
+	userGroup.Delete("/:id", middleware.RequirePermission("users:delete"), c.UserHandler.Delete)
+}
+
+func (c *RouteConfig) RoleRoutes(router fiber.Router) {
+	roleGroup := router.Group("/roles")
+	roleGroup.Get("/", middleware.RequirePermission("roles:view"), c.RoleHandler.GetAll)
+	roleGroup.Get("/:role/permissions", middleware.RequirePermission("roles:view"), c.RoleHandler.GetPermissions)
+	roleGroup.Put("/:role/permissions", middleware.RequirePermission("roles:edit"), c.RoleHandler.UpdatePermissions)
 }
 
 func (c *RouteConfig) ReportRoutes(router fiber.Router) {

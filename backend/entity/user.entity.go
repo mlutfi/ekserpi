@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -22,6 +23,19 @@ const (
 	RoleBackend  Role = "BACKEND"
 	RoleFrontend Role = "FRONTEND"
 )
+
+var roleLabels = map[Role]string{
+	RoleOwner:      "Owner",
+	RoleOps:        "Operations",
+	RoleCashier:    "Cashier",
+	RoleHRAdmin:    "HR Admin",
+	RoleManager:    "Manager",
+	RoleTeamLeader: "Team Leader",
+	RoleEmployee:   "Employee",
+	RoleStaff:      "Staff",
+	RoleBackend:    "Backend Developer",
+	RoleFrontend:   "Frontend Developer",
+}
 
 func (Role) GormDataType() string {
 	return "varchar(20)"
@@ -90,4 +104,41 @@ type User struct {
 
 func (User) TableName() string {
 	return "users"
+}
+
+func AllRoles() []Role {
+	return []Role{
+		RoleOwner,
+		RoleOps,
+		RoleCashier,
+		RoleHRAdmin,
+		RoleManager,
+		RoleTeamLeader,
+		RoleEmployee,
+		RoleStaff,
+		RoleBackend,
+		RoleFrontend,
+	}
+}
+
+func IsValidRole(raw string) bool {
+	normalized := strings.ToUpper(strings.TrimSpace(raw))
+	for _, role := range AllRoles() {
+		if string(role) == normalized {
+			return true
+		}
+	}
+	return false
+}
+
+func NormalizeRole(raw string) Role {
+	return Role(strings.ToUpper(strings.TrimSpace(raw)))
+}
+
+func RoleLabel(role Role) string {
+	label, ok := roleLabels[role]
+	if !ok {
+		return string(role)
+	}
+	return label
 }

@@ -5,6 +5,7 @@ import { stockTransfersApi, StockTransfer, locationsApi, Location, productsApi, 
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Plus, Eye, ArrowLeft, Trash2, Search, ArrowRightLeft } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function StockTransfersClient() {
     const [view, setView] = useState<"list" | "form" | "detail">("list")
@@ -157,11 +158,7 @@ export default function StockTransfersClient() {
     }
 
     if (loading && view === "list") {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-            </div>
-        )
+      return <PageLoading />
     }
 
     return (
@@ -359,7 +356,7 @@ export default function StockTransfersClient() {
                                         <span className="text-xs text-zinc-400 block mb-1">Gudang Asal:</span>
                                         <span className="font-medium text-zinc-900">{selectedTransfer.sourceLocationName}</span>
                                     </div>
-                                    <div className="flex justify-center text-zinc-300 py-1">⬇️</div>
+                                    <div className="flex justify-center text-zinc-300 py-1">â¬‡ï¸</div>
                                     <div>
                                         <span className="text-xs text-zinc-400 block mb-1">Gudang Tujuan:</span>
                                         <span className="font-medium text-zinc-900">{selectedTransfer.destLocationName}</span>

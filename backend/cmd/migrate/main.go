@@ -176,6 +176,7 @@ func main() {
 
 	entities := []interface{}{
 		&entity.User{},
+		&entity.RolePermission{},
 		&entity.Category{},
 		&entity.Product{},
 		&entity.Inventory{},
@@ -214,6 +215,10 @@ func main() {
 		log.Fatalf("✗ Migration failed: %v", err)
 	}
 	fmt.Println("✓ AutoMigrate completed successfully!")
+	fmt.Println()
+
+	fmt.Println("━━━ Step 1.2: Seed Role Permissions ━━━")
+	seedRolePermissions(db)
 	fmt.Println()
 
 	// ──────────────────────────────────────────────────────────────────
@@ -393,6 +398,33 @@ func verifyAllColumns(db *gorm.DB, entities []interface{}) {
 // ──────────────────────────────────────────────────────────────────────
 // SEED FUNCTIONS (all idempotent using FirstOrCreate)
 // ──────────────────────────────────────────────────────────────────────
+
+func seedRolePermissions(db *gorm.DB) {
+	defaultPermissions := entity.BuildDefaultRolePermissions()
+	created := 0
+
+	for _, permission := range defaultPermissions {
+		var existing entity.RolePermission
+		err := db.
+			Where("role = ? AND resource = ? AND action = ?", permission.Role, permission.Resource, permission.Action).
+			First(&existing).Error
+		if err == nil {
+			continue
+		}
+
+		if err := db.Create(&permission).Error; err != nil {
+			fmt.Printf("  ⚠ Failed to seed permission %s:%s for role %s: %v\n", permission.Resource, permission.Action, permission.Role, err)
+			continue
+		}
+		created++
+	}
+
+	if created > 0 {
+		fmt.Printf("  ✓ Seeded %d role permission records\n", created)
+	} else {
+		fmt.Println("  - Role permissions already seeded (skipping)")
+	}
+}
 
 func seedOwnerUser(db *gorm.DB) {
 	var existingOwner entity.User

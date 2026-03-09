@@ -5,6 +5,7 @@ import { purchaseOrdersApi, PurchaseOrder, suppliersApi, Supplier, locationsApi,
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Plus, Eye, ShoppingCart, ArrowLeft, Trash2, Search, X } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function PurchaseOrdersClient() {
     const [view, setView] = useState<"list" | "form" | "detail">("list")
@@ -162,11 +163,7 @@ export default function PurchaseOrdersClient() {
     }
 
     if (loading && view === "list") {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-            </div>
-        )
+      return <PageLoading />
     }
 
     return (

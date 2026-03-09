@@ -93,7 +93,7 @@ func (h *attendanceHandler) GetHistory(ctx *fiber.Ctx) error {
 			}
 			// Get the team leader's employee record
 			var teamLeader entity.User
-			dbErr := h.DB.WithContext(ctx.Context()).First(&teamLeader, "user_id = ?", userID.(string)).Error
+			dbErr := h.DB.WithContext(ctx.Context()).First(&teamLeader, "id = ?", userID.(string)).Error
 			if dbErr != nil {
 				if dbErr == gorm.ErrRecordNotFound {
 					return helper.BadRequestResponse(ctx, "Employee record not found for this user")
@@ -113,7 +113,7 @@ func (h *attendanceHandler) GetHistory(ctx *fiber.Ctx) error {
 			return helper.BadRequestResponse(ctx, "employeeId is required")
 		}
 		var employee entity.User
-		dbErr := h.DB.WithContext(ctx.Context()).First(&employee, "user_id = ?", userID.(string)).Error
+		dbErr := h.DB.WithContext(ctx.Context()).First(&employee, "id = ?", userID.(string)).Error
 		if dbErr != nil {
 			if dbErr == gorm.ErrRecordNotFound {
 				return helper.BadRequestResponse(ctx, "Employee record not found for this user. Please contact HR to set up your employee profile.")
@@ -147,7 +147,7 @@ func (h *attendanceHandler) GetMyTodayAttendance(ctx *fiber.Ctx) error {
 
 	// Get employee by user ID
 	var employee entity.User
-	err := h.DB.WithContext(ctx.Context()).First(&employee, "user_id = ?", userID.(string)).Error
+	err := h.DB.WithContext(ctx.Context()).First(&employee, "id = ?", userID.(string)).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return helper.BadRequestResponse(ctx, "Employee record not found")

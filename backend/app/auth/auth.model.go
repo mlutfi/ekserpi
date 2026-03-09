@@ -14,12 +14,13 @@ type LoginResponse struct {
 }
 
 type UserResponse struct {
-	ID                 string `json:"id"`
-	Name               string `json:"name"`
-	Email              string `json:"email"`
-	Role               string `json:"role"`
-	MustChangePassword bool   `json:"mustChangePassword"`
-	TwoFactorEnabled   bool   `json:"twoFactorEnabled"`
+	ID                 string   `json:"id"`
+	Name               string   `json:"name"`
+	Email              string   `json:"email"`
+	Role               string   `json:"role"`
+	Permissions        []string `json:"permissions,omitempty"`
+	MustChangePassword bool     `json:"mustChangePassword"`
+	TwoFactorEnabled   bool     `json:"twoFactorEnabled"`
 }
 
 type Setup2FAResponse struct {

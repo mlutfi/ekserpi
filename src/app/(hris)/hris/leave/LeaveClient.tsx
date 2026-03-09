@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function LeaveClient() {
     const user = useAuthStore((state) => state.user)
@@ -92,7 +93,7 @@ export default function LeaveClient() {
                 } catch (profileErr: any) {
                     const status = profileErr?.response?.status
                     if (status === 404) {
-                        // Employee profile not linked yet — show friendly message
+                        // Employee profile not linked yet â€” show friendly message
                         setEmployeeNotFound(true)
                     } else {
                         throw profileErr
@@ -210,14 +211,7 @@ export default function LeaveClient() {
     }
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center p-12">
-                <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-6 w-6 animate-spin text-zinc-900" />
-                    <p className="text-sm font-medium text-zinc-500">Memuat data...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     // Employee View - Request and view own leaves

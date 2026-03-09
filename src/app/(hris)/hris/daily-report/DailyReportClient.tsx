@@ -47,6 +47,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PageLoading } from "@/components/ui/page-loading"
 
 interface ReportItem {
     title: string
@@ -220,14 +221,7 @@ export default function DailyReportClient() {
     }
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <p className="text-slate-500">Memuat data...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     // Employee View - Create and view own reports

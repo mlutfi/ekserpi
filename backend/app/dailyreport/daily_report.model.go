@@ -425,7 +425,7 @@ func (h *dailyReportHandler) GetMyOwnReports(ctx *fiber.Ctx) error {
 
 	// Get employee by user ID
 	var employee entity.User
-	err := h.DB.WithContext(ctx.Context()).First(&employee, "user_id = ?", userID.(string)).Error
+	err := h.DB.WithContext(ctx.Context()).First(&employee, "id = ?", userID.(string)).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// User has no linked employee record, return empty list gracefully

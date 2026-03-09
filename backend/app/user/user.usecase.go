@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"sort"
 
 	"hris_backend/entity"
 
@@ -36,9 +37,14 @@ func (u *userUseCase) GetAll(ctx context.Context) ([]UserResponse, error) {
 		return nil, err
 	}
 
+	permissionByRole, err := u.getPermissionsByRoles(ctx, users)
+	if err != nil {
+		return nil, err
+	}
+
 	var responses []UserResponse
 	for _, user := range users {
-		responses = append(responses, *u.toResponse(&user))
+		responses = append(responses, *u.toResponse(&user, permissionByRole[string(user.Role)]))
 	}
 	return responses, nil
 }
@@ -48,7 +54,11 @@ func (u *userUseCase) GetByID(ctx context.Context, id string) (*UserResponse, er
 	if err != nil {
 		return nil, err
 	}
-	return u.toResponse(user), nil
+	permissions, err := u.getPermissionsForRole(ctx, user.Role)
+	if err != nil {
+		return nil, err
+	}
+	return u.toResponse(user, permissions), nil
 }
 
 func (u *userUseCase) Create(ctx context.Context, request *CreateUserRequest) (*UserResponse, error) {
@@ -64,12 +74,17 @@ func (u *userUseCase) Create(ctx context.Context, request *CreateUserRequest) (*
 		return nil, errors.New("failed to hash password")
 	}
 
+	normalizedRole := entity.NormalizeRole(request.Role)
+	if !entity.IsValidRole(string(normalizedRole)) {
+		return nil, errors.New("invalid role")
+	}
+
 	passwordStr := string(hashedPassword)
 	user := &entity.User{
 		Name:               request.Name,
 		Email:              request.Email,
 		PasswordHash:       &passwordStr,
-		Role:               entity.Role(request.Role),
+		Role:               normalizedRole,
 		MustChangePassword: true,
 		TeamLeaderID:       request.TeamLeaderID,
 	}
@@ -79,7 +94,12 @@ func (u *userUseCase) Create(ctx context.Context, request *CreateUserRequest) (*
 		return nil, err
 	}
 
-	return u.toResponse(user), nil
+	permissions, err := u.getPermissionsForRole(ctx, user.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.toResponse(user, permissions), nil
 }
 
 func (u *userUseCase) Update(ctx context.Context, id string, request *UpdateUserRequest) (*UserResponse, error) {
@@ -109,7 +129,11 @@ func (u *userUseCase) Update(ctx context.Context, id string, request *UpdateUser
 		user.MustChangePassword = false
 	}
 	if request.Role != nil {
-		user.Role = entity.Role(*request.Role)
+		normalizedRole := entity.NormalizeRole(*request.Role)
+		if !entity.IsValidRole(string(normalizedRole)) {
+			return nil, errors.New("invalid role")
+		}
+		user.Role = normalizedRole
 	}
 	if request.TeamLeaderID != nil {
 		user.TeamLeaderID = request.TeamLeaderID
@@ -120,7 +144,12 @@ func (u *userUseCase) Update(ctx context.Context, id string, request *UpdateUser
 		return nil, err
 	}
 
-	return u.toResponse(user), nil
+	permissions, err := u.getPermissionsForRole(ctx, user.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.toResponse(user, permissions), nil
 }
 
 func (u *userUseCase) Delete(ctx context.Context, id string) error {
@@ -131,13 +160,59 @@ func (u *userUseCase) Delete(ctx context.Context, id string) error {
 	return u.Repository.Delete(ctx, id)
 }
 
-func (u *userUseCase) toResponse(user *entity.User) *UserResponse {
+func (u *userUseCase) toResponse(user *entity.User, permissions []string) *UserResponse {
 	return &UserResponse{
 		ID:                 user.ID,
 		Name:               user.Name,
 		Email:              user.Email,
 		Role:               string(user.Role),
+		Permissions:        permissions,
 		MustChangePassword: user.MustChangePassword,
 		TeamLeaderID:       user.TeamLeaderID,
 	}
+}
+
+func (u *userUseCase) getPermissionsForRole(ctx context.Context, role entity.Role) ([]string, error) {
+	var rolePermissions []entity.RolePermission
+	err := u.DB.WithContext(ctx).
+		Where("role = ? AND is_allowed = ?", role, true).
+		Find(&rolePermissions).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rolePermissions) == 0 {
+		permissions := entity.DefaultPermissionCodesByRole(role)
+		sort.Strings(permissions)
+		return permissions, nil
+	}
+
+	set := map[string]struct{}{}
+	for _, permission := range rolePermissions {
+		set[entity.PermissionCode(permission.Resource, permission.Action)] = struct{}{}
+	}
+
+	permissions := make([]string, 0, len(set))
+	for permission := range set {
+		permissions = append(permissions, permission)
+	}
+	sort.Strings(permissions)
+	return permissions, nil
+}
+
+func (u *userUseCase) getPermissionsByRoles(ctx context.Context, users []entity.User) (map[string][]string, error) {
+	roleSet := map[entity.Role]struct{}{}
+	for _, user := range users {
+		roleSet[user.Role] = struct{}{}
+	}
+
+	out := map[string][]string{}
+	for role := range roleSet {
+		permissions, err := u.getPermissionsForRole(ctx, role)
+		if err != nil {
+			return nil, err
+		}
+		out[string(role)] = permissions
+	}
+	return out, nil
 }

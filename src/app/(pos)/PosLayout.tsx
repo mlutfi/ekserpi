@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
 import { PosNavbar } from "@/components/pos/PosNavbar"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function PosLayout({
   children,
@@ -22,9 +23,9 @@ export default function PosLayout({
       router.replace("/login")
     } else if (!posModuleActive) {
       // POS module is not active, redirect to appropriate page
-      if (["OWNER", "HR_ADMIN", "MANAGER", "OPS"].includes(user.role)) {
+      if (["OWNER", "OPS", "BACKEND", "FRONTEND"].includes(user.role)) {
         router.replace("/admin")
-      } else if (["HR_ADMIN", "MANAGER", "EMPLOYEE"].includes(user.role)) {
+      } else if (["HR_ADMIN", "MANAGER", "TEAM_LEADER", "EMPLOYEE", "STAFF"].includes(user.role)) {
         router.replace("/hris")
       } else {
         router.replace("/login")
@@ -33,14 +34,7 @@ export default function PosLayout({
   }, [_hasHydrated, token, user, router, posModuleActive])
 
   if (!_hasHydrated || !user || !posModuleActive) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-500" />
-          <p className="text-sm text-emerald-600/60 animate-pulse">Memuat...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading fullScreen label="Memuat..." className="bg-slate-50" />
   }
 
   return (

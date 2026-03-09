@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { usePathname } from "next/navigation"
 import { salesApi, productsApi, categoriesApi, reportsApi, type TopProduct } from "@/lib/api"
+import { PageLoading } from "@/components/ui/page-loading"
 import {
   DollarSign,
   ShoppingBag,
@@ -138,11 +139,7 @@ export default function AdminDashboard() {
   ]
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

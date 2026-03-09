@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { PageLoading } from "@/components/ui/page-loading"
 
 type UserRole = "OWNER" | "HR_ADMIN" | "MANAGER" | "TEAM_LEADER" | "EMPLOYEE" | "STAFF"
 type CheckInStep = 'work-type' | 'camera' | 'location' | 'confirm'
@@ -399,23 +400,12 @@ export default function AttendanceClient() {
     const GreetingIcon = greeting.icon
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full min-h-[400px]">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="relative">
-                        <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
-                        </div>
-                    </div>
-                    <p className="text-slate-500 text-sm">Memuat data...</p>
-                </div>
-            </div>
-        )
+      return <PageLoading />
     }
 
     return (
         <div className="min-h-screen bg-white">
-            {/* ── Header Section ── */}
+            {/* â”€â”€ Header Section â”€â”€ */}
             <div className="bg-white border-b border-zinc-200 px-5 py-6 md:px-8 md:py-8">
                 <div className="max-w-2xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -424,7 +414,7 @@ export default function AttendanceClient() {
                             <GreetingIcon className="h-4 w-4 text-zinc-500" />
                             <span className="text-zinc-500 text-sm font-medium">{greeting.text}</span>
                         </div>
-                        <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{user?.name || "User"} 👋</h1>
+                        <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{user?.name || "User"} ðŸ‘‹</h1>
                         <p className="text-zinc-500 text-sm">
                             {currentTime.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                         </p>
@@ -440,10 +430,10 @@ export default function AttendanceClient() {
                 </div>
             </div>
 
-            {/* ── Main Content ── */}
+            {/* â”€â”€ Main Content â”€â”€ */}
             <div className="px-4 md:px-8 py-6 max-w-2xl mx-auto space-y-6 pb-8">
 
-                {/* ── Today Status Card ── */}
+                {/* â”€â”€ Today Status Card â”€â”€ */}
                 <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden bg-white">
                     <CardContent className="p-0">
                         {todayAttendance ? (
@@ -509,7 +499,7 @@ export default function AttendanceClient() {
                     </CardContent>
                 </Card>
 
-                {/* ── Action Button ── */}
+                {/* â”€â”€ Action Button â”€â”€ */}
                 {needsCheckIn && (
                     <>
                         {!todayAttendance?.checkinTime ? (
@@ -551,9 +541,9 @@ export default function AttendanceClient() {
                                         <CheckCircle className="h-5 w-5 text-zinc-900" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-zinc-900">Absensi Selesai! ✨</p>
+                                        <p className="font-semibold text-zinc-900">Absensi Selesai! âœ¨</p>
                                         <p className="text-xs text-zinc-500 mt-1">
-                                            {todayAttendance.checkinTime} — {todayAttendance.checkoutTime}
+                                            {todayAttendance.checkinTime} â€” {todayAttendance.checkoutTime}
                                         </p>
                                     </div>
                                 </CardContent>
@@ -562,7 +552,7 @@ export default function AttendanceClient() {
                     </>
                 )}
 
-                {/* ── History Section ── */}
+                {/* â”€â”€ History Section â”€â”€ */}
                 <div className="pt-2">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-base font-semibold text-zinc-900">Riwayat Absensi</h2>
@@ -601,7 +591,7 @@ export default function AttendanceClient() {
                                                     <span className="text-sm font-semibold text-zinc-900">
                                                         {att.checkinTime || "--:--"}
                                                     </span>
-                                                    <span className="text-zinc-300">→</span>
+                                                    <span className="text-zinc-300">â†’</span>
                                                     <span className="text-sm font-semibold text-zinc-900">
                                                         {att.checkoutTime || "--:--"}
                                                     </span>
@@ -634,7 +624,7 @@ export default function AttendanceClient() {
                 </div>
             </div>
 
-            {/* ════════════ CHECK-IN MODAL ════════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â• CHECK-IN MODAL â•â•â•â•â•â•â•â•â•â•â•â• */}
             {showCheckInModal && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center">
                     <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 border border-zinc-200 shadow-xl">
@@ -864,8 +854,8 @@ export default function AttendanceClient() {
                                                             ? "text-amber-600" : "text-emerald-600"
                                                     )}>
                                                         {calculateDistance(location.lat, location.long, OFFICE_LAT, OFFICE_LONG) > OFFICE_RADIUS
-                                                            ? "⚠️ Di luar radius kantor"
-                                                            : "✅ Dalam radius kantor"}
+                                                            ? "âš ï¸ Di luar radius kantor"
+                                                            : "âœ… Dalam radius kantor"}
                                                     </p>
                                                 )}
                                             </div>
@@ -966,7 +956,7 @@ export default function AttendanceClient() {
                 </div>
             )}
 
-            {/* ════════════ CHECK-OUT MODAL ════════════ */}
+            {/* â•â•â•â•â•â•â•â•â•â•â•â• CHECK-OUT MODAL â•â•â•â•â•â•â•â•â•â•â•â• */}
             {showCheckOutModal && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center">
                     <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 border border-zinc-200 shadow-xl">

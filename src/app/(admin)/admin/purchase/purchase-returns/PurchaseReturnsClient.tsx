@@ -5,6 +5,7 @@ import { Inventory, locationsApi, Location, productsApi, Product, stockApi, Stoc
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ArrowRightLeft, Plus, RefreshCw } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function PurchaseReturnsClient() {
   const [view, setView] = useState<"list" | "form">("list")
@@ -116,11 +117,7 @@ export default function PurchaseReturnsClient() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

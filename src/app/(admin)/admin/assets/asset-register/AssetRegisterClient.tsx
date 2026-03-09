@@ -5,6 +5,7 @@ import { Asset, assetsApi, Location, locationsApi } from "@/lib/api"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Edit, Plus, RefreshCw, Trash2 } from "lucide-react"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function AssetRegisterClient() {
   const [view, setView] = useState<"list" | "form">("list")
@@ -141,11 +142,7 @@ export default function AssetRegisterClient() {
   }
 
   if (loading && view === "list") {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900" />
-      </div>
-    )
+    return <PageLoading />
   }
 
   return (

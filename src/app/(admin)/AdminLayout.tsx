@@ -6,6 +6,7 @@ import { useAuthStore } from "@/lib/store"
 import { AppSidebar } from "@/components/admin/AppSidebar"
 import { AdminHeader } from "@/components/admin/AdminHeader"
 import { FloatingBottomNav } from "@/components/ui/FloatingBottomNav"
+import { PageLoading } from "@/components/ui/page-loading"
 
 export default function AdminLayout({
   children,
@@ -37,11 +38,7 @@ export default function AdminLayout({
   }, [_hasHydrated, token, user, router])
 
   if (!_hasHydrated || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f1117]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/10 border-t-indigo-500" />
-      </div>
-    )
+    return <PageLoading fullScreen label="Memuat..." className="bg-slate-50" />
   }
 
   return (
