@@ -1,6 +1,7 @@
 package route
 
 import (
+	"hris_backend/app/asset"
 	"hris_backend/app/attendance"
 	"hris_backend/app/auth"
 	"hris_backend/app/category"
@@ -38,6 +39,7 @@ type RouteConfig struct {
 	UserHandler          user.UserHandler
 	ReportHandler        report.ReportHandler
 	StockHandler         stock.StockHandler
+	AssetHandler         asset.AssetHandler
 	LocationHandler      location.LocationHandler
 	SupplierHandler      supplier.SupplierHandler
 	PurchaseOrderHandler purchaseorder.PurchaseOrderHandler
@@ -93,6 +95,7 @@ func (c *RouteConfig) Setup() {
 	c.UserRoutes(protected)
 	c.ReportRoutes(protected)
 	c.StockRoutes(protected)
+	c.AssetRoutes(protected)
 	c.LocationRoutes(protected)
 	c.SupplierRoutes(protected)
 	c.PurchaseOrderRoutes(protected)
@@ -152,9 +155,11 @@ func (c *RouteConfig) CategoryRoutes(router fiber.Router) {
 
 func (c *RouteConfig) SaleRoutes(router fiber.Router) {
 	saleGroup := router.Group("/sales")
+	saleGroup.Get("/", c.SaleHandler.FindAll)
 	saleGroup.Post("/", c.SaleHandler.Create)
 	saleGroup.Get("/daily-report", c.SaleHandler.GetDailyReport)
 	saleGroup.Get("/:id", c.SaleHandler.GetByID)
+	saleGroup.Put("/:id/status", c.SaleHandler.UpdateStatus)
 	saleGroup.Post("/:id/pay-cash", c.SaleHandler.PayCash)
 	saleGroup.Post("/:id/pay-qris", c.SaleHandler.PayQRIS)
 	saleGroup.Post("/:id/pay-qris-static", c.SaleHandler.PayQRISStatic)
@@ -209,6 +214,32 @@ func (c *RouteConfig) StockRoutes(router fiber.Router) {
 
 	// Inventory can be viewed by all authenticated users
 	stockGroup.Get("/inventory", c.StockHandler.GetInventory)
+}
+
+func (c *RouteConfig) AssetRoutes(router fiber.Router) {
+	assetGroup := router.Group("/assets")
+	assetGroup.Get("/", c.AssetHandler.FindAllAssets)
+	assetGroup.Get("/:id", c.AssetHandler.FindAssetByID)
+	assetGroup.Post("/", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.CreateAsset)
+	assetGroup.Put("/:id", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.UpdateAsset)
+	assetGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.AssetHandler.DeleteAsset)
+
+	assignmentGroup := router.Group("/asset-assignments")
+	assignmentGroup.Get("/", c.AssetHandler.FindAllAssignments)
+	assignmentGroup.Post("/", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.CreateAssignment)
+	assignmentGroup.Put("/:id/return", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.ReturnAssignment)
+	assignmentGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.AssetHandler.DeleteAssignment)
+
+	maintenanceGroup := router.Group("/asset-maintenances")
+	maintenanceGroup.Get("/", c.AssetHandler.FindAllMaintenances)
+	maintenanceGroup.Post("/", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.CreateMaintenance)
+	maintenanceGroup.Put("/:id/status", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.UpdateMaintenanceStatus)
+	maintenanceGroup.Delete("/:id", middleware.RequireRole("OWNER"), c.AssetHandler.DeleteMaintenance)
+
+	depreciationGroup := router.Group("/asset-depreciations")
+	depreciationGroup.Get("/", c.AssetHandler.FindAllDepreciations)
+	depreciationGroup.Post("/generate", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.GenerateDepreciations)
+	depreciationGroup.Put("/:id/status", middleware.RequireRole("OWNER", "OPS", "MANAGER"), c.AssetHandler.UpdateDepreciationStatus)
 }
 
 func (c *RouteConfig) LocationRoutes(router fiber.Router) {

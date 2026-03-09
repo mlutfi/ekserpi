@@ -89,6 +89,8 @@ export interface Sale {
     id: string
     cashierId: string
     cashierName: string
+    locationId: string
+    locationName: string
     customerName?: string
     status: string
     total: number
@@ -246,6 +248,12 @@ export const categoriesApi = {
 
 // Sales API
 export const salesApi = {
+    getAll: async (status?: string): Promise<Sale[]> => {
+        const suffix = status ? `?status=${encodeURIComponent(status)}` : ''
+        const response = await api.get(`/sales${suffix}`)
+        return response.data.data ?? []
+    },
+
     create: async (locationId: string, items: { productId: string; qty: number }[], customerName?: string): Promise<Sale> => {
         const response = await api.post('/sales', { locationId, items, customerName })
         return response.data.data
@@ -253,6 +261,11 @@ export const salesApi = {
 
     getById: async (id: string): Promise<Sale> => {
         const response = await api.get(`/sales/${id}`)
+        return response.data.data
+    },
+
+    updateStatus: async (id: string, status: "CANCELLED"): Promise<Sale> => {
+        const response = await api.put(`/sales/${id}/status`, { status })
         return response.data.data
     },
 
@@ -501,9 +514,13 @@ export const locationsApi = {
 export interface Supplier {
     id: string
     name: string
+    contactName?: string
+    // Backward compatibility with existing frontend usage
     contactPerson?: string
     phone?: string
+    email?: string
     address?: string
+    isActive?: boolean
 }
 
 export const suppliersApi = {
@@ -655,5 +672,203 @@ export const stockOpnamesApi = {
     },
     delete: async (id: string): Promise<void> => {
         await api.delete(`/stock-opnames/${id}`)
+    },
+}
+
+// Assets API
+export interface Asset {
+    id: string
+    assetCode: string
+    name: string
+    category: string
+    purchaseDate: string
+    acquisitionCost: number
+    residualValue: number
+    usefulLifeMonths: number
+    depreciationMethod: string
+    status: "AVAILABLE" | "ASSIGNED" | "MAINTENANCE" | "DISPOSED"
+    locationId?: string | null
+    locationName?: string
+    note?: string | null
+    createdById: string
+    createdByName?: string
+    createdAt: string
+    currentBookValue: number
+}
+
+export interface CreateAssetRequest {
+    assetCode: string
+    name: string
+    category: string
+    purchaseDate: string
+    acquisitionCost: number
+    residualValue: number
+    usefulLifeMonths: number
+    locationId?: string
+    note?: string
+}
+
+export interface UpdateAssetRequest {
+    assetCode?: string
+    name?: string
+    category?: string
+    purchaseDate?: string
+    acquisitionCost?: number
+    residualValue?: number
+    usefulLifeMonths?: number
+    locationId?: string
+    status?: "AVAILABLE" | "ASSIGNED" | "MAINTENANCE" | "DISPOSED"
+    note?: string
+}
+
+export interface AssetAssignment {
+    id: string
+    assetId: string
+    assetCode: string
+    assetName: string
+    assigneeType: "USER" | "DEPARTMENT" | "LOCATION" | "OTHER"
+    assigneeRef?: string | null
+    assigneeName: string
+    assignedAt: string
+    returnedAt?: string | null
+    conditionOut?: string | null
+    conditionIn?: string | null
+    note?: string | null
+    status: "ACTIVE" | "RETURNED"
+    createdById: string
+    createdByName?: string
+    createdAt: string
+}
+
+export interface CreateAssetAssignmentRequest {
+    assetId: string
+    assigneeType: "USER" | "DEPARTMENT" | "LOCATION" | "OTHER"
+    assigneeRef?: string
+    assigneeName: string
+    assignedAt: string
+    conditionOut?: string
+    note?: string
+}
+
+export interface ReturnAssetAssignmentRequest {
+    returnedAt?: string
+    conditionIn?: string
+    note?: string
+}
+
+export interface AssetMaintenance {
+    id: string
+    assetId: string
+    assetCode: string
+    assetName: string
+    maintenanceDate: string
+    type: "PREVENTIVE" | "CORRECTIVE" | "INSPECTION"
+    vendor?: string | null
+    cost: number
+    description?: string | null
+    status: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED"
+    completedAt?: string | null
+    createdById: string
+    createdByName?: string
+    createdAt: string
+}
+
+export interface CreateAssetMaintenanceRequest {
+    assetId: string
+    maintenanceDate: string
+    type: "PREVENTIVE" | "CORRECTIVE" | "INSPECTION"
+    vendor?: string
+    cost: number
+    description?: string
+    status?: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED"
+}
+
+export interface AssetDepreciation {
+    id: string
+    assetId: string
+    assetCode: string
+    assetName: string
+    period: string
+    openingBookValue: number
+    depreciationValue: number
+    closingBookValue: number
+    status: "DRAFT" | "POSTED"
+    postedAt?: string | null
+    createdById: string
+    createdByName?: string
+    createdAt: string
+}
+
+export const assetsApi = {
+    getAll: async (): Promise<Asset[]> => {
+        const response = await api.get('/assets')
+        return response.data.data ?? []
+    },
+    getById: async (id: string): Promise<Asset> => {
+        const response = await api.get(`/assets/${id}`)
+        return response.data.data
+    },
+    create: async (data: CreateAssetRequest): Promise<Asset> => {
+        const response = await api.post('/assets', data)
+        return response.data.data
+    },
+    update: async (id: string, data: UpdateAssetRequest): Promise<Asset> => {
+        const response = await api.put(`/assets/${id}`, data)
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/assets/${id}`)
+    },
+}
+
+export const assetAssignmentsApi = {
+    getAll: async (): Promise<AssetAssignment[]> => {
+        const response = await api.get('/asset-assignments')
+        return response.data.data ?? []
+    },
+    create: async (data: CreateAssetAssignmentRequest): Promise<AssetAssignment> => {
+        const response = await api.post('/asset-assignments', data)
+        return response.data.data
+    },
+    returnAsset: async (id: string, data: ReturnAssetAssignmentRequest): Promise<AssetAssignment> => {
+        const response = await api.put(`/asset-assignments/${id}/return`, data)
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/asset-assignments/${id}`)
+    },
+}
+
+export const assetMaintenancesApi = {
+    getAll: async (): Promise<AssetMaintenance[]> => {
+        const response = await api.get('/asset-maintenances')
+        return response.data.data ?? []
+    },
+    create: async (data: CreateAssetMaintenanceRequest): Promise<AssetMaintenance> => {
+        const response = await api.post('/asset-maintenances', data)
+        return response.data.data
+    },
+    updateStatus: async (id: string, status: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED"): Promise<AssetMaintenance> => {
+        const response = await api.put(`/asset-maintenances/${id}/status`, { status })
+        return response.data.data
+    },
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/asset-maintenances/${id}`)
+    },
+}
+
+export const assetDepreciationsApi = {
+    getAll: async (period?: string): Promise<AssetDepreciation[]> => {
+        const suffix = period ? `?period=${encodeURIComponent(period)}` : ''
+        const response = await api.get(`/asset-depreciations${suffix}`)
+        return response.data.data ?? []
+    },
+    generate: async (period: string): Promise<AssetDepreciation[]> => {
+        const response = await api.post('/asset-depreciations/generate', { period })
+        return response.data.data ?? []
+    },
+    updateStatus: async (id: string, status: "DRAFT" | "POSTED"): Promise<AssetDepreciation> => {
+        const response = await api.put(`/asset-depreciations/${id}/status`, { status })
+        return response.data.data
     },
 }

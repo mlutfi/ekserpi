@@ -1,6 +1,7 @@
 package config
 
 import (
+	"hris_backend/app/asset"
 	"hris_backend/app/attendance"
 	"hris_backend/app/auth"
 	"hris_backend/app/category"
@@ -48,6 +49,7 @@ func Bootstrap(config *BootstrapConfig) {
 	userRepository := user.NewUserRepository(config.DB)
 	reportRepository := report.NewReportRepository(config.DB)
 	stockRepository := stock.NewStockRepository(config.DB)
+	assetRepository := asset.NewAssetRepository(config.DB)
 	settingRepository := setting.NewSettingRepository(config.DB)
 	locationRepository := location.NewLocationRepository(config.DB)
 	supplierRepository := supplier.NewSupplierRepository(config.DB)
@@ -72,6 +74,7 @@ func Bootstrap(config *BootstrapConfig) {
 	userUseCase := user.NewUserUseCase(config.DB, userRepository)
 	reportUseCase := report.NewReportUseCase(config.DB, reportRepository)
 	stockUseCase := stock.NewStockUseCase(config.DB, stockRepository)
+	assetUseCase := asset.NewAssetUseCase(config.DB, assetRepository)
 	settingUseCase := setting.NewSettingUseCase(settingRepository)
 	locationUseCase := location.NewLocationUseCase(locationRepository)
 	supplierUseCase := supplier.NewSupplierUseCase(supplierRepository)
@@ -96,6 +99,7 @@ func Bootstrap(config *BootstrapConfig) {
 	userHandler := user.NewUserHandler(userUseCase)
 	reportHandler := report.NewReportHandler(reportUseCase)
 	stockHandler := stock.NewStockHandler(stockUseCase)
+	assetHandler := asset.NewAssetHandler(assetUseCase)
 	settingHandler := setting.NewSettingHandler(settingUseCase, config.Validate)
 	locationHandler := location.NewLocationHandler(locationUseCase)
 	supplierHandler := supplier.NewSupplierHandler(supplierUseCase)
@@ -126,6 +130,7 @@ func Bootstrap(config *BootstrapConfig) {
 		UserHandler:          userHandler,
 		ReportHandler:        reportHandler,
 		StockHandler:         stockHandler,
+		AssetHandler:         assetHandler,
 		SettingHandler:       settingHandler,
 		LocationHandler:      locationHandler,
 		SupplierHandler:      supplierHandler,

@@ -22,7 +22,7 @@ export default function SuppliersClient() {
 
     const [formData, setFormData] = useState({
         name: "",
-        contactPerson: "",
+        contactName: "",
         phone: "",
         address: ""
     })
@@ -46,7 +46,7 @@ export default function SuppliersClient() {
 
     function openCreateModal() {
         setEditingSupplier(null)
-        setFormData({ name: "", contactPerson: "", phone: "", address: "" })
+        setFormData({ name: "", contactName: "", phone: "", address: "" })
         setShowModal(true)
     }
 
@@ -54,7 +54,7 @@ export default function SuppliersClient() {
         setEditingSupplier(supplier)
         setFormData({
             name: supplier.name,
-            contactPerson: supplier.contactPerson || "",
+            contactName: supplier.contactName || supplier.contactPerson || "",
             phone: supplier.phone || "",
             address: supplier.address || ""
         })
@@ -144,10 +144,10 @@ export default function SuppliersClient() {
                                     </h3>
 
                                     <div className="mt-2 space-y-1.5">
-                                        {supplier.contactPerson && (
+                                        {(supplier.contactName || supplier.contactPerson) && (
                                             <div className="flex items-center gap-1.5 text-xs text-zinc-600">
                                                 <UserRound className="h-3 w-3" />
-                                                <span className="truncate">{supplier.contactPerson}</span>
+                                                <span className="truncate">{supplier.contactName || supplier.contactPerson}</span>
                                             </div>
                                         )}
                                         {supplier.phone && (
@@ -227,8 +227,8 @@ export default function SuppliersClient() {
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.contactPerson}
-                                    onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                                    value={formData.contactName}
+                                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                                     className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
                                     placeholder="Contoh: Budi"
                                 />

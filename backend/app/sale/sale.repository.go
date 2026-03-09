@@ -11,6 +11,7 @@ import (
 
 type SaleRepository interface {
 	Create(ctx context.Context, sale *entity.Sale) error
+	FindAll(ctx context.Context, status string) ([]entity.Sale, error)
 	GetByID(ctx context.Context, id string) (*entity.Sale, error)
 	Update(ctx context.Context, sale *entity.Sale) error
 	CreatePayment(ctx context.Context, payment *entity.Payment) error
@@ -27,6 +28,22 @@ func NewSaleRepository(db *gorm.DB) SaleRepository {
 
 func (r *saleRepository) Create(ctx context.Context, sale *entity.Sale) error {
 	return r.DB.WithContext(ctx).Create(sale).Error
+}
+
+func (r *saleRepository) FindAll(ctx context.Context, status string) ([]entity.Sale, error) {
+	var sales []entity.Sale
+	query := r.DB.WithContext(ctx).
+		Preload("Cashier").
+		Preload("Location").
+		Preload("Items.Product").
+		Preload("Payments")
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	err := query.Order("created_at DESC").Find(&sales).Error
+	return sales, err
 }
 
 func (r *saleRepository) GetByID(ctx context.Context, id string) (*entity.Sale, error) {

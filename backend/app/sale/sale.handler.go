@@ -8,8 +8,10 @@ import (
 )
 
 type SaleHandler interface {
+	FindAll(ctx *fiber.Ctx) error
 	Create(ctx *fiber.Ctx) error
 	GetByID(ctx *fiber.Ctx) error
+	UpdateStatus(ctx *fiber.Ctx) error
 	PayCash(ctx *fiber.Ctx) error
 	PayQRIS(ctx *fiber.Ctx) error
 	PayQRISStatic(ctx *fiber.Ctx) error
@@ -26,6 +28,15 @@ type saleHandler struct {
 
 func NewSaleHandler(useCase SaleUseCase) SaleHandler {
 	return &saleHandler{UseCase: useCase}
+}
+
+func (h *saleHandler) FindAll(ctx *fiber.Ctx) error {
+	status := ctx.Query("status")
+	sales, err := h.UseCase.FindAll(ctx.Context(), status)
+	if err != nil {
+		return helper.InternalServerErrorResponse(ctx, err.Error())
+	}
+	return helper.SuccessResponse(ctx, sales)
 }
 
 func (h *saleHandler) Create(ctx *fiber.Ctx) error {
@@ -48,6 +59,21 @@ func (h *saleHandler) GetByID(ctx *fiber.Ctx) error {
 	if err != nil {
 		return helper.NotFoundResponse(ctx, "Sale not found")
 	}
+	return helper.SuccessResponse(ctx, sale)
+}
+
+func (h *saleHandler) UpdateStatus(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	request := new(UpdateSaleStatusRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return helper.BadRequestResponse(ctx, "Invalid request body")
+	}
+
+	sale, err := h.UseCase.UpdateStatus(ctx.Context(), id, request)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+
 	return helper.SuccessResponse(ctx, sale)
 }
 

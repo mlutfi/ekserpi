@@ -19,6 +19,10 @@ type PayTransferRequest struct {
 	BankDetails string `json:"bankDetails" validate:"required"`
 }
 
+type UpdateSaleStatusRequest struct {
+	Status string `json:"status" validate:"required,oneof=CANCELLED"`
+}
+
 type SaleItemResponse struct {
 	ID          string `json:"id"`
 	ProductID   string `json:"productId"`

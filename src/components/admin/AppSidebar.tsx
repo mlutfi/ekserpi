@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 
 export function AppSidebar() {
@@ -49,10 +49,30 @@ export function AppSidebar() {
     const isActive = (item: NavItem) => {
         if (item.href === "/admin") return pathname === "/admin"
         if (item.subItems) {
+            if (pathname === item.href || pathname.startsWith(item.href + "/")) {
+                return true
+            }
             return item.subItems.some(sub => pathname === sub.href || pathname.startsWith(sub.href + "/"))
         }
         return pathname === item.href || pathname.startsWith(item.href + "/")
     }
+
+    useEffect(() => {
+        const activeGroups = adminNavItems
+            .filter((item) => {
+                if (!item.subItems) return false
+                if (pathname === item.href || pathname.startsWith(item.href + "/")) return true
+                return item.subItems.some((sub) => pathname === sub.href || pathname.startsWith(sub.href + "/"))
+            })
+            .map((item) => item.href)
+
+        if (activeGroups.length === 0) return
+
+        setExpandedMenus((prev) => {
+            const merged = new Set([...prev, ...activeGroups])
+            return Array.from(merged)
+        })
+    }, [pathname])
 
     const initials = (name?: string) => {
         if (!name) return "U"

@@ -195,6 +195,10 @@ func main() {
 		&entity.StockTransferItem{},
 		&entity.StockOpname{},
 		&entity.StockOpnameItem{},
+		&entity.Asset{},
+		&entity.AssetAssignment{},
+		&entity.AssetMaintenance{},
+		&entity.AssetDepreciation{},
 		// HRIS Entities
 		&entity.Department{},
 		&entity.Position{},

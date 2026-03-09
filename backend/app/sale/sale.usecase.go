@@ -16,8 +16,10 @@ import (
 )
 
 type SaleUseCase interface {
+	FindAll(ctx context.Context, status string) ([]SaleResponse, error)
 	Create(ctx context.Context, cashierId string, request *CreateSaleRequest) (*SaleResponse, error)
 	GetByID(ctx context.Context, id string) (*SaleResponse, error)
+	UpdateStatus(ctx context.Context, id string, request *UpdateSaleStatusRequest) (*SaleResponse, error)
 	PayCash(ctx context.Context, id string, request *PayCashRequest) (*PaymentResponse, error)
 	PayQRIS(ctx context.Context, id string) (*PaymentResponse, error)
 	PayQRISStatic(ctx context.Context, id string) (*PaymentResponse, error)
@@ -56,6 +58,20 @@ func (u *saleUseCase) newMidtransClient() coreapi.Client {
 	c := coreapi.Client{}
 	c.New(serverKey, mtEnv)
 	return c
+}
+
+func (u *saleUseCase) FindAll(ctx context.Context, status string) ([]SaleResponse, error) {
+	sales, err := u.Repository.FindAll(ctx, status)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := make([]SaleResponse, 0, len(sales))
+	for _, sale := range sales {
+		responses = append(responses, *u.toResponse(&sale))
+	}
+
+	return responses, nil
 }
 
 func (u *saleUseCase) Create(ctx context.Context, cashierId string, request *CreateSaleRequest) (*SaleResponse, error) {
@@ -110,6 +126,33 @@ func (u *saleUseCase) GetByID(ctx context.Context, id string) (*SaleResponse, er
 	if err != nil {
 		return nil, err
 	}
+	return u.toResponse(sale), nil
+}
+
+func (u *saleUseCase) UpdateStatus(ctx context.Context, id string, request *UpdateSaleStatusRequest) (*SaleResponse, error) {
+	sale, err := u.Repository.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	targetStatus := entity.SaleStatus(request.Status)
+	if targetStatus != entity.SaleStatusCancelled {
+		return nil, errors.New("unsupported status update")
+	}
+
+	if sale.Status == entity.SaleStatusPaid {
+		return nil, errors.New("cannot cancel paid sale")
+	}
+
+	if sale.Status == entity.SaleStatusCancelled {
+		return u.toResponse(sale), nil
+	}
+
+	sale.Status = entity.SaleStatusCancelled
+	if err := u.Repository.Update(ctx, sale); err != nil {
+		return nil, err
+	}
+
 	return u.toResponse(sale), nil
 }
 

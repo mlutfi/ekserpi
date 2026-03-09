@@ -3,22 +3,15 @@
 import React, { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import {
-    LayoutDashboard,
-    Package,
-    Users,
-    Box,
-    Layers,
-    TrendingUp,
     PanelLeftClose,
     PanelLeftOpen,
-    Sparkles,
-    User as UserIcon,
     KeyRound,
     LogOut,
     Shield,
 } from "lucide-react"
 import { useSidebarState } from "@/lib/useSidebarState"
 import { useAuthStore } from "@/lib/store"
+import { adminNavItems } from "@/lib/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
     DropdownMenu,
@@ -32,15 +25,15 @@ import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal"
 import { TwoFactorSetupModal } from "@/components/auth/TwoFactorSetupModal"
 import { authApi } from "@/lib/api"
 
-const breadcrumbMap: Record<string, { label: string; icon: React.ElementType }> = {
-    "/admin": { label: "Dashboard", icon: LayoutDashboard },
-    "/admin/products": { label: "Produk", icon: Box },
-    "/admin/categories": { label: "Kategori", icon: Layers },
-    "/admin/stock": { label: "Stok", icon: Package },
-    "/admin/users": { label: "Pengguna", icon: Users },
-    "/admin/reports": { label: "Laporan", icon: TrendingUp },
-    "/admin/modules": { label: "Modul", icon: Sparkles },
-}
+const breadcrumbItems = adminNavItems.flatMap((item) => {
+    const parent = [{ path: item.href, label: item.label, icon: item.icon as React.ElementType }]
+    const children = (item.subItems ?? []).map((sub) => ({
+        path: sub.href,
+        label: `${item.label} / ${sub.label}`,
+        icon: sub.icon as React.ElementType,
+    }))
+    return [...parent, ...children]
+}).sort((a, b) => b.path.length - a.path.length)
 
 export function AdminHeader() {
     const pathname = usePathname()
@@ -50,13 +43,13 @@ export function AdminHeader() {
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
     const [is2faOpen, setIs2faOpen] = useState(false)
 
-    const currentPage = Object.entries(breadcrumbMap).find(([path]) => {
-        if (path === "/admin") return pathname === "/admin"
-        return pathname.startsWith(path)
+    const currentPage = breadcrumbItems.find((item) => {
+        if (item.path === "/admin") return pathname === "/admin"
+        return pathname === item.path || pathname.startsWith(item.path + "/")
     })
 
-    const Icon = currentPage?.[1].icon
-    const label = currentPage?.[1].label || "Admin"
+    const Icon = currentPage?.icon
+    const label = currentPage?.label || "Admin"
 
     const handleLogout = () => {
         logout()
