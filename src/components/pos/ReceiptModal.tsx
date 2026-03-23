@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { Printer, X, Store, Receipt } from "lucide-react"
+import { formatDateTime } from "@/lib/utils"
 
 interface ReceiptItem {
   name: string
@@ -197,7 +198,7 @@ export function ReceiptModal({ open, onClose, data }: ReceiptModalProps) {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Tanggal</span>
-                <span>{formatDate(data.createdAt)}</span>
+                <span>{formatDateTime(data.createdAt)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Kasir</span>

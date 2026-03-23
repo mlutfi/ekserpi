@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Plus, Eye, ArrowLeft, Trash2, Search, ClipboardCheck } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function StockOpnamesClient() {
     const [view, setView] = useState<"list" | "form" | "detail">("list")
@@ -186,7 +187,7 @@ export default function StockOpnamesClient() {
                                 )}
                             </div>
                             <div>
-                                <p className="text-xs text-zinc-400 mb-3">{new Date(o.createdAt).toLocaleDateString()}</p>
+                                <p className="text-xs text-zinc-400 mb-3">{formatDate(o.createdAt)}</p>
                                 <div className="flex justify-end pt-3 border-t border-zinc-100">
                                     <Button variant="outline" size="sm" className="w-full" onClick={() => { setSelectedOpname(o); setView("detail"); }}>
                                         <Eye className="w-3 h-3 mr-2" /> Detail Perhitungan

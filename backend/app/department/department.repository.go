@@ -27,7 +27,7 @@ func NewDepartmentRepository(db *gorm.DB) DepartmentRepository {
 
 func (r *departmentRepository) GetAll(ctx context.Context) ([]entity.Department, error) {
 	var departments []entity.Department
-	err := r.DB.WithContext(ctx).Find(&departments).Error
+	err := r.DB.WithContext(ctx).Order("created_at DESC").Find(&departments).Error
 	return departments, err
 }
 

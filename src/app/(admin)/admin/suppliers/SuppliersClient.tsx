@@ -11,7 +11,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog"
-import { Plus, Edit, Trash2, Truck, Phone, UserRound } from "lucide-react"
+import { Plus, Edit, Trash2, Truck, Phone, UserRound, Eye, MapPin } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
 
 export default function SuppliersClient() {
@@ -20,6 +20,8 @@ export default function SuppliersClient() {
     const [showModal, setShowModal] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
+    const [showDetailModal, setShowDetailModal] = useState(false)
+    const [viewingSupplier, setViewingSupplier] = useState<Supplier | null>(null)
 
     const [formData, setFormData] = useState({
         name: "",
@@ -60,6 +62,11 @@ export default function SuppliersClient() {
             address: supplier.address || ""
         })
         setShowModal(true)
+    }
+
+    function openDetailModal(supplier: Supplier) {
+        setViewingSupplier(supplier)
+        setShowDetailModal(true)
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -164,6 +171,9 @@ export default function SuppliersClient() {
                                 </div>
                             </div>
                             <div className="flex flex-col items-center gap-1 shrink-0 ml-2">
+                                <Button variant="ghost" size="icon" onClick={() => openDetailModal(supplier)} className="text-zinc-500 hover:text-zinc-600 hover:bg-zinc-50">
+                                    <Eye className="h-4 w-4" />
+                                </Button>
                                 <Button variant="ghost" size="icon" onClick={() => openEditModal(supplier)}>
                                     <Edit className="h-4 w-4" />
                                 </Button>
@@ -189,6 +199,68 @@ export default function SuppliersClient() {
                     </Button>
                 </div>
             )}
+
+            {/* Modal Detail */}
+            <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader className="mb-4 pb-3 border-b border-zinc-200">
+                        <DialogTitle>Detail Supplier</DialogTitle>
+                        <DialogDescription>
+                            Informasi lengkap data pemasok
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {viewingSupplier && (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-100 border border-zinc-200">
+                                    <Truck className="h-6 w-6 text-zinc-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-zinc-900 leading-tight">
+                                        {viewingSupplier.name}
+                                    </h3>
+                                    <p className="text-sm text-zinc-500">
+                                        ID: {viewingSupplier.id}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-4 py-2">
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Kontak Person</p>
+                                    <div className="flex items-center gap-2 text-zinc-700">
+                                        <UserRound className="h-4 w-4 text-zinc-400" />
+                                        <span className="text-sm">{viewingSupplier.contactName || viewingSupplier.contactPerson || "-"}</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Nomor Telepon</p>
+                                    <div className="flex items-center gap-2 text-zinc-700">
+                                        <Phone className="h-4 w-4 text-zinc-400" />
+                                        <span className="text-sm font-mono text-zinc-900">{viewingSupplier.phone || "-"}</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Alamat</p>
+                                    <div className="flex items-start gap-2 text-zinc-700">
+                                        <MapPin className="h-4 w-4 text-zinc-400 mt-0.5" />
+                                        <span className="text-sm leading-relaxed">{viewingSupplier.address || "-"}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex justify-end">
+                                <Button variant="outline" onClick={() => setShowDetailModal(false)}>
+                                    Tutup
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>

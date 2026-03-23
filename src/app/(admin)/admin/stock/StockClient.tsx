@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { formatDate } from "@/lib/utils"
 
 type TabType = 'INVENTORY' | 'STOCK_IN' | 'STOCK_OUT'
 
@@ -163,7 +164,7 @@ export default function StockManagementPage() {
                                                     <td className="px-5 py-4 font-medium text-zinc-900">{item.productName}</td>
                                                     <td className="px-5 py-4 text-zinc-600">{item.category || '-'}</td>
                                                     <td className="px-5 py-4 text-zinc-600 text-xs">{item.batchNumber || '-'}</td>
-                                                    <td className="px-5 py-4 text-zinc-600 text-sm">{item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('id-ID') : '-'}</td>
+                                                    <td className="px-5 py-4 text-zinc-600 text-sm">{formatDate(item.expiryDate)}</td>
                                                     <td className="px-5 py-4 text-right text-zinc-900 font-medium">
                                                         {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.avgCost || 0)}
                                                     </td>

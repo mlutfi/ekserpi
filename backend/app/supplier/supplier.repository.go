@@ -25,7 +25,7 @@ func NewSupplierRepository(db *gorm.DB) SupplierRepository {
 
 func (r *supplierRepository) FindAll(ctx context.Context) ([]entity.Supplier, error) {
 	var suppliers []entity.Supplier
-	err := r.DB.WithContext(ctx).Order("name ASC").Find(&suppliers).Error
+	err := r.DB.WithContext(ctx).Order("created_at DESC").Find(&suppliers).Error
 	return suppliers, err
 }
 

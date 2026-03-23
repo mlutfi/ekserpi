@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Plus, Eye, ArrowLeft, Trash2, Search, ArrowRightLeft } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function StockTransfersClient() {
     const [view, setView] = useState<"list" | "form" | "detail">("list")
@@ -209,7 +210,7 @@ export default function StockTransfersClient() {
                                     <span className="font-medium text-zinc-800">{t.destLocationName}</span>
                                 </div>
                             </div>
-                            <p className="text-xs text-zinc-400 mb-3">{new Date(t.createdAt).toLocaleDateString()}</p>
+                            <p className="text-xs text-zinc-400 mb-3">{formatDate(t.createdAt)}</p>
                             <div className="flex justify-end pt-3 border-t border-zinc-100">
                                 <Button variant="outline" size="sm" className="w-full" onClick={() => { setSelectedTransfer(t); setView("detail"); }}>
                                     <Eye className="w-3 h-3 mr-2" /> Detail

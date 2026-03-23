@@ -1,6 +1,9 @@
 package employee
 
-import "time"
+import (
+	"hris_backend/entity"
+	"time"
+)
 
 type EmployeeResponse struct {
 	ID             string  `json:"id"`
@@ -9,18 +12,23 @@ type EmployeeResponse struct {
 	Email          string  `json:"email"`
 	Phone          string  `json:"phone"`
 	Address        string  `json:"address"`
-	DepartmentID   *string `json:"departmentId"`
-	DepartmentName string  `json:"departmentName"`
-	PositionID     *string `json:"positionId"`
-	PositionName   string  `json:"positionName"`
-	JoinDate       string  `json:"joinDate"`
-	EmployeeType   string  `json:"employeeType"`
-	Status         string  `json:"status"`
-	Photo          string  `json:"photo"`
-	ManagerID      *string `json:"managerId"`
-	ManagerName    string  `json:"managerName"`
-	TeamLeaderID   *string `json:"teamLeaderId"`
-	TeamLeaderName string  `json:"teamLeaderName"`
+	DepartmentID   *string            `json:"departmentId"`
+	DepartmentName string             `json:"departmentName"`
+	Department     *entity.Department `json:"department"`
+	PositionID     *string            `json:"positionId"`
+	PositionName   string             `json:"positionName"`
+	Position       *entity.Position   `json:"position"`
+	JoinDate       string             `json:"joinDate"`
+	EmployeeType   string             `json:"employeeType"`
+	Status         string             `json:"status"`
+	Photo          string             `json:"photo"`
+	KTPPhoto       string             `json:"ktpPhoto"`
+	ManagerID      *string            `json:"managerId"`
+	ManagerName    string             `json:"managerName"`
+	Manager        *entity.User       `json:"manager"`
+	TeamLeaderID   *string            `json:"teamLeaderId"`
+	TeamLeaderName string             `json:"teamLeaderName"`
+	TeamLeader     *entity.User       `json:"teamLeader"`
 	BasicSalary    float64 `json:"basicSalary"`
 	Allowance      float64 `json:"allowance"`
 	DailyRate      float64 `json:"dailyRate"`
@@ -38,6 +46,7 @@ type CreateEmployeeRequest struct {
 	JoinDate     string  `json:"joinDate" validate:"required"`
 	EmployeeType string  `json:"employeeType"`
 	Photo        string  `json:"photo"`
+	KTPPhoto     string  `json:"ktpPhoto"`
 	ManagerID    *string `json:"managerId"`
 	TeamLeaderID *string `json:"teamLeaderId"`
 	BasicSalary  float64 `json:"basicSalary"`
@@ -56,6 +65,7 @@ type UpdateEmployeeRequest struct {
 	EmployeeType *string  `json:"employeeType,omitempty"`
 	Status       *string  `json:"status,omitempty"`
 	Photo        *string  `json:"photo,omitempty"`
+	KTPPhoto     *string  `json:"ktpPhoto,omitempty"`
 	ManagerID    *string  `json:"managerId,omitempty"`
 	TeamLeaderID *string  `json:"teamLeaderId,omitempty"`
 	BasicSalary  *float64 `json:"basicSalary,omitempty"`

@@ -6,14 +6,23 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CheckCircle2, ClipboardCheck, Eye, RefreshCw } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function GoodsReceiptsClient() {
-  const [view, setView] = useState<"list" | "detail">("list")
+  const [view, setView] = useState<"list" | "detail" | "adjust">("list")
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([])
-  const [stockIns, setStockIns] = useState<StockIn[]>([])
+   const [stockIns, setStockIns] = useState<StockIn[]>([])
+   const [stockOuts, setStockOuts] = useState<any[]>([])
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null)
+  const [adjustmentItems, setAdjustmentItems] = useState<{
+    productId: string;
+    productName: string;
+    qtyOrdered: number;
+    qtyReceived: number;
+    reason: string;
+  }[]>([])
 
   useEffect(() => {
     void fetchData()
@@ -22,9 +31,10 @@ export default function GoodsReceiptsClient() {
   async function fetchData() {
     setLoading(true)
     try {
-      const [poData, stockInData] = await Promise.all([
+      const [poData, stockInData, stockOutData] = await Promise.all([
         purchaseOrdersApi.getAll(),
         stockApi.getStockIns(1, 100),
+        stockApi.getStockOuts(1, 100),
       ])
 
       const candidatePOs = (poData ?? []).filter((po) =>
@@ -33,8 +43,22 @@ export default function GoodsReceiptsClient() {
 
       setPurchaseOrders(candidatePOs)
       setStockIns(stockInData.data ?? [])
+      setStockOuts(stockOutData.data ?? [])
     } catch (_error) {
-      toast.error("Gagal memuat data goods receipt")
+      toast.error("Gagal memuat data penerimaan barang")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleViewDetail(po: PurchaseOrder) {
+    setLoading(true)
+    try {
+      const fullPO = await purchaseOrdersApi.getById(po.id)
+      setSelectedPO(fullPO)
+      setView("detail")
+    } catch (_error) {
+      toast.error("Gagal memuat detail purchase order")
     } finally {
       setLoading(false)
     }
@@ -51,10 +75,83 @@ export default function GoodsReceiptsClient() {
       await purchaseOrdersApi.updateStatus(po.id, "COMPLETED")
       const updated = await purchaseOrdersApi.getById(po.id)
       setSelectedPO(updated)
-      toast.success("Goods receipt berhasil diproses")
+      toast.success("Penerimaan barang berhasil diproses")
       await fetchData()
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Gagal memproses goods receipt")
+      toast.error(error?.response?.data?.message || "Gagal memproses penerimaan barang")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function handleStartAdjustment(po: PurchaseOrder) {
+    const items = po.items.map(item => ({
+      productId: item.productId,
+      productName: item.productName || "",
+      qtyOrdered: item.qtyOrdered,
+      qtyReceived: item.qtyOrdered,
+      reason: ""
+    }))
+    setAdjustmentItems(items)
+    setSelectedPO(po)
+    setView("adjust")
+  }
+
+  function handleUpdateAdjustmentItem(index: number, field: "qtyReceived" | "reason", value: any) {
+    const newItems = [...adjustmentItems]
+    if (field === "qtyReceived") {
+      newItems[index].qtyReceived = Math.max(0, Math.min(newItems[index].qtyOrdered, Number(value) || 0))
+    } else {
+      newItems[index].reason = value
+    }
+    setAdjustmentItems(newItems)
+  }
+
+  async function handleSubmitAdjustment() {
+    if (!selectedPO) return
+
+    // Validate reasons
+    const missingReason = adjustmentItems.some(item => item.qtyReceived < item.qtyOrdered && !item.reason.trim())
+    if (missingReason) {
+      toast.error("Alasan wajib diisi untuk barang yang tidak diterima penuh")
+      return
+    }
+
+    const confirmed = confirm("Simpan penyesuaian penerimaan? Sistem akan otomatis mencatat retur untuk selisih barang.")
+    if (!confirmed) return
+
+    setSubmitting(true)
+    try {
+      // 1. Complete PO (triggers full receipt in backend)
+      await purchaseOrdersApi.updateStatus(selectedPO.id, "COMPLETED")
+      
+      // 2. Create Returns for missing items
+      const returnPromises = adjustmentItems
+        .filter(item => item.qtyReceived < item.qtyOrdered)
+        .map(item => {
+          const diff = item.qtyOrdered - item.qtyReceived
+          return stockApi.addStockOut({
+            productId: item.productId,
+            locationId: selectedPO.locationId,
+            qty: diff,
+            reason: "REFUND",
+            note: `Otomatis dari Penerimaan ${selectedPO.poNumber}. Alasan: ${item.reason}`
+          })
+        })
+
+      if (returnPromises.length > 0) {
+        await Promise.all(returnPromises)
+        toast.success(`Berhasil memproses penerimaan dan mencatat ${returnPromises.length} retur barang.`)
+      } else {
+        toast.success("Penerimaan barang berhasil diproses (Full Receipt)")
+      }
+
+      await fetchData()
+      const updated = await purchaseOrdersApi.getById(selectedPO.id)
+      setSelectedPO(updated)
+      setView("detail")
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Gagal menyimpan penyesuaian")
     } finally {
       setSubmitting(false)
     }
@@ -62,8 +159,16 @@ export default function GoodsReceiptsClient() {
 
   const selectedReceiptHistory = useMemo(() => {
     if (!selectedPO) return []
-    return stockIns.filter((stockIn) => stockIn.purchaseOrderId === selectedPO.id)
-  }, [stockIns, selectedPO])
+    const ins = stockIns
+      .filter((si) => si.purchaseOrderId === selectedPO.id)
+      .map(si => ({ ...si, historyType: 'IN' as const }));
+    
+    const outs = stockOuts
+      .filter((so) => so.reason === "REFUND" && so.note?.includes(selectedPO.poNumber))
+      .map(so => ({ ...so, historyType: 'OUT' as const }));
+
+    return [...ins, ...outs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  }, [stockIns, stockOuts, selectedPO])
 
   function getStatusStyle(status: string) {
     if (status === "DRAFT") return "bg-zinc-100 text-zinc-600 border-zinc-200"
@@ -80,7 +185,7 @@ export default function GoodsReceiptsClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Goods Receipt</h1>
+          <h1 className="text-2xl font-bold text-zinc-900">Penerimaan Barang</h1>
           <p className="text-sm text-zinc-500">
             {view === "list" && "Proses penerimaan barang dari purchase order"}
             {view === "detail" && `Penerimaan untuk ${selectedPO?.poNumber}`}
@@ -96,6 +201,12 @@ export default function GoodsReceiptsClient() {
             <Button variant="outline" onClick={() => setView("list")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Kembali
+            </Button>
+          )}
+          {view === "adjust" && (
+            <Button variant="outline" onClick={() => setView("detail")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Kembali ke Detail
             </Button>
           )}
         </div>
@@ -131,7 +242,7 @@ export default function GoodsReceiptsClient() {
                   <strong>Total:</strong> Rp {po.totalAmount.toLocaleString("id-ID")}
                 </p>
                 <p className="pt-1 text-xs text-zinc-400">
-                  {new Date(po.createdAt).toLocaleDateString("id-ID")}
+                  {formatDate(po.createdAt)}
                 </p>
               </div>
 
@@ -140,10 +251,7 @@ export default function GoodsReceiptsClient() {
                   variant="outline"
                   size="sm"
                   className="w-full"
-                  onClick={() => {
-                    setSelectedPO(po)
-                    setView("detail")
-                  }}
+                  onClick={() => handleViewDetail(po)}
                 >
                   <Eye className="mr-2 h-3 w-3" />
                   Detail
@@ -208,13 +316,25 @@ export default function GoodsReceiptsClient() {
                   Penerimaan sudah selesai diproses.
                 </div>
               ) : (
-                <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  disabled={submitting}
-                  onClick={() => void handleReceiveAll(selectedPO)}
-                >
-                  {submitting ? "Memproses..." : "Terima Semua Barang"}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    disabled={submitting}
+                    onClick={() => void handleReceiveAll(selectedPO)}
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    {submitting ? "Memproses..." : "Terima Semua"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={submitting}
+                    onClick={() => handleStartAdjustment(selectedPO)}
+                  >
+                    <ClipboardCheck className="mr-2 h-4 w-4" />
+                    Terima dg Penyesuaian
+                  </Button>
+                </div>
               )}
 
               <p className="mt-3 text-xs text-zinc-500">
@@ -234,33 +354,35 @@ export default function GoodsReceiptsClient() {
                     <th className="px-4 py-3">Produk</th>
                     <th className="px-4 py-3 text-right">Harga Beli</th>
                     <th className="px-4 py-3 text-center">Qty Order</th>
-                    <th className="px-4 py-3 text-center">Qty Received</th>
                     <th className="px-4 py-3 text-right">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {selectedPO.items.map((item, idx) => (
-                    <tr key={`${item.productId}-${idx}`} className="hover:bg-zinc-50">
-                      <td className="px-4 py-3 font-medium">{item.productName}</td>
-                      <td className="px-4 py-3 text-right">
-                        Rp {item.costPerUnit.toLocaleString("id-ID")}
-                      </td>
-                      <td className="px-4 py-3 text-center">{item.qtyOrdered}</td>
-                      <td className="px-4 py-3 text-center font-semibold text-emerald-700">
-                        {item.qtyReceived || 0}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        Rp {(item.subtotal || 0).toLocaleString("id-ID")}
-                      </td>
-                    </tr>
-                  ))}
+                  {selectedPO.items.map((item, idx) => {
+                    const netReceived = (item.qtyReceived || 0) - selectedReceiptHistory
+                      .filter(h => h.historyType === 'OUT' && h.productId === item.productId)
+                      .reduce((acc, curr) => acc + curr.qty, 0)
+
+                    return (
+                      <tr key={`${item.productId}-${idx}`} className="hover:bg-zinc-50">
+                        <td className="px-4 py-3 font-medium text-zinc-900">{item.productName}</td>
+                        <td className="px-4 py-3 text-right text-zinc-600">
+                          Rp {item.costPerUnit.toLocaleString("id-ID")}
+                        </td>
+                        <td className="px-4 py-3 text-center font-medium">{item.qtyOrdered}</td>
+                        <td className="px-4 py-3 text-right font-medium text-zinc-900">
+                          Rp {(item.qtyOrdered * item.costPerUnit).toLocaleString("id-ID")}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
 
             <div className="overflow-hidden rounded-lg border bg-white">
               <div className="border-b bg-zinc-50 p-4">
-                <h3 className="font-semibold text-zinc-900">Riwayat Goods Receipt</h3>
+                <h3 className="font-semibold text-zinc-900">Riwayat Penerimaan Barang</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
@@ -268,37 +390,122 @@ export default function GoodsReceiptsClient() {
                     <tr>
                       <th className="px-4 py-3">Tanggal</th>
                       <th className="px-4 py-3">Produk</th>
-                      <th className="px-4 py-3">Lokasi</th>
-                      <th className="px-4 py-3 text-right">Qty</th>
+                      <th className="px-4 py-3 text-center">Qty Order</th>
+                      <th className="px-4 py-3 text-right">Qty Receive</th>
                       <th className="px-4 py-3 text-right">Cost</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {selectedReceiptHistory.map((receipt) => (
-                      <tr key={receipt.id} className="hover:bg-zinc-50">
-                        <td className="px-4 py-3 text-zinc-500">
-                          {new Date(receipt.createdAt).toLocaleString("id-ID")}
-                        </td>
-                        <td className="px-4 py-3 font-medium">{receipt.productName}</td>
-                        <td className="px-4 py-3">{receipt.locationName || "-"}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-emerald-700">
-                          +{receipt.qty}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          Rp {receipt.costPerUnit.toLocaleString("id-ID")}
-                        </td>
-                      </tr>
-                    ))}
+                    {selectedReceiptHistory.map((receipt) => {
+                      const poItem = selectedPO.items.find(i => i.productId === receipt.productId)
+                      const qtyOrdered = poItem?.qtyOrdered || 0
+
+                      return (
+                        <tr key={receipt.id} className="hover:bg-zinc-50">
+                          <td className="px-4 py-3 text-zinc-500">
+                            {new Date(receipt.createdAt).toLocaleString("id-ID")}
+                          </td>
+                          <td className="px-4 py-3 font-medium text-zinc-900">{receipt.productName}</td>
+                          <td className="px-4 py-3 text-center text-zinc-600">{qtyOrdered}</td>
+                          <td className={`px-4 py-3 text-right font-bold ${receipt.historyType === 'IN' ? 'text-emerald-700' : 'text-red-600'}`}>
+                            {receipt.historyType === 'IN' ? (
+                              `+${receipt.qty}`
+                            ) : (
+                              <div className="flex flex-col items-end">
+                                <span>-{receipt.qty}</span>
+                                <span className="text-[10px] bg-red-100 px-1 rounded font-normal">Kurang {receipt.qty}</span>
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-right text-zinc-600">
+                            {receipt.historyType === 'IN' ? `Rp ${receipt.costPerUnit.toLocaleString("id-ID")}` : "-"}
+                          </td>
+                        </tr>
+                      )
+                    })}
 
                     {selectedReceiptHistory.length === 0 && (
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-zinc-500">
-                          Belum ada histori goods receipt untuk PO ini.
+                          Belum ada histori penerimaan barang untuk PO ini.
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {view === "adjust" && selectedPO && (
+        <div className="space-y-6">
+          <div className="rounded-lg border bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-bold text-zinc-900 border-b pb-2">
+              Penyesuaian Barang Diterima: {selectedPO.poNumber}
+            </h3>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b bg-zinc-50 text-xs uppercase text-zinc-500 font-semibold">
+                  <tr>
+                    <th className="px-4 py-3">Nama Produk</th>
+                    <th className="px-4 py-3 text-center w-24">Qty PO</th>
+                    <th className="px-4 py-3 text-center w-32">Diterima</th>
+                    <th className="px-4 py-3 text-center w-24">Selisih</th>
+                    <th className="px-4 py-3">Alasan (Jika bermasalah)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {adjustmentItems.map((item, idx) => (
+                    <tr key={item.productId} className={item.qtyReceived < item.qtyOrdered ? "bg-amber-50/50" : ""}>
+                      <td className="px-4 py-4 font-medium text-zinc-900">{item.productName}</td>
+                      <td className="px-4 py-4 text-center text-zinc-600">{item.qtyOrdered}</td>
+                      <td className="px-4 py-4 text-center">
+                        <input
+                          type="number"
+                          value={item.qtyReceived}
+                          onChange={(e) => handleUpdateAdjustmentItem(idx, "qtyReceived", e.target.value)}
+                          className="w-20 rounded border border-zinc-300 p-1 text-center font-bold focus:ring-2 focus:ring-zinc-100 outline-none"
+                        />
+                      </td>
+                      <td className="px-4 py-4 text-center font-bold text-red-600">
+                        {item.qtyOrdered - item.qtyReceived > 0 ? `-${item.qtyOrdered - item.qtyReceived}` : "-"}
+                      </td>
+                      <td className="px-4 py-4">
+                        {item.qtyReceived < item.qtyOrdered && (
+                          <input
+                            type="text"
+                            placeholder="Alasan (Wajib: Rusak/Kurang/dll)"
+                            value={item.reason}
+                            onChange={(e) => handleUpdateAdjustmentItem(idx, "reason", e.target.value)}
+                            className="w-full rounded border border-zinc-300 p-1 px-2 text-xs focus:ring-2 focus:ring-zinc-100 outline-none"
+                            required
+                          />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-8 flex items-center justify-between border-t pt-6 bg-zinc-50 -mx-6 -mb-6 p-6 rounded-b-lg">
+              <div className="text-sm text-zinc-500 italic max-w-md">
+                Barang yang tidak diterima akan otomatis dicatat sebagai retur pembelian (Purchase Return) untuk menyesuaikan nilai inventory dan hutang.
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setView("detail")} disabled={submitting}>
+                  Batal
+                </Button>
+                <Button 
+                  className="bg-zinc-900 hover:bg-zinc-800 text-white px-8" 
+                  onClick={handleSubmitAdjustment}
+                  disabled={submitting}
+                >
+                  {submitting ? "Memproses..." : "Simpan & Proses Penyesuaian"}
+                </Button>
               </div>
             </div>
           </div>

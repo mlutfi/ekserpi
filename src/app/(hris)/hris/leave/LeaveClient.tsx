@@ -18,7 +18,8 @@ import {
     AlertTriangle,
     User,
     Calendar,
-    Plane
+    Plane,
+    Eye
 } from "lucide-react"
 import {
     Table,
@@ -44,7 +45,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { PageLoading } from "@/components/ui/page-loading"
 
@@ -58,6 +59,7 @@ export default function LeaveClient() {
     const [employeeId, setEmployeeId] = useState<string>("")
     const [loading, setLoading] = useState(true)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [viewLeave, setViewLeave] = useState<LeaveRequest | null>(null)
     const [saving, setSaving] = useState(false)
 
     const [formData, setFormData] = useState({
@@ -332,6 +334,7 @@ export default function LeaveClient() {
                                     <TableHead className="font-semibold text-zinc-900">Hari</TableHead>
                                     <TableHead className="font-semibold text-zinc-900">Alasan</TableHead>
                                     <TableHead className="font-semibold text-zinc-900">Status</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900 text-right">Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -341,13 +344,18 @@ export default function LeaveClient() {
                                             <TableCell>{getLeaveTypeBadge(leave.leaveType)}</TableCell>
                                             <TableCell>
                                                 <div className="text-sm">
-                                                    <p className="font-medium text-zinc-900">{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
-                                                    <p className="text-zinc-500 text-xs mt-0.5">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
+                                                    <p className="font-medium text-zinc-900">{formatDate(leave.startDate)}</p>
+                                                    <p className="text-zinc-500 text-xs mt-0.5">s.d {formatDate(leave.endDate)}</p>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="font-medium text-zinc-900">{leave.days} hari</TableCell>
                                             <TableCell className="max-w-xs truncate text-zinc-600">{leave.reason}</TableCell>
                                             <TableCell>{getStatusBadge(leave.status)}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="sm" onClick={() => setViewLeave(leave)}>
+                                                    <Eye className="h-4 w-4 text-zinc-500" />
+                                                </Button>
+                                            </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
@@ -377,7 +385,7 @@ export default function LeaveClient() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
-                        {user?.role === "MANAGER" ? "Approval Cuti" : "Kelola Cuti"}
+                        {user?.role === "MANAGER" ? "Approval Cuti & Izin" : "Kelola Cuti & Izin"}
                     </h1>
                     <p className="text-sm text-zinc-500 mt-1">
                         {user?.role === "MANAGER" ? "Review request cuti dari tim" : "Kelola seluruh request cuti"}
@@ -452,7 +460,7 @@ export default function LeaveClient() {
                                     <TableHead className="font-semibold text-zinc-900">Tanggal</TableHead>
                                     <TableHead className="font-semibold text-zinc-900">Hari</TableHead>
                                     <TableHead className="font-semibold text-zinc-900">Alasan</TableHead>
-                                    <TableHead className="font-semibold text-zinc-900">Aksi</TableHead>
+                                    <TableHead className="font-semibold text-zinc-900 text-right">Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -469,14 +477,21 @@ export default function LeaveClient() {
                                         <TableCell>{getLeaveTypeBadge(leave.leaveType)}</TableCell>
                                         <TableCell>
                                             <div className="text-sm">
-                                                <p className="font-medium text-zinc-900">{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
-                                                <p className="text-zinc-500 text-xs mt-0.5">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
+                                                <p className="font-medium text-zinc-900">{formatDate(leave.startDate)}</p>
+                                                <p className="text-zinc-500 text-xs mt-0.5">s.d {formatDate(leave.endDate)}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium text-zinc-900">{leave.days} hari</TableCell>
                                         <TableCell className="max-w-xs truncate text-zinc-600">{leave.reason}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => setViewLeave(leave)}
+                                                >
+                                                    <Eye className="h-4 w-4 text-zinc-500" />
+                                                </Button>
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
@@ -518,6 +533,7 @@ export default function LeaveClient() {
                                 <TableHead className="font-semibold text-zinc-900">Tanggal</TableHead>
                                 <TableHead className="font-semibold text-zinc-900">Hari</TableHead>
                                 <TableHead className="font-semibold text-zinc-900">Status</TableHead>
+                                <TableHead className="font-semibold text-zinc-900 text-right">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -535,12 +551,17 @@ export default function LeaveClient() {
                                         <TableCell>{getLeaveTypeBadge(leave.leaveType)}</TableCell>
                                         <TableCell>
                                             <div className="text-sm">
-                                                <p className="font-medium text-zinc-900">{new Date(leave.startDate).toLocaleDateString("id-ID")}</p>
-                                                <p className="text-zinc-500 text-xs mt-0.5">s.d {new Date(leave.endDate).toLocaleDateString("id-ID")}</p>
+                                                <p className="font-medium text-zinc-900">{formatDate(leave.startDate)}</p>
+                                                <p className="text-zinc-500 text-xs mt-0.5">s.d {formatDate(leave.endDate)}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium text-zinc-900">{leave.days} hari</TableCell>
                                         <TableCell>{getStatusBadge(leave.status)}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="sm" onClick={() => setViewLeave(leave)}>
+                                                <Eye className="h-4 w-4 text-zinc-500" />
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
@@ -560,6 +581,50 @@ export default function LeaveClient() {
                     </Table>
                 </CardContent>
             </Card>
+            {/* View Dialog */}
+            <Dialog open={!!viewLeave} onOpenChange={(open) => !open && setViewLeave(null)}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
+                        <DialogTitle>Detail Pengajuan Cuti</DialogTitle>
+                    </DialogHeader>
+                    {viewLeave && (
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-3 gap-2 border-b border-zinc-100 pb-3">
+                                <span className="text-sm font-medium text-zinc-500">Pegawai</span>
+                                <span className="col-span-2 text-sm font-semibold text-zinc-900">{viewLeave.employee?.name || user?.name || "Pegawai"}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-zinc-100 pb-3">
+                                <span className="text-sm font-medium text-zinc-500">Jenis Cuti</span>
+                                <span className="col-span-2 text-sm font-semibold">{getLeaveTypeBadge(viewLeave.leaveType)}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-zinc-100 pb-3">
+                                <span className="text-sm font-medium text-zinc-500">Tanggal</span>
+                                <div className="col-span-2 text-sm font-semibold">
+                                    <p>{formatDate(viewLeave.startDate)} - {formatDate(viewLeave.endDate)}</p>
+                                    <p className="text-zinc-500 font-normal">({viewLeave.days} hari)</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-zinc-100 pb-3">
+                                <span className="text-sm font-medium text-zinc-500">Alasan</span>
+                                <span className="col-span-2 text-sm font-medium text-zinc-900">{viewLeave.reason}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 pb-1">
+                                <span className="text-sm font-medium text-zinc-500">Status</span>
+                                <span className="col-span-2 text-sm font-medium">{getStatusBadge(viewLeave.status)}</span>
+                            </div>
+                            {viewLeave.rejectionReason && (
+                                <div className="mt-2 p-3 rounded-lg bg-red-50 border border-red-100 flex gap-3">
+                                    <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-red-800">Alasan Penolakan:</p>
+                                        <p className="text-sm text-red-700">{viewLeave.rejectionReason}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, RefreshCw, Trash2 } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function MaintenanceClient() {
   const [view, setView] = useState<"list" | "form">("list")
@@ -263,7 +264,7 @@ export default function MaintenanceClient() {
                       <p className="font-mono text-xs text-zinc-500">{item.assetCode}</p>
                       <p className="font-medium text-zinc-900">{item.assetName}</p>
                     </td>
-                    <td className="px-4 py-3">{new Date(item.maintenanceDate).toLocaleDateString("id-ID")}</td>
+                    <td className="px-4 py-3">{formatDate(item.maintenanceDate)}</td>
                     <td className="px-4 py-3">{item.type}</td>
                     <td className="px-4 py-3">{item.vendor || "-"}</td>
                     <td className="px-4 py-3 text-right">Rp {item.cost.toLocaleString("id-ID")}</td>

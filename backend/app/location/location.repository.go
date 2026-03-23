@@ -25,7 +25,7 @@ func NewLocationRepository(db *gorm.DB) LocationRepository {
 
 func (r *locationRepository) FindAll(ctx context.Context) ([]entity.Location, error) {
 	var locations []entity.Location
-	err := r.DB.WithContext(ctx).Order("name ASC").Find(&locations).Error
+	err := r.DB.WithContext(ctx).Order("created_at DESC").Find(&locations).Error
 	return locations, err
 }
 

@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Plus, Eye, ShoppingCart, ArrowLeft, Trash2, Search, X } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function PurchaseOrdersClient() {
     const [view, setView] = useState<"list" | "form" | "detail">("list")
@@ -129,6 +130,19 @@ export default function PurchaseOrdersClient() {
         }
     }
 
+    async function handleViewDetail(po: PurchaseOrder) {
+        setLoading(true)
+        try {
+            const fullPO = await purchaseOrdersApi.getById(po.id)
+            setSelectedPO(fullPO)
+            setView("detail")
+        } catch (error) {
+            toast.error("Gagal memuat detail Purchase Order")
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku?.toLowerCase().includes(searchQuery.toLowerCase()))
 
     const addProductToOrder = (product: Product) => {
@@ -163,7 +177,7 @@ export default function PurchaseOrdersClient() {
     }
 
     if (loading && view === "list") {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     return (
@@ -178,12 +192,12 @@ export default function PurchaseOrdersClient() {
                     </p>
                 </div>
 
-                {view === "list" && (
+                {/* {view === "list" && (
                     <Button onClick={() => setView("form")}>
                         <Plus className="h-4 w-4 mr-2" />
                         Buat PO
                     </Button>
-                )}
+                )} */}
 
                 {view !== "list" && (
                     <Button variant="outline" onClick={() => setView("list")}>
@@ -211,10 +225,10 @@ export default function PurchaseOrdersClient() {
                                 <p><strong>Supplier:</strong> {po.supplierName}</p>
                                 <p><strong>Lokasi:</strong> {po.locationName}</p>
                                 <p><strong>Total:</strong> Rp {po.totalAmount.toLocaleString()}</p>
-                                <p className="text-xs text-zinc-400 mt-2">{new Date(po.createdAt).toLocaleDateString()}</p>
+                                <p className="text-xs text-zinc-400 mt-2">{formatDate(po.createdAt)}</p>
                             </div>
                             <div className="flex justify-end pt-3 border-t border-zinc-100 gap-2">
-                                <Button variant="outline" size="sm" className="w-full" onClick={() => { setSelectedPO(po); setView("detail"); }}>
+                                <Button variant="outline" size="sm" className="w-full" onClick={() => handleViewDetail(po)}>
                                     <Eye className="w-3 h-3 mr-2" /> Detail
                                 </Button>
                             </div>

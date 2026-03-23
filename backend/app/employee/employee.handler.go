@@ -19,6 +19,7 @@ type EmployeeHandler interface {
 	GetDashboardStats(ctx *fiber.Ctx) error
 	GetHRStats(ctx *fiber.Ctx) error
 	GetManagerStats(ctx *fiber.Ctx) error
+	UploadPhoto(ctx *fiber.Ctx) error
 }
 
 type employeeHandler struct {
@@ -159,4 +160,26 @@ func (h *employeeHandler) GetManagerStats(ctx *fiber.Ctx) error {
 		return helper.InternalServerErrorResponse(ctx, err.Error())
 	}
 	return helper.SuccessResponse(ctx, stats)
+}
+
+func (h *employeeHandler) UploadPhoto(ctx *fiber.Ctx) error {
+	file, err := ctx.FormFile("photo")
+	if err != nil {
+		return helper.BadRequestResponse(ctx, "Failed to get photo file from request")
+	}
+
+	_ = helper.CreateDirIfNotExists("./uploads/employees")
+
+	filename := helper.GenerateSafeFilename(file.Filename)
+	filePath := "./uploads/employees/" + filename
+
+	if err := ctx.SaveFile(file, filePath); err != nil {
+		return helper.InternalServerErrorResponse(ctx, "Failed to save photo file")
+	}
+
+	imageUrl := "/uploads/employees/" + filename
+
+	return helper.SuccessResponse(ctx, fiber.Map{
+		"imageUrl": imageUrl,
+	})
 }

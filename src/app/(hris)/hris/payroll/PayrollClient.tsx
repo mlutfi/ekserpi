@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/lib/store"
@@ -43,7 +43,7 @@ import {
     SelectValue
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { PageLoading } from "@/components/ui/page-loading"
 
@@ -687,7 +687,7 @@ export default function PayrollClient() {
                                         const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
                                         return (
                                             <SelectItem key={value} value={value}>
-                                                {date.toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                                                {formatDate(date)}
                                             </SelectItem>
                                         )
                                     })}

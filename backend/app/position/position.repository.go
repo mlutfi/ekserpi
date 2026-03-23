@@ -27,7 +27,7 @@ func NewPositionRepository(db *gorm.DB) PositionRepository {
 
 func (r *positionRepository) GetAll(ctx context.Context) ([]entity.Position, error) {
 	var positions []entity.Position
-	err := r.DB.WithContext(ctx).Find(&positions).Error
+	err := r.DB.WithContext(ctx).Order("created_at DESC").Find(&positions).Error
 	return positions, err
 }
 

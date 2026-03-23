@@ -28,7 +28,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (r *userRepository) GetAll(ctx context.Context) ([]entity.User, error) {
 	var users []entity.User
-	err := r.DB.WithContext(ctx).Find(&users).Error
+	err := r.DB.WithContext(ctx).Order("created_at DESC").Find(&users).Error
 	return users, err
 }
 

@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ClipboardList, Eye, Plus, Search, Trash2, X } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function PurchaseRequestsClient() {
   const router = useRouter()
@@ -142,6 +143,19 @@ export default function PurchaseRequestsClient() {
       await fetchRequests()
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Gagal memperbarui status")
+    }
+  }
+
+  async function handleViewDetail(request: PurchaseOrder) {
+    setLoading(true)
+    try {
+      const fullRequest = await purchaseOrdersApi.getById(request.id)
+      setSelectedRequest(fullRequest)
+      setView("detail")
+    } catch (_error) {
+      toast.error("Gagal memuat detail purchase request")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -274,7 +288,7 @@ export default function PurchaseRequestsClient() {
                   <strong>Total:</strong> Rp {request.totalAmount.toLocaleString("id-ID")}
                 </p>
                 <p className="pt-1 text-xs text-zinc-400">
-                  {new Date(request.createdAt).toLocaleDateString("id-ID")}
+                  {formatDate(request.createdAt)}
                 </p>
               </div>
 
@@ -283,10 +297,7 @@ export default function PurchaseRequestsClient() {
                   variant="outline"
                   size="sm"
                   className="w-full"
-                  onClick={() => {
-                    setSelectedRequest(request)
-                    setView("detail")
-                  }}
+                  onClick={() => handleViewDetail(request)}
                 >
                   <Eye className="mr-2 h-3 w-3" />
                   Detail

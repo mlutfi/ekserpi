@@ -31,7 +31,7 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 
 func (r *productRepository) GetAll(ctx context.Context) ([]entity.Product, error) {
 	var products []entity.Product
-	err := r.DB.WithContext(ctx).Preload("Category").Preload("Inventory").Where("is_active = ?", true).Find(&products).Error
+	err := r.DB.WithContext(ctx).Preload("Category").Preload("Inventory").Where("is_active = ?", true).Order("created_at DESC").Find(&products).Error
 	return products, err
 }
 

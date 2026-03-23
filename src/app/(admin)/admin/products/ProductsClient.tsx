@@ -73,7 +73,6 @@ export default function ProductsAdminPage() {
     sku: "",
     barcode: "",
     cost: "",
-    qtyOnHand: "",
     isActive: true,
     imageUrl: "",
   });
@@ -126,7 +125,6 @@ export default function ProductsAdminPage() {
       sku: "",
       barcode: "",
       cost: "",
-      qtyOnHand: "",
       isActive: true,
       imageUrl: "",
     });
@@ -144,7 +142,6 @@ export default function ProductsAdminPage() {
       sku: product.sku || "",
       barcode: product.barcode || "",
       cost: product.cost?.toString() || "",
-      qtyOnHand: product.qtyOnHand?.toString() || "",
       isActive: product.isActive,
       imageUrl: product.imageUrl || "",
     });
@@ -172,7 +169,6 @@ export default function ProductsAdminPage() {
         sku: formData.sku || undefined,
         barcode: formData.barcode || undefined,
         cost: formData.cost ? parseInt(formData.cost) : undefined,
-        qtyOnHand: formData.qtyOnHand ? parseInt(formData.qtyOnHand) : 0,
         isActive: formData.isActive,
         imageUrl: finalImageUrl || undefined,
       };
@@ -523,20 +519,7 @@ export default function ProductsAdminPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-700">
-                    Stok Awal
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.qtyOnHand}
-                    onChange={(e) =>
-                      setFormData({ ...formData, qtyOnHand: e.target.value })
-                    }
-                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
-                  />
-                </div>
+
 
                 <div className="flex items-center gap-2">
                   <input

@@ -17,6 +17,12 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -33,8 +39,11 @@ import {
     UserCircle,
     Filter,
     Download,
+    Eye,
+    MapPin,
+    Camera,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 
 // Role type for access control
@@ -46,6 +55,7 @@ export default function AttendanceReportClient() {
 
     const [activeTab, setActiveTab] = useState("my-attendance")
     const [loading, setLoading] = useState(true)
+    const [viewAttendance, setViewAttendance] = useState<Attendance | null>(null)
     const [myAttendance, setMyAttendance] = useState<Attendance[]>([])
     const [staffAttendance, setStaffAttendance] = useState<Attendance[]>([])
     const [myEmployee, setMyEmployee] = useState<Employee | null>(null)
@@ -407,6 +417,7 @@ export default function AttendanceReportClient() {
                                             <TableHead className="font-semibold text-zinc-900">Jam Kerja</TableHead>
                                             <TableHead className="font-semibold text-zinc-900">Mode</TableHead>
                                             <TableHead className="font-semibold text-zinc-900">Status</TableHead>
+                                            <TableHead className="font-semibold text-zinc-900 text-right">Aksi</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -421,12 +432,7 @@ export default function AttendanceReportClient() {
                                             filteredMyAttendance.map((att) => (
                                                 <TableRow key={att.id}>
                                                     <TableCell className="font-medium text-zinc-900">
-                                                        {new Date(att.date).toLocaleDateString("id-ID", {
-                                                            weekday: "long",
-                                                            year: "numeric",
-                                                            month: "long",
-                                                            day: "numeric",
-                                                        })}
+                                                        {formatDate(att.date)}
                                                     </TableCell>
                                                     <TableCell className="text-zinc-600">{att.checkinTime || "-"}</TableCell>
                                                     <TableCell className="text-zinc-600">{att.checkoutTime || "-"}</TableCell>
@@ -435,11 +441,16 @@ export default function AttendanceReportClient() {
                                                     </TableCell>
                                                     <TableCell>{getWorkTypeBadge(att.workType)}</TableCell>
                                                     <TableCell>{getStatusBadge(att.status)}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="ghost" size="sm" onClick={() => setViewAttendance(att)}>
+                                                            <Eye className="h-4 w-4 text-zinc-500" />
+                                                        </Button>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell colSpan={6} className="text-center py-12">
+                                                <TableCell colSpan={7} className="text-center py-12">
                                                     <div className="flex flex-col items-center gap-2">
                                                         <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center mb-1">
                                                             <Calendar className="h-5 w-5 text-zinc-400" />
@@ -542,12 +553,13 @@ export default function AttendanceReportClient() {
                                                 <TableHead className="font-semibold text-zinc-900">Jam Kerja</TableHead>
                                                 <TableHead className="font-semibold text-zinc-900">Mode</TableHead>
                                                 <TableHead className="font-semibold text-zinc-900">Status</TableHead>
+                                                <TableHead className="font-semibold text-zinc-900 text-right">Aksi</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {loading ? (
                                                 <TableRow>
-                                                    <TableCell colSpan={7} className="text-center py-12">
+                                                    <TableCell colSpan={8} className="text-center py-12">
                                                         <Loader2 className="h-6 w-6 animate-spin mx-auto text-zinc-400" />
                                                         <p className="text-sm font-medium text-zinc-500 mt-2">Memuat data...</p>
                                                     </TableCell>
@@ -556,12 +568,7 @@ export default function AttendanceReportClient() {
                                                 filteredStaffAttendance.map((att) => (
                                                     <TableRow key={att.id}>
                                                         <TableCell className="font-medium text-zinc-900">
-                                                            {new Date(att.date).toLocaleDateString("id-ID", {
-                                                                weekday: "long",
-                                                                year: "numeric",
-                                                                month: "long",
-                                                                day: "numeric",
-                                                            })}
+                                                            {formatDate(att.date)}
                                                         </TableCell>
                                                         <TableCell>
                                                             <div className="flex items-center gap-3">
@@ -578,11 +585,16 @@ export default function AttendanceReportClient() {
                                                         </TableCell>
                                                         <TableCell>{getWorkTypeBadge(att.workType)}</TableCell>
                                                         <TableCell>{getStatusBadge(att.status)}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button variant="ghost" size="sm" onClick={() => setViewAttendance(att)}>
+                                                                <Eye className="h-4 w-4 text-zinc-500" />
+                                                            </Button>
+                                                        </TableCell>
                                                     </TableRow>
                                                 ))
                                             ) : (
                                                 <TableRow>
-                                                    <TableCell colSpan={7} className="text-center py-12">
+                                                    <TableCell colSpan={8} className="text-center py-12">
                                                         <div className="flex flex-col items-center gap-2">
                                                             <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center mb-1">
                                                                 <Users className="h-5 w-5 text-zinc-400" />
@@ -600,6 +612,101 @@ export default function AttendanceReportClient() {
                     </TabsContent>
                 )}
             </Tabs>
+
+            {/* View Attendance Dialog */}
+            <Dialog open={!!viewAttendance} onOpenChange={(open) => !open && setViewAttendance(null)}>
+                <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+                    <DialogHeader className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50">
+                        <DialogTitle>Detail Absensi</DialogTitle>
+                    </DialogHeader>
+                    {viewAttendance && (
+                        <div className="p-6 max-h-[80vh] overflow-y-auto space-y-6">
+                            {/* Staff Info & Date */}
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200">
+                                        <User className="h-5 w-5 text-zinc-500" />
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-zinc-900">{viewAttendance.employee?.name || user?.name || "-"}</p>
+                                        <p className="text-sm text-zinc-500 flex items-center gap-1 mt-0.5">
+                                            <Calendar className="h-3.5 w-3.5" />
+                                            {formatDate(viewAttendance.date)}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    {getStatusBadge(viewAttendance.status)}
+                                    <div className="mt-1">
+                                        {getWorkTypeBadge(viewAttendance.workType)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Check In Details */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2">Check In</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Clock className="h-4 w-4 text-emerald-500" />
+                                            <span className="font-medium text-emerald-700">{viewAttendance.checkinTime || "-"}</span>
+                                        </div>
+                                        {viewAttendance.checkinPhoto && (
+                                            <div className="rounded-lg overflow-hidden border border-zinc-200 aspect-square">
+                                                <img src={viewAttendance.checkinPhoto} alt="Check In" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        {viewAttendance.checkinLat && viewAttendance.checkinLong && (
+                                            <a
+                                                href={`https://maps.google.com/?q=${viewAttendance.checkinLat},${viewAttendance.checkinLong}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-start gap-2 text-xs text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-md transition-colors"
+                                            >
+                                                <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                                                <span>{viewAttendance.checkinLat}, {viewAttendance.checkinLong}</span>
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Check Out Details */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2">Check Out</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Clock className="h-4 w-4 text-emerald-500" />
+                                            <span className="font-medium text-emerald-700">{viewAttendance.checkoutTime || "-"}</span>
+                                        </div>
+                                        {viewAttendance.checkoutPhoto ? (
+                                            <div className="rounded-lg overflow-hidden border border-zinc-200 aspect-square">
+                                                <img src={viewAttendance.checkoutPhoto} alt="Check Out" className="w-full h-full object-cover" />
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-zinc-400 bg-zinc-50 border border-zinc-100 rounded-lg aspect-square text-xs gap-1">
+                                                <Camera className="h-6 w-6" />
+                                                <span>Belum Check Out</span>
+                                            </div>
+                                        )}
+                                        {viewAttendance.checkoutLat && viewAttendance.checkoutLong && (
+                                            <a
+                                                href={`https://maps.google.com/?q=${viewAttendance.checkoutLat},${viewAttendance.checkoutLong}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-start gap-2 text-xs text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-md transition-colors"
+                                            >
+                                                <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                                                <span>{viewAttendance.checkoutLat}, {viewAttendance.checkoutLong}</span>
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

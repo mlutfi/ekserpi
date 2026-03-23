@@ -320,6 +320,7 @@ func (c *RouteConfig) EmployeeRoutes(router fiber.Router) {
 	empGroup.Get("/:id", c.EmployeeHandler.GetByID)
 	// Only OWNER and HR_ADMIN can create, update, delete employees
 	empGroup.Post("/", middleware.RequireRole("OWNER", "HR_ADMIN"), c.EmployeeHandler.Create)
+	empGroup.Post("/upload-photo", middleware.RequireRole("OWNER", "HR_ADMIN"), c.EmployeeHandler.UploadPhoto)
 	empGroup.Put("/:id", middleware.RequireRole("OWNER", "HR_ADMIN"), c.EmployeeHandler.Update)
 	empGroup.Delete("/:id", middleware.RequireRole("OWNER", "HR_ADMIN"), c.EmployeeHandler.Delete)
 }

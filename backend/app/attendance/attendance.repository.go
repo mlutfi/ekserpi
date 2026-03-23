@@ -106,6 +106,7 @@ func (r *attendanceRepository) GetTodayAttendance(ctx context.Context) ([]entity
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
 		Where("date = ?", startOfDay).
+		Order("created_at DESC").
 		Find(&attendances).Error
 	return attendances, err
 }
@@ -137,6 +138,7 @@ func (r *attendanceRepository) GetByDepartment(ctx context.Context, deptID strin
 		Preload("Employee").
 		Joins("JOIN users ON users.id = attendances.employee_id").
 		Where("users.department_id = ? AND attendances.date = ?", deptID, startOfDay).
+		Order("attendances.created_at DESC").
 		Find(&attendances).Error
 	return attendances, err
 }
@@ -148,6 +150,7 @@ func (r *attendanceRepository) GetLateEmployees(ctx context.Context, date time.T
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
 		Where("date = ? AND checkin_time > ?", startOfDay, threshold).
+		Order("created_at DESC").
 		Find(&attendances).Error
 	return attendances, err
 }

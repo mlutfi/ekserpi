@@ -206,6 +206,7 @@ func (u *employeeUseCase) Create(ctx context.Context, request *CreateEmployeeReq
 		EmployeeType:       employeeType,
 		Status:             entity.EmployeeStatusActive,
 		Photo:              request.Photo,
+		KTPPhoto:           request.KTPPhoto,
 		ManagerID:          request.ManagerID,
 		TeamLeaderID:       request.TeamLeaderID,
 		BasicSalary:        basicSalary,
@@ -264,6 +265,9 @@ func (u *employeeUseCase) Update(ctx context.Context, id string, request *Update
 	}
 	if request.Photo != nil {
 		employee.Photo = *request.Photo
+	}
+	if request.KTPPhoto != nil {
+		employee.KTPPhoto = *request.KTPPhoto
 	}
 	if request.ManagerID != nil {
 		employee.ManagerID = request.ManagerID
@@ -379,6 +383,7 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 		EmployeeType: string(entity.NormalizeEmployeeType(string(employee.EmployeeType))),
 		Status:       string(employee.Status),
 		Photo:        employee.Photo,
+		KTPPhoto:     employee.KTPPhoto,
 		BasicSalary:  employee.BasicSalary,
 		Allowance:    employee.Allowance,
 		DailyRate:    employee.DailyRate,
@@ -389,6 +394,7 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 		resp.DepartmentID = employee.DepartmentID
 		if employee.Department != nil {
 			resp.DepartmentName = employee.Department.Name
+			resp.Department = employee.Department
 		}
 	}
 
@@ -396,6 +402,7 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 		resp.PositionID = employee.PositionID
 		if employee.Position != nil {
 			resp.PositionName = employee.Position.Name
+			resp.Position = employee.Position
 		}
 	}
 
@@ -403,6 +410,7 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 		resp.ManagerID = employee.ManagerID
 		if employee.Manager != nil {
 			resp.ManagerName = employee.Manager.Name
+			resp.Manager = employee.Manager
 		}
 	}
 
@@ -410,6 +418,7 @@ func (u *employeeUseCase) toResponse(employee *entity.User) *EmployeeResponse {
 		resp.TeamLeaderID = employee.TeamLeaderID
 		if employee.TeamLeader != nil {
 			resp.TeamLeaderName = employee.TeamLeader.Name
+			resp.TeamLeader = employee.TeamLeader
 		}
 	}
 

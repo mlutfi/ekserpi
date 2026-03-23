@@ -128,7 +128,7 @@ export const adminNavItems: NavItem[] = [
             },
             {
                 href: "/admin/purchase/goods-receipts",
-                label: "Goods Receipt",
+                label: "Penerimaan Barang",
                 icon: Package,
             },
             {

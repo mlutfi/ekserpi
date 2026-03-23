@@ -46,6 +46,7 @@ func (r *employeeRepository) GetAll(ctx context.Context, page, limit int) ([]ent
 		Preload("Department").
 		Preload("Position").
 		Preload("Manager").
+		Order("created_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&employees).Error

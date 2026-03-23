@@ -82,6 +82,7 @@ type User struct {
 	EmployeeType     EmployeeType   `gorm:"column:employee_type;type:varchar(20);default:'KARYAWAN_TETAP'" json:"employeeType"`
 	Status           EmployeeStatus `gorm:"column:status;type:varchar(20);default:'ACTIVE'" json:"status"`
 	Photo            string         `gorm:"column:photo;type:varchar(500)" json:"photo"`
+	KTPPhoto         string         `gorm:"column:ktp_photo;type:varchar(500)" json:"ktpPhoto"`
 	ManagerID        *string        `gorm:"column:manager_id;type:varchar(255)" json:"managerId"`
 	BasicSalary      float64        `gorm:"column:basic_salary;type:decimal(15,2);default:0" json:"basicSalary"`
 	Allowance        float64        `gorm:"column:allowance;type:decimal(15,2);default:0" json:"allowance"`

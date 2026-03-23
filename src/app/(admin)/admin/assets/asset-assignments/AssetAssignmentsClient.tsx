@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
 import { PageLoading } from "@/components/ui/page-loading"
+import { formatDate } from "@/lib/utils"
 
 export default function AssetAssignmentsClient() {
   const [view, setView] = useState<"list" | "form">("list")
@@ -275,9 +276,9 @@ export default function AssetAssignmentsClient() {
                     </td>
                     <td className="px-4 py-3">{assignment.assigneeName}</td>
                     <td className="px-4 py-3">{assignment.assigneeType}</td>
-                    <td className="px-4 py-3">{new Date(assignment.assignedAt).toLocaleDateString("id-ID")}</td>
+                    <td className="px-4 py-3">{formatDate(assignment.assignedAt)}</td>
                     <td className="px-4 py-3">
-                      {assignment.returnedAt ? new Date(assignment.returnedAt).toLocaleDateString("id-ID") : "-"}
+                      {formatDate(assignment.returnedAt)}
                     </td>
                     <td className="px-4 py-3">
                       <span

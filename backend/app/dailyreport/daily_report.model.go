@@ -164,7 +164,7 @@ func (r *dailyReportRepository) GetPendingFiltered(ctx context.Context, userID, 
 		return []entity.DailyReport{}, nil
 	}
 
-	err := query.Order("daily_reports.created_at ASC").Find(&reports).Error
+	err := query.Order("daily_reports.created_at DESC").Find(&reports).Error
 	return reports, err
 }
 

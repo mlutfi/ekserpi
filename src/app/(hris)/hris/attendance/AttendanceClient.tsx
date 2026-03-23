@@ -29,7 +29,7 @@ import {
     Sunset,
     ArrowRight,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { PageLoading } from "@/components/ui/page-loading"
@@ -400,7 +400,7 @@ export default function AttendanceClient() {
     const GreetingIcon = greeting.icon
 
     if (loading) {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     return (
@@ -416,7 +416,7 @@ export default function AttendanceClient() {
                         </div>
                         <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{user?.name || "User"} 👋</h1>
                         <p className="text-zinc-500 text-sm">
-                            {currentTime.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                            {formatDate(currentTime)}
                         </p>
                     </div>
 
@@ -424,7 +424,7 @@ export default function AttendanceClient() {
                     <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-3 flex items-center gap-3">
                         <Clock className="h-5 w-5 text-zinc-500" />
                         <span className="text-xl md:text-2xl font-bold tracking-tight font-mono text-zinc-900">
-                            {currentTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                            {currentTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).replace(/\./g, ":")}
                         </span>
                     </div>
                 </div>
@@ -578,7 +578,7 @@ export default function AttendanceClient() {
                                             {/* Date */}
                                             <div className="h-12 w-12 rounded-lg bg-zinc-50 border border-zinc-100 flex flex-col items-center justify-center shrink-0">
                                                 <span className="text-[10px] font-medium text-zinc-500 leading-none uppercase mb-1">
-                                                    {dateObj.toLocaleDateString("id-ID", { weekday: "short" })}
+                                                    {formatDate(att.date)}
                                                 </span>
                                                 <span className="text-base font-bold text-zinc-900 leading-none">
                                                     {dateObj.getDate()}

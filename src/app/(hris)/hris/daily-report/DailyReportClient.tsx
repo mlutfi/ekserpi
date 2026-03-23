@@ -51,7 +51,7 @@ import {
     DialogFooter
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { PageLoading } from "@/components/ui/page-loading"
 
@@ -297,7 +297,7 @@ export default function DailyReportClient() {
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-4 w-4 text-slate-400" />
-                                                {new Date(report.date).toLocaleDateString("id-ID")}
+                                                {formatDate(report.date)}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -371,7 +371,7 @@ export default function DailyReportClient() {
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-slate-400" />
-                                            {new Date(report.date).toLocaleDateString("id-ID")}
+                                            {formatDate(report.date)}
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -604,7 +604,7 @@ export default function DailyReportClient() {
                                             <h2 className="text-lg font-semibold text-slate-800">Laporan Kerja Harian</h2>
                                             <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
                                                 <Calendar className="h-3.5 w-3.5" />
-                                                {new Date(viewReport.date).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                                                {formatDate(viewReport.date)}
                                             </p>
                                         </div>
                                     </div>

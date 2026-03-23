@@ -35,6 +35,7 @@ export interface Employee {
     employeeType?: 'FREELANCE_BURUH' | 'PKWT' | 'KARYAWAN_TETAP' | 'PKWTT' | 'HARIAN_LEPAS'
     status: 'ACTIVE' | 'INACTIVE' | 'RESIGNED' | 'active' | 'inactive'
     photo?: string
+    ktpPhoto?: string
     managerId?: string
     manager?: Employee
     teamLeaderId?: string
@@ -115,6 +116,7 @@ export interface LeaveRequest {
     approvedBy?: string
     approver?: Employee
     approvedAt?: string
+    rejectionReason?: string
     createdAt: string
 }
 
@@ -246,6 +248,18 @@ export const employeesApi = {
     getTeamLeaders: async (): Promise<Employee[]> => {
         const response = await api.get('/employees/team-leaders')
         return response.data.data ?? []
+    },
+
+    uploadPhoto: async (file: File): Promise<string> => {
+        const formData = new FormData()
+        formData.append('photo', file)
+
+        const response = await api.post('/employees/upload-photo', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+        return response.data.data.imageUrl
     },
 
 }

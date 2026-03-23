@@ -27,7 +27,7 @@ func NewCategoryRepository(db *gorm.DB) CategoryRepository {
 
 func (r *categoryRepository) GetAll(ctx context.Context) ([]entity.Category, error) {
 	var categories []entity.Category
-	err := r.DB.WithContext(ctx).Find(&categories).Error
+	err := r.DB.WithContext(ctx).Order("created_at DESC").Find(&categories).Error
 	return categories, err
 }
 

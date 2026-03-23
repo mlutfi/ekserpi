@@ -15,7 +15,7 @@ func NewViper() *viper.Viper {
 	}
 
 	config := viper.New()
-	config.SetDefault("app.name", "POS Backend API")
+	config.SetDefault("app.name", "XRP Backend API")
 	config.SetDefault("web.port", 4001)
 	config.SetDefault("web.prefork", false)
 	config.SetDefault("database.host", "localhost")
