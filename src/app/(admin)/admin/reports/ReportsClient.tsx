@@ -520,7 +520,7 @@ export default function ReportsAdminPage() {
                     {/* Sales Detail Modal */}
                     <Dialog open={!!selectedSale} onOpenChange={() => setSelectedSale(null)}>
                         <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden bg-white border-zinc-200">
-                            <DialogHeader>
+                            <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                                 <DialogTitle className="text-zinc-900">Detail Transaksi</DialogTitle>
                                 <DialogDescription className="font-mono text-zinc-500">
                                     {selectedSale?.id}

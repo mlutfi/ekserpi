@@ -370,7 +370,7 @@ export default function ProductsAdminPage() {
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
+          <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
             <DialogTitle>
               {editingProduct ? "Edit Produk" : "Tambah Produk"}
             </DialogTitle>

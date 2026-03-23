@@ -104,7 +104,7 @@ export default function LocationsClient() {
     }
 
     if (loading) {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     return (
@@ -192,7 +192,7 @@ export default function LocationsClient() {
             {/* Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
+                    <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                         <DialogTitle>
                             {editingLocation ? "Edit Lokasi" : "Tambah Lokasi"}
                         </DialogTitle>

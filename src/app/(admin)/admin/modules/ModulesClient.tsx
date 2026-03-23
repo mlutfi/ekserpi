@@ -16,6 +16,12 @@ interface Module {
 const AVAILABLE_MODULES = [
   { id: "HRIS", name: "HRIS", description: "Human Resources Information System - Manage employees, attendance, leave, payroll" },
   { id: "POS", name: "POS", description: "Point of Sale - Handle sales, products, inventory" },
+  { id: "SALES", name: "Sales", description: "Manage sales orders, POS, price lists, and returns" },
+  { id: "PURCHASE", name: "Purchase", description: "Manage suppliers, purchase requests, orders, and receipts" },
+  { id: "INVENTORY", name: "Inventory", description: "Manage items, warehouses, stock movements, and opnames" },
+  { id: "PRODUCTION", name: "Production", description: "Manage bill of materials, production orders, and reports" },
+  { id: "FINANCE", name: "Finance", description: "Manage invoices, payments, expenses, and journal entries" },
+  { id: "ASSETS", name: "Assets", description: "Manage asset register, assignment, maintenance, and depreciation" },
 ]
 
 export default function ModulesPage() {
@@ -42,14 +48,16 @@ export default function ModulesPage() {
         setActiveModules(modules)
       } else {
         // Default modules
-        setLocalActiveModules(["HRIS", "POS"])
-        setActiveModules(["HRIS", "POS"])
+        const defaultModules = ["HRIS", "POS", "SALES", "PURCHASE", "INVENTORY", "PRODUCTION", "FINANCE", "ASSETS"]
+        setLocalActiveModules(defaultModules)
+        setActiveModules(defaultModules)
       }
     } catch (error) {
       console.error("Failed to fetch modules:", error)
       // Default modules on error
-      setLocalActiveModules(["HRIS", "POS"])
-      setActiveModules(["HRIS", "POS"])
+      const defaultModules = ["HRIS", "POS", "SALES", "PURCHASE", "INVENTORY", "PRODUCTION", "FINANCE", "ASSETS"]
+      setLocalActiveModules(defaultModules)
+      setActiveModules(defaultModules)
     } finally {
       setLoading(false)
     }

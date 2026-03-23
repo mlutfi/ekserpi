@@ -1,4 +1,4 @@
-package entity
+package entity // x
 
 import (
 	"time"
@@ -23,7 +23,9 @@ type Payroll struct {
 	// Potongan / Deductions
 	LateDeduction   float64 `gorm:"column:late_deduction;type:decimal(15,2);default:0" json:"lateDeduction"`     // Potongan Terlambat
 	AbsentDeduction float64 `gorm:"column:absent_deduction;type:decimal(15,2);default:0" json:"absentDeduction"` // Potongan Absen
-	BPJS            float64 `gorm:"column:bpjs;type:decimal(15,2);default:0" json:"bpjs"`                        // BPJS Kesehatan
+	BPJS            float64 `gorm:"column:bpjs;type:decimal(15,2);default:0" json:"bpjs"`                        // Legacy: total BPJS employee
+	BPJSEmployee    float64 `gorm:"column:bpjs_employee;type:decimal(15,2);default:0" json:"bpjsEmployee"`       // BPJS (potongan karyawan)
+	BPJSEmployer    float64 `gorm:"column:bpjs_employer;type:decimal(15,2);default:0" json:"bpjsEmployer"`       // BPJS (ditanggung perusahaan)
 	THT             float64 `gorm:"column:tht;type:decimal(15,2);default:0" json:"tht"`                          // BPJS TK
 	Tax             float64 `gorm:"column:tax;type:decimal(15,2);default:0" json:"tax"`                          // PPH 21
 	OtherDeduction  float64 `gorm:"column:other_deduction;type:decimal(15,2);default:0" json:"otherDeduction"`   // Potongan Lain
@@ -39,6 +41,12 @@ type Payroll struct {
 	LateDays    int `gorm:"column:late_days;type:integer;default:0" json:"lateDays"`
 	AbsentDays  int `gorm:"column:absent_days;type:integer;default:0" json:"absentDays"`
 	LeaveDays   int `gorm:"column:leave_days;type:integer;default:0" json:"leaveDays"`
+
+	// Proration Metadata
+	IsProrated    bool    `gorm:"column:is_prorated;default:false" json:"isProrated"`
+	ProrateDays   int     `gorm:"column:prorate_days;type:integer;default:0" json:"prorateDays"`
+	PeriodDays    int     `gorm:"column:period_days;type:integer;default:0" json:"periodDays"`
+	ProrateFactor float64 `gorm:"column:prorate_factor;type:decimal(8,6);default:1" json:"prorateFactor"`
 
 	// Status
 	IsPaid bool       `gorm:"column:is_paid;default:false" json:"isPaid"`

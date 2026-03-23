@@ -96,8 +96,8 @@ func (r *leaveRepository) GetByManager(ctx context.Context, managerID string) ([
 	var leaves []entity.LeaveRequest
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
-		Joins("JOIN employees ON employees.id = leave_requests.employee_id").
-		Where("employees.manager_id = ?", managerID).
+		Joins("JOIN users ON users.id = leave_requests.employee_id").
+		Where("users.manager_id = ?", managerID).
 		Order("leave_requests.created_at DESC").
 		Find(&leaves).Error
 	return leaves, err

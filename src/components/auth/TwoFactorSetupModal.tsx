@@ -106,7 +106,7 @@ export function TwoFactorSetupModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+                <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                     <DialogTitle className="flex items-center gap-2">
                         <Shield className="h-5 w-5" />
                         2-Factor Authentication

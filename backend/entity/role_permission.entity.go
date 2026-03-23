@@ -132,25 +132,6 @@ func DefaultPermissionCodesByRole(role Role) []string {
 	switch role {
 	case RoleOwner:
 		return CatalogPermissionCodes()
-	case RoleOps:
-		return []string{
-			"dashboard:view",
-			"modules:view",
-			"users:view",
-			"roles:view",
-			"products:view", "products:create", "products:edit",
-			"categories:view", "categories:create", "categories:edit",
-			"sales:view", "sales:create", "sales:edit", "sales:pay",
-			"reports:view", "reports:export",
-			"stock:view", "stock:create",
-			"assets:view", "assets:create", "assets:edit", "assets:assign", "assets:maintain", "assets:depreciate",
-			"locations:view", "locations:create", "locations:edit",
-			"suppliers:view", "suppliers:create", "suppliers:edit",
-			"purchase_orders:view", "purchase_orders:create", "purchase_orders:edit",
-			"stock_transfers:view", "stock_transfers:create", "stock_transfers:edit",
-			"stock_opnames:view", "stock_opnames:create", "stock_opnames:edit",
-			"settings:view",
-		}
 	case RoleCashier:
 		return []string{
 			"dashboard:view",
@@ -174,16 +155,6 @@ func DefaultPermissionCodesByRole(role Role) []string {
 			"positions:view", "positions:create", "positions:edit", "positions:delete",
 			"reports:view", "reports:export",
 		}
-	case RoleManager:
-		return []string{
-			"dashboard:view",
-			"employees:view",
-			"attendance:view", "attendance:create", "attendance:approve",
-			"leave:view", "leave:create", "leave:approve",
-			"daily_report:view", "daily_report:create", "daily_report:approve",
-			"payroll:view",
-			"reports:view",
-		}
 	case RoleTeamLeader:
 		return []string{
 			"dashboard:view",
@@ -193,28 +164,13 @@ func DefaultPermissionCodesByRole(role Role) []string {
 			"payroll:view",
 			"reports:view",
 		}
-	case RoleEmployee, RoleStaff:
+	case RoleEmployee:
 		return []string{
 			"dashboard:view",
 			"attendance:view", "attendance:create",
 			"leave:view", "leave:create",
 			"daily_report:view", "daily_report:create",
 			"payroll:view",
-		}
-	case RoleBackend, RoleFrontend:
-		return []string{
-			"dashboard:view",
-			"modules:view",
-			"products:view", "categories:view",
-			"sales:view", "reports:view",
-			"stock:view",
-			"assets:view",
-			"locations:view",
-			"suppliers:view",
-			"purchase_orders:view",
-			"stock_transfers:view",
-			"stock_opnames:view",
-			"settings:view",
 		}
 	default:
 		return []string{"dashboard:view"}

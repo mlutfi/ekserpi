@@ -16,6 +16,7 @@ type JWTClaims struct {
 	Name         string   `json:"name"`
 	Permissions  []string `json:"permissions,omitempty"`
 	Is2FAPending bool     `json:"is2faPending"`
+	IsRefreshToken bool     `json:"isRefreshToken"`
 	jwt.RegisteredClaims
 }
 
@@ -43,6 +44,10 @@ func AuthMiddleware(config *viper.Viper) fiber.Handler {
 		}
 
 		if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
+			if claims.IsRefreshToken {
+				return helper.UnauthorizedResponse(c, "Refresh token cannot be used as an access token")
+			}
+
 			c.Locals("userId", claims.UserID)
 			c.Locals("email", claims.Email)
 			c.Locals("role", claims.Role)

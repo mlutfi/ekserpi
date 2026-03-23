@@ -16,13 +16,16 @@ type DailyReportResponse struct {
 	ID           string                    `json:"id"`
 	EmployeeID   string                    `json:"employeeId"`
 	EmployeeName string                    `json:"employeeName"`
+	Employee     *entity.User              `json:"employee,omitempty"`
 	Date         string                    `json:"date"`
 	Notes        string                    `json:"notes"`
 	Status       string                    `json:"status"`
-	ApprovedBy   *string                   `json:"approvedBy"`
-	ApprovedAt   *string                   `json:"approvedAt"`
-	CreatedAt    string                    `json:"createdAt"`
-	Items        []DailyReportItemResponse `json:"items"`
+	ApprovedBy      *string                   `json:"approvedBy"`
+	ApproverName    string                    `json:"approverName"`
+	ApprovedAt      *string                   `json:"approvedAt"`
+	RejectionReason string                    `json:"rejectionReason"`
+	CreatedAt       string                    `json:"createdAt"`
+	Items           []DailyReportItemResponse `json:"items"`
 }
 
 type DailyReportItemResponse struct {
@@ -56,6 +59,7 @@ type UpdateReportItemRequest struct {
 
 type ApproveReportRequest struct {
 	Status string `json:"status" validate:"required,oneof=APPROVED REJECTED"`
+	Reason string `json:"reason"`
 }
 
 type DailyReportRepository interface {
@@ -63,7 +67,7 @@ type DailyReportRepository interface {
 	GetByEmployee(ctx context.Context, employeeID string, date time.Time) (*entity.DailyReport, error)
 	GetByEmployeeRange(ctx context.Context, employeeID string, startDate, endDate time.Time) ([]entity.DailyReport, error)
 	GetByManager(ctx context.Context, managerID string, startDate, endDate time.Time) ([]entity.DailyReport, error)
-	GetPending(ctx context.Context) ([]entity.DailyReport, error)
+	GetPendingFiltered(ctx context.Context, userID, role string) ([]entity.DailyReport, error)
 	Create(ctx context.Context, report *entity.DailyReport) error
 	Update(ctx context.Context, report *entity.DailyReport) error
 	Delete(ctx context.Context, id string) error
@@ -87,6 +91,7 @@ func (r *dailyReportRepository) GetByID(ctx context.Context, id string) (*entity
 	report := new(entity.DailyReport)
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
+		Preload("Approver").
 		Preload("Items").
 		First(report, "id = ?", id).Error
 	if err != nil {
@@ -116,6 +121,8 @@ func (r *dailyReportRepository) GetByEmployee(ctx context.Context, employeeID st
 func (r *dailyReportRepository) GetByEmployeeRange(ctx context.Context, employeeID string, startDate, endDate time.Time) ([]entity.DailyReport, error) {
 	var reports []entity.DailyReport
 	err := r.DB.WithContext(ctx).
+		Preload("Employee").
+		Preload("Approver").
 		Preload("Items").
 		Where("employee_id = ? AND date >= ? AND date <= ?", employeeID, startDate, endDate).
 		Order("date DESC").
@@ -127,22 +134,37 @@ func (r *dailyReportRepository) GetByManager(ctx context.Context, managerID stri
 	var reports []entity.DailyReport
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
+		Preload("Approver").
 		Preload("Items").
-		Joins("JOIN employees ON employees.id = daily_reports.employee_id").
-		Where("employees.manager_id = ? AND daily_reports.date >= ? AND daily_reports.date <= ?", managerID, startDate, endDate).
+		Joins("JOIN users ON users.id = daily_reports.employee_id").
+		Where("users.manager_id = ? AND daily_reports.date >= ? AND daily_reports.date <= ?", managerID, startDate, endDate).
 		Order("daily_reports.date DESC").
 		Find(&reports).Error
 	return reports, err
 }
 
-func (r *dailyReportRepository) GetPending(ctx context.Context) ([]entity.DailyReport, error) {
+func (r *dailyReportRepository) GetPendingFiltered(ctx context.Context, userID, role string) ([]entity.DailyReport, error) {
 	var reports []entity.DailyReport
-	err := r.DB.WithContext(ctx).
+	query := r.DB.WithContext(ctx).
 		Preload("Employee").
+		Preload("Approver").
 		Preload("Items").
-		Where("status = ?", entity.DailyReportStatusPending).
-		Order("created_at ASC").
-		Find(&reports).Error
+		Joins("JOIN users AS employees ON employees.id = daily_reports.employee_id").
+		Where("daily_reports.status = ?", entity.DailyReportStatusPending)
+
+	if role == "OWNER" {
+		query = query.Where("employees.role IN ?", []string{"HR_ADMIN", "TEAM_LEADER", "MANAGER"})
+	} else if role == "HR_ADMIN" {
+		query = query.Where("employees.role IN ?", []string{"TEAM_LEADER", "MANAGER"})
+	} else if role == "MANAGER" {
+		query = query.Where("employees.role IN ?", []string{"TEAM_LEADER", "EMPLOYEE"})
+	} else if role == "TEAM_LEADER" {
+		query = query.Where("employees.manager_id = ?", userID)
+	} else {
+		return []entity.DailyReport{}, nil
+	}
+
+	err := query.Order("daily_reports.created_at ASC").Find(&reports).Error
 	return reports, err
 }
 
@@ -181,8 +203,9 @@ type DailyReportUseCase interface {
 	GetByEmployee(ctx context.Context, employeeID string, date string) (*DailyReportResponse, error)
 	GetMyReports(ctx context.Context, employeeID string, startDate, endDate string) ([]DailyReportResponse, error)
 	GetTeamReports(ctx context.Context, managerID string, startDate, endDate string) ([]DailyReportResponse, error)
-	GetPending(ctx context.Context) ([]DailyReportResponse, error)
+	GetPending(ctx context.Context, userID, role string) ([]DailyReportResponse, error)
 	Create(ctx context.Context, request *CreateDailyReportRequest) (*DailyReportResponse, error)
+	Update(ctx context.Context, id string, request *CreateDailyReportRequest) (*DailyReportResponse, error)
 	Approve(ctx context.Context, id string, approvedBy string, request *ApproveReportRequest) (*DailyReportResponse, error)
 }
 
@@ -222,7 +245,7 @@ func (u *dailyReportUseCase) GetByEmployee(ctx context.Context, employeeID strin
 func (u *dailyReportUseCase) GetMyReports(ctx context.Context, employeeID string, startDate, endDate string) ([]DailyReportResponse, error) {
 	start, _ := time.Parse("2006-01-02", startDate)
 	if startDate == "" {
-		start = time.Now().AddDate(0, 0, -30)
+		start = time.Now().AddDate(0, 0, -7)
 	}
 	end, _ := time.Parse("2006-01-02", endDate)
 	if endDate == "" {
@@ -263,8 +286,8 @@ func (u *dailyReportUseCase) GetTeamReports(ctx context.Context, managerID strin
 	return responses, nil
 }
 
-func (u *dailyReportUseCase) GetPending(ctx context.Context) ([]DailyReportResponse, error) {
-	reports, err := u.Repository.GetPending(ctx)
+func (u *dailyReportUseCase) GetPending(ctx context.Context, userID, role string) ([]DailyReportResponse, error) {
+	reports, err := u.Repository.GetPendingFiltered(ctx, userID, role)
 	if err != nil {
 		return nil, err
 	}
@@ -316,6 +339,48 @@ func (u *dailyReportUseCase) Create(ctx context.Context, request *CreateDailyRep
 	return u.toResponse(report), nil
 }
 
+func (u *dailyReportUseCase) Update(ctx context.Context, id string, request *CreateDailyReportRequest) (*DailyReportResponse, error) {
+	report, err := u.Repository.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if report.Status != entity.DailyReportStatusPending && report.Status != entity.DailyReportStatusRejected {
+		return nil, errors.New("report is not pending or rejected")
+	}
+
+	report.Date, _ = time.Parse("2006-01-02", request.Date)
+	report.Notes = request.Notes
+	report.Status = entity.DailyReportStatusPending
+	report.ApprovedBy = nil
+	report.ApprovedAt = nil
+	// We keep RejectionReason as "history" until it's either approved or rejected with a new reason
+
+	err = u.Repository.Update(ctx, report)
+	if err != nil {
+		return nil, err
+	}
+
+	// Delete old items and create new ones
+	items, _ := u.Repository.GetItemsByReportID(ctx, id)
+	for _, item := range items {
+		u.Repository.DeleteItem(ctx, item.ID)
+	}
+
+	for _, item := range request.Items {
+		reportItem := &entity.DailyReportItem{
+			ReportID:    report.ID,
+			Title:       item.Title,
+			Description: item.Description,
+			Progress:    item.Progress,
+			Status:      entity.TaskStatusPending,
+		}
+		u.Repository.CreateItem(ctx, reportItem)
+	}
+
+	report, _ = u.Repository.GetByID(ctx, id)
+	return u.toResponse(report), nil
+}
+
 func (u *dailyReportUseCase) Approve(ctx context.Context, id string, approvedBy string, request *ApproveReportRequest) (*DailyReportResponse, error) {
 	report, err := u.Repository.GetByID(ctx, id)
 	if err != nil {
@@ -330,6 +395,12 @@ func (u *dailyReportUseCase) Approve(ctx context.Context, id string, approvedBy 
 	report.ApprovedBy = &approvedBy
 	now := time.Now()
 	report.ApprovedAt = &now
+
+	if request.Status == string(entity.DailyReportStatusRejected) {
+		report.RejectionReason = request.Reason
+	} else {
+		report.RejectionReason = "" // Clear reason if approved
+	}
 
 	err = u.Repository.Update(ctx, report)
 	if err != nil {
@@ -346,13 +417,18 @@ func (u *dailyReportUseCase) toResponse(report *entity.DailyReport) *DailyReport
 		EmployeeID: report.EmployeeID,
 		Date:       report.Date.Format("2006-01-02"),
 		Notes:      report.Notes,
-		Status:     string(report.Status),
-		ApprovedBy: report.ApprovedBy,
-		CreatedAt:  report.CreatedAt.Format("2006-01-02 15:04:05"),
+		Status:          string(report.Status),
+		ApprovedBy:      report.ApprovedBy,
+		RejectionReason: report.RejectionReason,
+		CreatedAt:       report.CreatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	if report.Employee.Name != "" {
 		resp.EmployeeName = report.Employee.Name
+		resp.Employee = &report.Employee
+	}
+	if report.Approver != nil && report.Approver.Name != "" {
+		resp.ApproverName = report.Approver.Name
 	}
 	if report.ApprovedAt != nil {
 		approvedAt := report.ApprovedAt.Format("2006-01-02 15:04:05")
@@ -382,6 +458,7 @@ type DailyReportHandler interface {
 	GetTeamReports(ctx *fiber.Ctx) error
 	GetPending(ctx *fiber.Ctx) error
 	Create(ctx *fiber.Ctx) error
+	Update(ctx *fiber.Ctx) error
 	Approve(ctx *fiber.Ctx) error
 }
 
@@ -457,7 +534,18 @@ func (h *dailyReportHandler) GetTeamReports(ctx *fiber.Ctx) error {
 }
 
 func (h *dailyReportHandler) GetPending(ctx *fiber.Ctx) error {
-	reports, err := h.UseCase.GetPending(ctx.Context())
+	userID := ctx.Locals("userId")
+	userRole := ctx.Locals("role")
+	uid := ""
+	urole := ""
+	if userID != nil {
+		uid = userID.(string)
+	}
+	if userRole != nil {
+		urole = userRole.(string)
+	}
+
+	reports, err := h.UseCase.GetPending(ctx.Context(), uid, urole)
 	if err != nil {
 		return helper.InternalServerErrorResponse(ctx, err.Error())
 	}
@@ -475,6 +563,20 @@ func (h *dailyReportHandler) Create(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, err.Error())
 	}
 	return helper.CreatedResponse(ctx, report)
+}
+
+func (h *dailyReportHandler) Update(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	request := new(CreateDailyReportRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return helper.BadRequestResponse(ctx, "Invalid request body")
+	}
+
+	report, err := h.UseCase.Update(ctx.Context(), id, request)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+	return helper.SuccessResponse(ctx, report)
 }
 
 func (h *dailyReportHandler) Approve(ctx *fiber.Ctx) error {

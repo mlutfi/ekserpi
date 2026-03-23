@@ -74,7 +74,7 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
     return (
         <Dialog open={open} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+                <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                     <DialogTitle>Ganti Password</DialogTitle>
                     <DialogDescription>
                         Masukkan password lama Anda dan password baru yang Anda inginkan.

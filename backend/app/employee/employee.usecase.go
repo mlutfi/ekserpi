@@ -142,14 +142,6 @@ func (u *employeeUseCase) GetTeamLeaderOptions(ctx context.Context) ([]EmployeeR
 		responses = append(responses, *u.toResponse(&emp))
 	}
 
-	managers, err := u.Repository.GetByRole(ctx, "MANAGER")
-	if err != nil {
-		return nil, err
-	}
-	for _, emp := range managers {
-		responses = append(responses, *u.toResponse(&emp))
-	}
-
 	return responses, nil
 }
 
@@ -203,7 +195,7 @@ func (u *employeeUseCase) Create(ctx context.Context, request *CreateEmployeeReq
 		Name:               request.Name,
 		Email:              request.Email,
 		PasswordHash:       &hashedStr,
-		Role:               entity.RoleStaff, // Default role
+		Role:               entity.RoleEmployee, // Default role
 		MustChangePassword: true,
 		NIP:                &nipCopy,
 		Phone:              request.Phone,

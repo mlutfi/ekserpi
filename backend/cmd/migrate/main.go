@@ -446,7 +446,7 @@ func seedOwnerUser(db *gorm.DB) {
 		Email:              "admin@admin.com",
 		PasswordHash:       &hashedStr,
 		Role:               entity.RoleOwner,
-		MustChangePassword: true,
+		MustChangePassword: false,
 	}
 
 	if err := db.Create(&ownerUser).Error; err != nil {
@@ -544,8 +544,8 @@ func seedHRISData(db *gorm.DB) {
 
 	hrisSeeds := []hrisSeed{
 		{"Budi Santoso", "budi@hris.com", entity.RoleHRAdmin, "EMP001", hrDept.ID, hrManager.ID, -1, 15000000, 3000000},
-		{"Ani Wijaya", "ani@hris.com", entity.RoleManager, "EMP002", engDept.ID, engManager.ID, -1, 25000000, 5000000},
-		{"Joko Pramono", "joko@hris.com", entity.RoleManager, "EMP003", salesDept.ID, salesManager.ID, -1, 20000000, 4000000},
+		{"Ani Wijaya", "ani@hris.com", entity.RoleTeamLeader, "EMP002", engDept.ID, engManager.ID, -1, 25000000, 5000000},
+		{"Joko Pramono", "joko@hris.com", entity.RoleTeamLeader, "EMP003", salesDept.ID, salesManager.ID, -1, 20000000, 4000000},
 		{"Siti Rahayu", "siti@hris.com", entity.RoleEmployee, "EMP004", hrDept.ID, hrStaff.ID, 0, 8000000, 1500000},
 		{"Rudi Hermawan", "rudi@hris.com", entity.RoleEmployee, "EMP005", engDept.ID, seniorDev.ID, 1, 18000000, 3500000},
 		{"Dewi Lestari", "dewi@hris.com", entity.RoleEmployee, "EMP006", engDept.ID, midDev.ID, 1, 12000000, 2500000},
@@ -570,7 +570,7 @@ func seedHRISData(db *gorm.DB) {
 			Email:              s.email,
 			PasswordHash:       &hashedStr,
 			Role:               s.role,
-			MustChangePassword: true,
+			MustChangePassword: false,
 			NIP:                &nipCopy,
 			Phone:              fmt.Sprintf("08123456789%d", i),
 			DepartmentID:       &s.deptID,
@@ -655,7 +655,7 @@ func seedHRISData(db *gorm.DB) {
 		result := db.Where("employee_id = ? AND date = ?", emp.ID, todayDate).FirstOrCreate(&report, entity.DailyReport{
 			EmployeeID: emp.ID,
 			Date:       todayDate,
-			Notes:      "Daily work report for " + todayDate.Format("2006-01-02"),
+			Notes:      "",
 			Status:     entity.DailyReportStatusPending,
 		})
 

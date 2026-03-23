@@ -301,6 +301,11 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
+  [type='checkbox'],
+  [type='radio'] {
+    @apply focus:ring-1 focus:ring-offset-0;
+  }
+
   button {
     cursor: pointer;
   }

@@ -84,7 +84,11 @@ export interface DailyReport {
     employee?: Employee
     date: string
     notes?: string
-    status: 'draft' | 'submitted' | 'approved' | 'rejected'
+    status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'pending'
+    approvedBy?: string
+    approverName?: string
+    approvedAt?: string
+    rejectionReason?: string
     items?: DailyReportItem[]
     createdAt: string
 }
@@ -371,23 +375,38 @@ export const dailyReportApi = {
         return response.data.data ?? []
     },
 
-    getMyReports: async (): Promise<DailyReport[]> => {
-        const response = await api.get('/daily-report/my')
+    getMyReports: async (startDate?: string, endDate?: string): Promise<DailyReport[]> => {
+        const params = new URLSearchParams()
+        if (startDate) params.append('startDate', startDate)
+        if (endDate) params.append('endDate', endDate)
+        const response = await api.get(`/daily-report/my?${params.toString()}`)
         return response.data.data ?? []
     },
 
-    getTeamReports: async (managerId: string): Promise<DailyReport[]> => {
-        const response = await api.get(`/daily-report/team/${managerId}`)
+    getTeamReports: async (managerId: string, startDate?: string, endDate?: string): Promise<DailyReport[]> => {
+        const params = new URLSearchParams()
+        if (startDate) params.append('startDate', startDate)
+        if (endDate) params.append('endDate', endDate)
+        const response = await api.get(`/daily-report/team/${managerId}?${params.toString()}`)
         return response.data.data ?? []
     },
 
-    approve: async (id: string): Promise<DailyReport> => {
-        const response = await api.post(`/daily-report/${id}/approve`)
+    approve: async (id: string, approvedBy: string): Promise<DailyReport> => {
+        const response = await api.post(`/daily-report/${id}/approve/${approvedBy}`, { status: 'APPROVED' })
         return response.data.data
     },
 
-    reject: async (id: string, reason: string): Promise<DailyReport> => {
-        const response = await api.post(`/daily-report/${id}/reject`, { reason })
+    reject: async (id: string, approvedBy: string, reason?: string): Promise<DailyReport> => {
+        const response = await api.post(`/daily-report/${id}/reject/${approvedBy}`, { status: 'REJECTED', reason })
+        return response.data.data
+    },
+
+    update: async (id: string, data: {
+        date: string
+        notes?: string
+        items: { title: string; description?: string; progress: number; status: string }[]
+    }): Promise<DailyReport> => {
+        const response = await api.put(`/daily-report/${id}`, data)
         return response.data.data
     },
 }

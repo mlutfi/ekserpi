@@ -46,6 +46,7 @@ export function AppSidebar() {
     const canAccessItem = (item: NavItem) => {
         if (item.requiredRole && user?.role !== item.requiredRole) return false
         if (item.requiredPermission && !user?.permissions?.includes(item.requiredPermission)) return false
+        if (item.requiredModule && !activeModules.includes(item.requiredModule)) return false
         return true
     }
 
@@ -137,7 +138,7 @@ export function AppSidebar() {
         <TooltipProvider delayDuration={0}>
             <aside
                 className={cn(
-                    "flex h-screen flex-col bg-white border-r border-slate-100 shrink-0 shadow-[1px_0_12px_0_rgba(0,0,0,0.04)] transition-all duration-300 ease-in-out",
+                    "flex h-screen flex-col bg-white border-r border-slate-200 shrink-0 shadow-[1px_0_12px_0_rgba(0,0,0,0.04)] transition-all duration-300 ease-in-out",
                     collapsed ? "w-[68px]" : "w-64"
                 )}
             >
@@ -347,80 +348,80 @@ export function AppSidebar() {
                                                 {item.label}
                                             </TooltipContent>
                                         </Tooltip>
-                                ) : collapsed ? (
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Link
-                                                href={item.href}
-                                                className={cn(
-                                                    "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200 justify-center p-2",
-                                                    active
-                                                        ? `${item.activeBg} ${item.activeText}`
-                                                        : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
-                                                )}
+                                    ) : collapsed ? (
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Link
+                                                    href={item.href}
+                                                    className={cn(
+                                                        "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200 justify-center p-2",
+                                                        active
+                                                            ? `${item.activeBg} ${item.activeText}`
+                                                            : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
+                                                    )}
+                                                >
+                                                    <span className={cn(
+                                                        "flex items-center justify-center rounded-md shrink-0 transition-all duration-200 h-9 w-9",
+                                                        active ? item.activeIconBg : "bg-transparent"
+                                                    )}>
+                                                        <Icon className={cn(
+                                                            "h-4 w-4 transition-all",
+                                                            active ? "text-white" : item.iconColor
+                                                        )} />
+                                                    </span>
+                                                </Link>
+                                            </TooltipTrigger>
+                                            <TooltipContent
+                                                side="right"
+                                                align="start"
+                                                alignOffset={10}
+                                                sideOffset={5}
+                                                className="z-[90] border-zinc-800 bg-zinc-900 text-zinc-50 shadow-lg"
                                             >
-                                                <span className={cn(
-                                                    "flex items-center justify-center rounded-md shrink-0 transition-all duration-200 h-9 w-9",
-                                                    active ? item.activeIconBg : "bg-transparent"
-                                                )}>
-                                                    <Icon className={cn(
-                                                        "h-4 w-4 transition-all",
-                                                        active ? "text-white" : item.iconColor
-                                                    )} />
-                                                </span>
-                                            </Link>
-                                        </TooltipTrigger>
-                                        <TooltipContent
-                                            side="right"
-                                            align="start"
-                                            alignOffset={10}
-                                            sideOffset={5}
-                                            className="z-[90] border-zinc-800 bg-zinc-900 text-zinc-50 shadow-lg"
+                                                {item.label}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    ) : (
+                                        <Link
+                                            href={item.href}
+                                            className={cn(
+                                                "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200 px-3 py-2",
+                                                active
+                                                    ? `${item.activeBg} ${item.activeText}`
+                                                    : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
+                                            )}
                                         >
-                                            {item.label}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                ) : (
-                                    <Link
-                                        href={item.href}
-                                        className={cn(
-                                            "group relative flex items-center gap-3 rounded-md text-sm transition-all duration-200 px-3 py-2",
-                                            active
-                                                ? `${item.activeBg} ${item.activeText}`
-                                                : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
-                                        )}
-                                    >
-                                        {/* Active left border accent */}
-                                        {active && (
-                                            <span className={cn(
-                                                "absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full",
-                                                item.activeBorder
-                                            )} />
-                                        )}
-
-                                        <span className={cn(
-                                            "flex items-center justify-center rounded-md shrink-0 transition-all duration-200 h-6 w-6",
-                                            active ? item.activeIconBg : "bg-transparent"
-                                        )}>
-                                            <Icon className={cn(
-                                                "h-4 w-4 transition-all",
-                                                active ? "text-white" : item.iconColor
-                                            )} />
-                                        </span>
-
-                                        <>
-                                            <span className="flex-1 truncate">{item.label}</span>
-                                            {item.badge && (
-                                                <Badge className="bg-zinc-900 text-white rounded-full text-[10px] px-1.5 py-0 h-4 font-medium hover:bg-zinc-800">
-                                                    {item.badge}
-                                                </Badge>
-                                            )}
+                                            {/* Active left border accent */}
                                             {active && (
-                                                <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", item.iconColor)} />
+                                                <span className={cn(
+                                                    "absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-r-full",
+                                                    item.activeBorder
+                                                )} />
                                             )}
-                                        </>
-                                    </Link>
-                                )}
+
+                                            <span className={cn(
+                                                "flex items-center justify-center rounded-md shrink-0 transition-all duration-200 h-6 w-6",
+                                                active ? item.activeIconBg : "bg-transparent"
+                                            )}>
+                                                <Icon className={cn(
+                                                    "h-4 w-4 transition-all",
+                                                    active ? "text-white" : item.iconColor
+                                                )} />
+                                            </span>
+
+                                            <>
+                                                <span className="flex-1 truncate">{item.label}</span>
+                                                {item.badge && (
+                                                    <Badge className="bg-zinc-900 text-white rounded-full text-[10px] px-1.5 py-0 h-4 font-medium hover:bg-zinc-800">
+                                                        {item.badge}
+                                                    </Badge>
+                                                )}
+                                                {active && (
+                                                    <ChevronRight className={cn("h-3.5 w-3.5 shrink-0", item.iconColor)} />
+                                                )}
+                                            </>
+                                        </Link>
+                                    )}
                                 </div>
                             )
                         })}

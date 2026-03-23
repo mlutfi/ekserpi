@@ -11,6 +11,7 @@ import (
 type AuthHandler interface {
 	Login(ctx *fiber.Ctx) error
 	Verify2FALogin(ctx *fiber.Ctx) error
+	Refresh(ctx *fiber.Ctx) error
 	Logout(ctx *fiber.Ctx) error
 	Me(ctx *fiber.Ctx) error
 	ChangePassword(ctx *fiber.Ctx) error
@@ -34,15 +35,33 @@ func (h *authHandler) Login(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, "Invalid request body")
 	}
 
-	response, err := h.UseCase.Login(ctx.Context(), request)
+	response, refreshToken, err := h.UseCase.Login(ctx.Context(), request)
 	if err != nil {
 		return helper.ErrorResponse(ctx, fiber.StatusUnauthorized, err.Error())
+	}
+
+	if refreshToken != "" {
+		ctx.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    refreshToken,
+			HTTPOnly: true,
+			// Secure:   true, // Uncomment in production with HTTPS
+			MaxAge: 48 * 60 * 60, // 2 days in seconds
+			Path:   "/",
+		})
 	}
 
 	return helper.SuccessResponse(ctx, response)
 }
 
 func (h *authHandler) Logout(ctx *fiber.Ctx) error {
+	ctx.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		HTTPOnly: true,
+		MaxAge:   -1,
+		Path:     "/",
+	})
 	return helper.SuccessResponse(ctx, fiber.Map{"ok": true})
 }
 
@@ -107,9 +126,19 @@ func (h *authHandler) Verify2FALogin(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, "Invalid request body")
 	}
 
-	response, err := h.UseCase.Verify2FALogin(ctx.Context(), request)
+	response, refreshToken, err := h.UseCase.Verify2FALogin(ctx.Context(), request)
 	if err != nil {
 		return helper.ErrorResponse(ctx, fiber.StatusUnauthorized, err.Error())
+	}
+
+	if refreshToken != "" {
+		ctx.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    refreshToken,
+			HTTPOnly: true,
+			MaxAge:   48 * 60 * 60,
+			Path:     "/",
+		})
 	}
 
 	return helper.SuccessResponse(ctx, response)
@@ -148,6 +177,30 @@ func (h *authHandler) Disable2FA(ctx *fiber.Ctx) error {
 	}
 
 	return helper.SuccessResponseWithMessage(ctx, "2FA disabled successfully", nil)
+}
+
+func (h *authHandler) Refresh(ctx *fiber.Ctx) error {
+	refreshToken := ctx.Cookies("refresh_token")
+	if refreshToken == "" {
+		return helper.ErrorResponse(ctx, fiber.StatusUnauthorized, "Refresh token is missing")
+	}
+
+	response, newRefreshToken, err := h.UseCase.Refresh(ctx.Context(), refreshToken)
+	if err != nil {
+		return helper.ErrorResponse(ctx, fiber.StatusUnauthorized, err.Error())
+	}
+
+	if newRefreshToken != "" {
+		ctx.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    newRefreshToken,
+			HTTPOnly: true,
+			MaxAge:   48 * 60 * 60,
+			Path:     "/",
+		})
+	}
+
+	return helper.SuccessResponse(ctx, response)
 }
 
 // Helper function to convert *string to string

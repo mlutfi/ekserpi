@@ -46,6 +46,7 @@ export interface NavItem {
     badge: string | null
     requiredRole?: string
     requiredPermission?: string
+    requiredModule?: string
     subItems?: SubNavItem[]
 }
 
@@ -73,6 +74,7 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredModule: "SALES",
         subItems: [
             {
                 href: "/admin/sales/pos",
@@ -107,6 +109,7 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredModule: "PURCHASE",
         subItems: [
             {
                 href: "/admin/purchase/suppliers",
@@ -146,6 +149,7 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredModule: "INVENTORY",
         subItems: [
             {
                 href: "/admin/inventory/items",
@@ -195,6 +199,7 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredModule: "PRODUCTION",
         subItems: [
             {
                 href: "/admin/production/bill-of-materials",
@@ -229,6 +234,7 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredModule: "FINANCE",
         subItems: [
             {
                 href: "/admin/finance/invoices",
@@ -268,6 +274,7 @@ export const adminNavItems: NavItem[] = [
         activeBorder: "bg-zinc-900",
         activeText: "text-zinc-900 font-semibold",
         badge: null,
+        requiredModule: "ASSETS",
         subItems: [
             {
                 href: "/admin/assets/asset-register",

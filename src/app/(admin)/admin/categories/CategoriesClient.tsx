@@ -175,7 +175,7 @@ export default function CategoriesAdminPage() {
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
             <DialogTitle>
               {editingCategory ? "Edit Kategori" : "Tambah Kategori"}
             </DialogTitle>

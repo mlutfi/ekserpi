@@ -1,40 +1,30 @@
 // Role types for the application
 export type Role =
     | 'OWNER'
-    | 'OPS'
     | 'CASHIER'
     | 'HR_ADMIN'
-    | 'MANAGER'
     | 'TEAM_LEADER'
     | 'EMPLOYEE'
-    | 'STAFF'
-    | 'BACKEND'
-    | 'FRONTEND'
 
 // Role groups for easier access control
 export const RoleGroups = {
     // Admin roles (can access admin panel)
-    ADMIN: ['OWNER', 'OPS'],
+    ADMIN: ['OWNER'],
     // HRIS roles
-    HRIS: ['HR_ADMIN', 'MANAGER', 'TEAM_LEADER', 'EMPLOYEE', 'STAFF'],
+    HRIS: ['HR_ADMIN', 'TEAM_LEADER', 'EMPLOYEE'],
     // POS roles
-    POS: ['CASHIER', 'OWNER', 'OPS'],
+    POS: ['CASHIER', 'OWNER'],
     // Technical roles
-    TECHNICAL: ['BACKEND', 'FRONTEND', 'OWNER', 'OPS'],
+    TECHNICAL: ['OWNER'],
 } as const
 
 // Role labels for display
 export const RoleLabels: Record<Role, string> = {
     OWNER: 'Owner',
-    OPS: 'Operations',
     CASHIER: 'Cashier',
     HR_ADMIN: 'HR Admin',
-    MANAGER: 'Manager',
     TEAM_LEADER: 'Team Leader',
     EMPLOYEE: 'Employee',
-    STAFF: 'Staff',
-    BACKEND: 'Backend Developer',
-    FRONTEND: 'Frontend Developer',
 }
 
 // Check if user has any of the specified roles
@@ -53,19 +43,13 @@ export function hasRoleGroup(userRole: string | undefined, group: readonly strin
 export function getDefaultRoute(role: string): string {
     switch (role) {
         case 'OWNER':
-        case 'OPS':
             return '/admin'
         case 'CASHIER':
             return '/pos'
         case 'HR_ADMIN':
-        case 'MANAGER':
         case 'TEAM_LEADER':
         case 'EMPLOYEE':
-        case 'STAFF':
             return '/hris'
-        case 'BACKEND':
-        case 'FRONTEND':
-            return '/admin' // Technical roles go to admin panel
         default:
             return '/'
     }

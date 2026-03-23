@@ -161,7 +161,7 @@ export default function PositionsClient() {
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
-                        <DialogHeader>
+                        <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                             <DialogTitle>
                                 {editingPosition ? "Edit Posisi" : "Tambah Posisi"}
                             </DialogTitle>

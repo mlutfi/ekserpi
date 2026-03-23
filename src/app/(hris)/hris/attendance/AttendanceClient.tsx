@@ -414,7 +414,7 @@ export default function AttendanceClient() {
                             <GreetingIcon className="h-4 w-4 text-zinc-500" />
                             <span className="text-zinc-500 text-sm font-medium">{greeting.text}</span>
                         </div>
-                        <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{user?.name || "User"} ðŸ‘‹</h1>
+                        <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{user?.name || "User"} 👋</h1>
                         <p className="text-zinc-500 text-sm">
                             {currentTime.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                         </p>
@@ -541,9 +541,9 @@ export default function AttendanceClient() {
                                         <CheckCircle className="h-5 w-5 text-zinc-900" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-zinc-900">Absensi Selesai! âœ¨</p>
+                                        <p className="font-semibold text-zinc-900">Absensi Selesai! ✨</p>
                                         <p className="text-xs text-zinc-500 mt-1">
-                                            {todayAttendance.checkinTime} â€” {todayAttendance.checkoutTime}
+                                            {todayAttendance.checkinTime} — {todayAttendance.checkoutTime}
                                         </p>
                                     </div>
                                 </CardContent>
@@ -591,7 +591,7 @@ export default function AttendanceClient() {
                                                     <span className="text-sm font-semibold text-zinc-900">
                                                         {att.checkinTime || "--:--"}
                                                     </span>
-                                                    <span className="text-zinc-300">â†’</span>
+                                                    <span className="text-zinc-300">→</span>
                                                     <span className="text-sm font-semibold text-zinc-900">
                                                         {att.checkoutTime || "--:--"}
                                                     </span>
@@ -624,7 +624,7 @@ export default function AttendanceClient() {
                 </div>
             </div>
 
-            {/* â•â•â•â•â•â•â•â•â•â•â•â• CHECK-IN MODAL â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* ------------ CHECK-IN MODAL ------------ */}
             {showCheckInModal && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center">
                     <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 border border-zinc-200 shadow-xl">
@@ -854,8 +854,8 @@ export default function AttendanceClient() {
                                                             ? "text-amber-600" : "text-emerald-600"
                                                     )}>
                                                         {calculateDistance(location.lat, location.long, OFFICE_LAT, OFFICE_LONG) > OFFICE_RADIUS
-                                                            ? "âš ï¸ Di luar radius kantor"
-                                                            : "âœ… Dalam radius kantor"}
+                                                            ? "⚠️ Di luar radius kantor"
+                                                            : "✅ Dalam radius kantor"}
                                                     </p>
                                                 )}
                                             </div>
@@ -956,7 +956,7 @@ export default function AttendanceClient() {
                 </div>
             )}
 
-            {/* â•â•â•â•â•â•â•â•â•â•â•â• CHECK-OUT MODAL â•â•â•â•â•â•â•â•â•â•â•â• */}
+            {/* ------------ CHECK-OUT MODAL ------------ */}
             {showCheckOutModal && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center">
                     <div className="bg-white w-full md:max-w-lg md:rounded-2xl rounded-t-3xl max-h-[92vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300 border border-zinc-200 shadow-xl">

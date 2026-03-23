@@ -17,8 +17,9 @@ import (
 )
 
 type AuthUseCase interface {
-	Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error)
-	Verify2FALogin(ctx context.Context, request *Verify2FALoginRequest) (*LoginResponse, error)
+	Login(ctx context.Context, request *LoginRequest) (*LoginResponse, string, error)
+	Verify2FALogin(ctx context.Context, request *Verify2FALoginRequest) (*LoginResponse, string, error)
+	Refresh(ctx context.Context, refreshToken string) (*LoginResponse, string, error)
 	GetMe(ctx context.Context, userId string) (*UserResponse, error)
 	ChangePassword(ctx context.Context, userId string, request *ChangePasswordRequest) error
 	Generate2FASetup(ctx context.Context, userId string) (*Setup2FAResponse, error)
@@ -40,41 +41,41 @@ func NewAuthUseCase(db *gorm.DB, repository AuthRepository, config *viper.Viper)
 	}
 }
 
-// isHRISRole checks if the role requires an employee profile
 func isHRISRole(role string) bool {
 	switch role {
-	case string(entity.RoleOwner), string(entity.RoleHRAdmin), string(entity.RoleManager),
-		string(entity.RoleTeamLeader), string(entity.RoleEmployee), string(entity.RoleStaff):
+	case string(entity.RoleOwner), string(entity.RoleHRAdmin),
+		string(entity.RoleTeamLeader), string(entity.RoleEmployee):
 		return true
 	}
 	return false
 }
 
-func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error) {
+func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginResponse, string, error) {
 	user, err := u.Repository.FindByEmail(ctx, request.Email)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, "", errors.New("invalid email or password")
 	}
 
 	if user.PasswordHash == nil {
-		return nil, errors.New("user has no password set")
+		return nil, "", errors.New("user has no password set")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(*user.PasswordHash), []byte(request.Password))
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, "", errors.New("invalid email or password")
 	}
 
 	permissions, err := u.getPermissionsByRole(ctx, user.Role)
 	if err != nil {
-		return nil, errors.New("failed to load role permissions")
+		return nil, "", errors.New("failed to load role permissions")
 	}
 
 	if user.TwoFactorEnabled {
 		token, err := u.generateToken(user, permissions, true)
 		if err != nil {
-			return nil, errors.New("failed to generate 2fa token")
+			return nil, "", errors.New("failed to generate 2fa token")
 		}
+
 		return &LoginResponse{
 			TwoFactorRequired: true,
 			TwoFactorToken:    token,
@@ -87,12 +88,17 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 				MustChangePassword: user.MustChangePassword,
 				TwoFactorEnabled:   user.TwoFactorEnabled,
 			},
-		}, nil
+		}, "", nil
 	}
 
 	token, err := u.generateToken(user, permissions, false)
 	if err != nil {
-		return nil, errors.New("failed to generate token")
+		return nil, "", errors.New("failed to generate token")
+	}
+
+	refreshToken, err := u.generateRefreshToken(user)
+	if err != nil {
+		return nil, "", errors.New("failed to generate refresh token")
 	}
 
 	response := &LoginResponse{
@@ -137,41 +143,46 @@ func (u *authUseCase) Login(ctx context.Context, request *LoginRequest) (*LoginR
 		}
 	}
 
-	return response, nil
+	return response, refreshToken, nil
 }
 
-func (u *authUseCase) Verify2FALogin(ctx context.Context, request *Verify2FALoginRequest) (*LoginResponse, error) {
+func (u *authUseCase) Verify2FALogin(ctx context.Context, request *Verify2FALoginRequest) (*LoginResponse, string, error) {
 	secret := u.Config.GetString("jwt.secret")
 	token, err := jwt.ParseWithClaims(request.TwoFactorToken, &middleware.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
 
 	if err != nil || !token.Valid {
-		return nil, errors.New("invalid or expired 2fa token")
+		return nil, "", errors.New("invalid or expired 2fa token")
 	}
 
 	claims, ok := token.Claims.(*middleware.JWTClaims)
 	if !ok || !claims.Is2FAPending {
-		return nil, errors.New("invalid token claims")
+		return nil, "", errors.New("invalid token claims")
 	}
 
 	user, err := u.Repository.FindByID(ctx, claims.UserID)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return nil, "", errors.New("user not found")
 	}
 
 	if !totp.Validate(request.Code, user.TwoFactorSecret) {
-		return nil, errors.New("invalid 2fa code")
+		return nil, "", errors.New("invalid 2fa code")
 	}
 
 	permissions, err := u.getPermissionsByRole(ctx, user.Role)
 	if err != nil {
-		return nil, errors.New("failed to load role permissions")
+		return nil, "", errors.New("failed to load role permissions")
 	}
 
 	newToken, err := u.generateToken(user, permissions, false)
 	if err != nil {
-		return nil, errors.New("failed to generate token")
+		return nil, "", errors.New("failed to generate token")
+	}
+
+	refreshToken, err := u.generateRefreshToken(user)
+	if err != nil {
+		return nil, "", errors.New("failed to generate refresh token")
 	}
 
 	return &LoginResponse{
@@ -185,7 +196,7 @@ func (u *authUseCase) Verify2FALogin(ctx context.Context, request *Verify2FALogi
 			MustChangePassword: user.MustChangePassword,
 			TwoFactorEnabled:   user.TwoFactorEnabled,
 		},
-	}, nil
+	}, refreshToken, nil
 }
 
 func (u *authUseCase) Generate2FASetup(ctx context.Context, userId string) (*Setup2FAResponse, error) {
@@ -281,6 +292,87 @@ func (u *authUseCase) ChangePassword(ctx context.Context, userId string, request
 	return u.Repository.UpdatePassword(ctx, userId, string(hashedPassword))
 }
 
+func (u *authUseCase) Refresh(ctx context.Context, refreshToken string) (*LoginResponse, string, error) {
+	secret := u.Config.GetString("jwt.secret")
+
+	token, err := jwt.ParseWithClaims(refreshToken, &middleware.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, "", errors.New("invalid or expired refresh token")
+	}
+
+	claims, ok := token.Claims.(*middleware.JWTClaims)
+	if !ok || !claims.IsRefreshToken {
+		return nil, "", errors.New("invalid token claims, not a refresh token")
+	}
+
+	user, err := u.Repository.FindByID(ctx, claims.UserID)
+	if err != nil {
+		return nil, "", errors.New("user not found")
+	}
+
+	permissions, err := u.getPermissionsByRole(ctx, user.Role)
+	if err != nil {
+		return nil, "", errors.New("failed to load role permissions")
+	}
+
+	newToken, err := u.generateToken(user, permissions, false)
+	if err != nil {
+		return nil, "", errors.New("failed to generate access token")
+	}
+
+	newRefreshToken, err := u.generateRefreshToken(user)
+	if err != nil {
+		return nil, "", errors.New("failed to generate new refresh token")
+	}
+
+	response := &LoginResponse{
+		Token: newToken,
+		User: UserResponse{
+			ID:                 user.ID,
+			Name:               user.Name,
+			Email:              user.Email,
+			Role:               string(user.Role),
+			Permissions:        permissions,
+			MustChangePassword: user.MustChangePassword,
+			TwoFactorEnabled:   user.TwoFactorEnabled,
+		},
+	}
+
+	// Helper to convert *string to string
+	ptrToStr := func(s *string) string {
+		if s == nil {
+			return ""
+		}
+		return *s
+	}
+
+	// HRIS Employee Response mapping
+	if isHRISRole(string(user.Role)) {
+		joinDateStr := ""
+		if user.JoinDate != nil {
+			joinDateStr = user.JoinDate.Format("2006-01-02")
+		}
+
+		response.Employee = &EmployeeResponse{
+			ID:           user.ID,
+			NIP:          ptrToStr(user.NIP),
+			Name:         user.Name,
+			Email:        user.Email,
+			Phone:        user.Phone,
+			DepartmentID: ptrToStr(user.DepartmentID),
+			PositionID:   ptrToStr(user.PositionID),
+			JoinDate:     joinDateStr,
+			EmployeeType: string(entity.NormalizeEmployeeType(string(user.EmployeeType))),
+			Status:       string(user.Status),
+		}
+	}
+
+	return response, newRefreshToken, nil
+}
+
 func (u *authUseCase) generateToken(user *entity.User, permissions []string, is2faPending bool) (string, error) {
 	secret := u.Config.GetString("jwt.secret")
 	expiration := u.Config.GetInt("jwt.expiration")
@@ -298,6 +390,24 @@ func (u *authUseCase) generateToken(user *entity.User, permissions []string, is2
 		Is2FAPending: is2faPending,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiration) * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
+
+func (u *authUseCase) generateRefreshToken(user *entity.User) (string, error) {
+	secret := u.Config.GetString("jwt.secret")
+
+	claims := &middleware.JWTClaims{
+		UserID:         user.ID,
+		Email:          user.Email,
+		Role:           string(user.Role),
+		IsRefreshToken: true,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(48 * time.Hour)), // 2 days expiration
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}

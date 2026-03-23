@@ -211,7 +211,7 @@ export default function LeaveClient() {
     }
 
     if (loading) {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     // Employee View - Request and view own leaves
@@ -231,7 +231,7 @@ export default function LeaveClient() {
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
+                            <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                                 <DialogTitle>Ajukan Cuti / Izin</DialogTitle>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">

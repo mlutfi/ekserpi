@@ -11,30 +11,19 @@ type Role string
 
 const (
 	RoleOwner   Role = "OWNER"
-	RoleOps     Role = "OPS"
 	RoleCashier Role = "CASHIER"
 	// HRIS Roles
 	RoleHRAdmin    Role = "HR_ADMIN"
-	RoleManager    Role = "MANAGER"
 	RoleTeamLeader Role = "TEAM_LEADER"
 	RoleEmployee   Role = "EMPLOYEE"
-	RoleStaff      Role = "STAFF"
-	// Technical Roles
-	RoleBackend  Role = "BACKEND"
-	RoleFrontend Role = "FRONTEND"
 )
 
 var roleLabels = map[Role]string{
 	RoleOwner:      "Owner",
-	RoleOps:        "Operations",
 	RoleCashier:    "Cashier",
 	RoleHRAdmin:    "HR Admin",
-	RoleManager:    "Manager",
 	RoleTeamLeader: "Team Leader",
 	RoleEmployee:   "Employee",
-	RoleStaff:      "Staff",
-	RoleBackend:    "Backend Developer",
-	RoleFrontend:   "Frontend Developer",
 }
 
 func (Role) GormDataType() string {
@@ -115,15 +104,10 @@ func (User) TableName() string {
 func AllRoles() []Role {
 	return []Role{
 		RoleOwner,
-		RoleOps,
 		RoleCashier,
 		RoleHRAdmin,
-		RoleManager,
 		RoleTeamLeader,
 		RoleEmployee,
-		RoleStaff,
-		RoleBackend,
-		RoleFrontend,
 	}
 }
 

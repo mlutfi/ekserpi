@@ -101,7 +101,7 @@ export default function RolesClient() {
     }
 
     if (loading) {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     return (
@@ -161,7 +161,7 @@ export default function RolesClient() {
 
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-4xl">
-                    <DialogHeader>
+                    <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                         <DialogTitle>Role Permission</DialogTitle>
                         <DialogDescription>
                             {selectedRole ? `Kelola permission untuk ${selectedRole.label} (${selectedRole.role})` : ""}

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/lib/store"
@@ -60,6 +60,7 @@ export default function PayrollClient() {
     const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null)
     const [isManualDialogOpen, setIsManualDialogOpen] = useState(false)
     const [creatingPayroll, setCreatingPayroll] = useState(false)
+    const [downloadingSlipId, setDownloadingSlipId] = useState<string | null>(null)
     const [manualForm, setManualForm] = useState({
         employeeId: "",
         period: "",
@@ -146,6 +147,44 @@ export default function PayrollClient() {
             toast.error("Gagal", {
                 description: "Gagal memperbarui status",
             })
+        }
+    }
+    const getBpjsEmployee = (payroll: Payroll) => payroll.bpjsEmployee ?? payroll.bpjs ?? 0
+    const getBpjsEmployer = (payroll: Payroll) => payroll.bpjsEmployer ?? 0
+    const getTotalDeductionAmount = (payroll: Payroll) => (
+        payroll.absentDeduction +
+        payroll.lateDeduction +
+        getBpjsEmployee(payroll) +
+        payroll.tht +
+        payroll.tax +
+        payroll.otherDeduction
+    )
+
+    const handleDownloadSlipPdf = async (payroll: Payroll) => {
+        try {
+            setDownloadingSlipId(payroll.id)
+            const blob = await payrollApi.downloadSlipPdf(payroll.id)
+            const objectUrl = window.URL.createObjectURL(blob)
+            const periodLabel = payroll.period || "periode"
+            const employeeLabel = (payroll.employee?.name || payroll.employeeName || payroll.employeeId || "pegawai")
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+            const filename = `slip-gaji-${employeeLabel || "pegawai"}-${periodLabel}.pdf`
+
+            const link = document.createElement("a")
+            link.href = objectUrl
+            link.download = filename
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(objectUrl)
+        } catch (err: any) {
+            toast.error("Gagal", {
+                description: err?.response?.data?.message || "Gagal mengunduh slip gaji PDF",
+            })
+        } finally {
+            setDownloadingSlipId(null)
         }
     }
 
@@ -287,6 +326,12 @@ export default function PayrollClient() {
                     <span className="text-slate-600">Departemen</span>
                     <span className="font-medium">{payroll.employee?.department?.name}</span>
                 </div>
+                {payroll.isProrated && (
+                    <div className="flex justify-between">
+                        <span className="text-slate-600">Prorata</span>
+                        <span className="font-medium">{payroll.prorateDays || 0}/{payroll.periodDays || 0} hari ({(payroll.prorateFactor || 0).toFixed(4)})</span>
+                    </div>
+                )}
             </div>
 
             <div className="border-t pt-4">
@@ -325,15 +370,15 @@ export default function PayrollClient() {
                         <span>- {formatCurrency(payroll.lateDeduction)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-slate-600">BPJS</span>
-                        <span>- {formatCurrency(payroll.bpjs)}</span>
+                        <span className="text-slate-600">BPJS (Employee)</span>
+                        <span>- {formatCurrency(getBpjsEmployee(payroll))}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-slate-600">THT</span>
                         <span>- {formatCurrency(payroll.tht)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-slate-600">Pajak</span>
+                        <span className="text-slate-600">PPh21</span>
                         <span>- {formatCurrency(payroll.tax)}</span>
                     </div>
                     {payroll.otherDeduction > 0 && (
@@ -342,6 +387,16 @@ export default function PayrollClient() {
                             <span>- {formatCurrency(payroll.otherDeduction)}</span>
                         </div>
                     )}
+                </div>
+            </div>
+
+            <div className="border-t pt-4">
+                <h3 className="font-semibold mb-2">KONTRIBUSI PERUSAHAAN</h3>
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span className="text-slate-600">BPJS (Employer)</span>
+                        <span>{formatCurrency(getBpjsEmployer(payroll))}</span>
+                    </div>
                 </div>
             </div>
 
@@ -355,7 +410,7 @@ export default function PayrollClient() {
     )
 
     if (loading) {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     // Employee View - See own salary slips
@@ -399,7 +454,7 @@ export default function PayrollClient() {
                                                 {formatCurrency(
                                                     payroll.absentDeduction +
                                                     payroll.lateDeduction +
-                                                    payroll.bpjs +
+                                                    getBpjsEmployee(payroll) +
                                                     payroll.tht +
                                                     payroll.tax +
                                                     payroll.otherDeduction
@@ -422,12 +477,25 @@ export default function PayrollClient() {
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent>
-                                                        <DialogHeader>
+                                                        <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                                                             <DialogTitle>Slip Gaji</DialogTitle>
                                                         </DialogHeader>
                                                         {selectedPayroll && <SlipGajiModal payroll={selectedPayroll} />}
                                                     </DialogContent>
                                                 </Dialog>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={downloadingSlipId === payroll.id}
+                                                    onClick={() => handleDownloadSlipPdf(payroll)}
+                                                >
+                                                    {downloadingSlipId === payroll.id ? (
+                                                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                                    ) : (
+                                                        <Download className="h-4 w-4 mr-1" />
+                                                    )}
+                                                    PDF
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -468,7 +536,7 @@ export default function PayrollClient() {
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
-                        <DialogHeader>
+                        <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                             <DialogTitle>Input Payroll Manual</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-2">
@@ -544,7 +612,7 @@ export default function PayrollClient() {
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Pajak</Label>
+                                    <Label>PPh21 (0 = otomatis)</Label>
                                     <Input
                                         type="number"
                                         min={0}
@@ -556,7 +624,7 @@ export default function PayrollClient() {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="grid gap-2">
-                                    <Label>BPJS</Label>
+                                    <Label>BPJS Employee (0 = otomatis)</Label>
                                     <Input
                                         type="number"
                                         min={0}
@@ -732,7 +800,7 @@ export default function PayrollClient() {
                                             {formatCurrency(
                                                 payroll.absentDeduction +
                                                 payroll.lateDeduction +
-                                                payroll.bpjs +
+                                                getBpjsEmployee(payroll) +
                                                 payroll.tht +
                                                 payroll.tax +
                                                 payroll.otherDeduction
@@ -756,12 +824,25 @@ export default function PayrollClient() {
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent>
-                                                        <DialogHeader>
+                                                        <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                                                             <DialogTitle>Slip Gaji</DialogTitle>
                                                         </DialogHeader>
                                                         {selectedPayroll && <SlipGajiModal payroll={selectedPayroll} />}
                                                     </DialogContent>
                                                 </Dialog>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={downloadingSlipId === payroll.id}
+                                                    onClick={() => handleDownloadSlipPdf(payroll)}
+                                                >
+                                                    {downloadingSlipId === payroll.id ? (
+                                                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                                    ) : (
+                                                        <Download className="h-4 w-4 mr-1" />
+                                                    )}
+                                                    PDF
+                                                </Button>
                                                 {payroll.status !== "paid" && (
                                                     <Button
                                                         size="sm"
@@ -792,3 +873,9 @@ export default function PayrollClient() {
         </div>
     )
 }
+
+
+
+
+
+

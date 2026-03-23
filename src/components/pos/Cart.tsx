@@ -160,7 +160,7 @@ export function Cart({ items, total, onSetQty, onRemove }: CartProps) {
       {/* Edit Item Dialog */}
       <Dialog open={!!editingItem} onOpenChange={(open) => !open && setEditingItem(null)}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+          <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
             <DialogTitle>{editingItem?.name}</DialogTitle>
           </DialogHeader>
           <div className="py-4">

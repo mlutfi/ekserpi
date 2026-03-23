@@ -91,8 +91,8 @@ func (r *attendanceRepository) GetByTeamLeader(ctx context.Context, teamLeaderID
 	var attendances []entity.Attendance
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
-		Joins("JOIN employees ON employees.id = attendances.employee_id").
-		Where("employees.team_leader_id = ? AND attendances.date >= ? AND attendances.date <= ?", teamLeaderID, startDate, endDate).
+		Joins("JOIN users ON users.id = attendances.employee_id").
+		Where("users.team_leader_id = ? AND attendances.date >= ? AND attendances.date <= ?", teamLeaderID, startDate, endDate).
 		Order("attendances.date DESC").
 		Find(&attendances).Error
 	return attendances, err
@@ -135,8 +135,8 @@ func (r *attendanceRepository) GetByDepartment(ctx context.Context, deptID strin
 
 	err := r.DB.WithContext(ctx).
 		Preload("Employee").
-		Joins("JOIN employees ON employees.id = attendance.employee_id").
-		Where("employees.department_id = ? AND attendance.date = ?", deptID, startOfDay).
+		Joins("JOIN users ON users.id = attendances.employee_id").
+		Where("users.department_id = ? AND attendances.date = ?", deptID, startOfDay).
 		Find(&attendances).Error
 	return attendances, err
 }

@@ -62,7 +62,12 @@ type RouteConfig struct {
 func (c *RouteConfig) Setup() {
 	// CORS middleware
 	c.App.Use(func(ctx *fiber.Ctx) error {
-		ctx.Set("Access-Control-Allow-Origin", "*")
+		origin := ctx.Get("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+		ctx.Set("Access-Control-Allow-Origin", origin)
+		ctx.Set("Access-Control-Allow-Credentials", "true")
 		ctx.Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
 		ctx.Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
 		if ctx.Method() == "OPTIONS" {
@@ -125,6 +130,7 @@ func (c *RouteConfig) AuthRoutes(router fiber.Router) {
 	authGroup := router.Group("/auth")
 	authGroup.Post("/login", c.AuthHandler.Login)
 	authGroup.Post("/verify-2fa", c.AuthHandler.Verify2FALogin)
+	authGroup.Post("/refresh", c.AuthHandler.Refresh)
 	authGroup.Post("/logout", c.AuthHandler.Logout)
 	authGroup.Get("/me", c.AuthMiddleware, c.AuthHandler.Me)
 	authGroup.Post("/change-password", c.AuthMiddleware, c.AuthHandler.ChangePassword)
@@ -353,8 +359,10 @@ func (c *RouteConfig) DailyReportRoutes(router fiber.Router) {
 	// TEAM_LEADER can view team reports from their team (STAFF only)
 	drGroup.Get("/team/:managerId", middleware.RequireRole("OWNER", "HR_ADMIN", "MANAGER", "TEAM_LEADER"), c.DailyReportHandler.GetTeamReports)
 	drGroup.Get("/:id", c.DailyReportHandler.GetByID)
+	drGroup.Put("/:id", c.DailyReportHandler.Update)
 	// Approve and reject for all managers, HR_ADMIN, and TEAM_LEADER
 	drGroup.Post("/:id/approve/:approvedBy", middleware.RequireRole("OWNER", "HR_ADMIN", "MANAGER", "TEAM_LEADER"), c.DailyReportHandler.Approve)
+	drGroup.Post("/:id/reject/:approvedBy", middleware.RequireRole("OWNER", "HR_ADMIN", "MANAGER", "TEAM_LEADER"), c.DailyReportHandler.Approve)
 }
 
 func (c *RouteConfig) PayrollRoutes(router fiber.Router) {
@@ -367,6 +375,7 @@ func (c *RouteConfig) PayrollRoutes(router fiber.Router) {
 	payGroup.Post("/calculate", middleware.RequireRole("OWNER", "HR_ADMIN"), c.PayrollHandler.CalculateAll)
 	// Calculate for specific employee
 	payGroup.Post("/calculate/:employeeId", middleware.RequireRole("OWNER", "HR_ADMIN"), c.PayrollHandler.Calculate)
+	payGroup.Get("/:id/slip-pdf", c.PayrollHandler.DownloadSlipPDF)
 	payGroup.Get("/:id", c.PayrollHandler.GetByID)
 	payGroup.Post("/:id/mark-paid", middleware.RequireRole("OWNER", "HR_ADMIN"), c.PayrollHandler.MarkAsPaid)
 }

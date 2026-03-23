@@ -330,7 +330,7 @@ export default function UsersAdminPage() {
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
             <DialogTitle>
               {editingUser ? "Edit Pengguna" : "Tambah Pengguna"}
             </DialogTitle>

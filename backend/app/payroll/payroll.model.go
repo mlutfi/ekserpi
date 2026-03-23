@@ -1,8 +1,10 @@
-package payroll
+﻿package payroll
 
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -11,6 +13,12 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+)
+
+const (
+	defaultMonthlyWorkDays = 22
+	bpjsHealthSalaryCap    = 12000000.0
+	annualPTKPDefault      = 54000000.0
 )
 
 type PayrollResponse struct {
@@ -27,6 +35,8 @@ type PayrollResponse struct {
 	LateDeduction   float64 `json:"lateDeduction"`
 	AbsentDeduction float64 `json:"absentDeduction"`
 	BPJS            float64 `json:"bpjs"`
+	BPJSEmployee    float64 `json:"bpjsEmployee"`
+	BPJSEmployer    float64 `json:"bpjsEmployer"`
 	THT             float64 `json:"tht"`
 	Tax             float64 `json:"tax"`
 	OtherDeduction  float64 `json:"otherDeduction"`
@@ -38,6 +48,10 @@ type PayrollResponse struct {
 	LateDays        int     `json:"lateDays"`
 	AbsentDays      int     `json:"absentDays"`
 	LeaveDays       int     `json:"leaveDays"`
+	IsProrated      bool    `json:"isProrated"`
+	ProrateDays     int     `json:"prorateDays"`
+	PeriodDays      int     `json:"periodDays"`
+	ProrateFactor   float64 `json:"prorateFactor"`
 	IsPaid          bool    `json:"isPaid"`
 	PaidAt          *string `json:"paidAt"`
 	Status          string  `json:"status"`
@@ -54,6 +68,7 @@ type CreatePayrollRequest struct {
 	LateDeduction   float64 `json:"lateDeduction"`
 	AbsentDeduction float64 `json:"absentDeduction"`
 	BPJS            float64 `json:"bpjs"`
+	BPJSEmployer    float64 `json:"bpjsEmployer"`
 	THT             float64 `json:"tht"`
 	Tax             float64 `json:"tax"`
 	OtherDeduction  float64 `json:"otherDeduction"`
@@ -111,6 +126,7 @@ func (r *payrollRepository) GetByEmployeeAndPeriod(ctx context.Context, employee
 func (r *payrollRepository) GetByEmployee(ctx context.Context, employeeID string) ([]entity.Payroll, error) {
 	var payrolls []entity.Payroll
 	err := r.DB.WithContext(ctx).
+		Preload("Employee").
 		Where("employee_id = ?", employeeID).
 		Order("period DESC").
 		Find(&payrolls).Error
@@ -157,6 +173,7 @@ type PayrollUseCase interface {
 	Create(ctx context.Context, request *CreatePayrollRequest) (*PayrollResponse, error)
 	CalculatePayroll(ctx context.Context, employeeID, period string) (*PayrollResponse, error)
 	CalculateAllPayroll(ctx context.Context, period string) ([]PayrollResponse, error)
+	GenerateSlipPDF(ctx context.Context, id string) ([]byte, string, error)
 	MarkAsPaid(ctx context.Context, id string) error
 }
 
@@ -215,21 +232,28 @@ func (u *payrollUseCase) GetAll(ctx context.Context, period string) ([]PayrollRe
 }
 
 func (u *payrollUseCase) Create(ctx context.Context, request *CreatePayrollRequest) (*PayrollResponse, error) {
+	if err := validatePeriod(request.Period); err != nil {
+		return nil, err
+	}
+
+	if request.WorkDays < 0 || request.Bonus < 0 || request.Commission < 0 || request.Overtime < 0 ||
+		request.LateDeduction < 0 || request.AbsentDeduction < 0 || request.BPJS < 0 || request.BPJSEmployer < 0 ||
+		request.THT < 0 || request.Tax < 0 || request.OtherDeduction < 0 {
+		return nil, errors.New("all numeric payroll values must be zero or greater")
+	}
+
 	var employee entity.User
 	err := u.DB.WithContext(ctx).First(&employee, "id = ?", request.EmployeeID).Error
 	if err != nil {
 		return nil, errors.New("employee not found")
 	}
 
-	if request.WorkDays < 0 {
-		return nil, errors.New("workDays must be zero or greater")
-	}
-
 	employeeType := entity.NormalizeEmployeeType(string(employee.EmployeeType))
-	basicSalary := employee.BasicSalary
-	allowance := employee.Allowance
 	workDays := request.WorkDays
 	presentDays := request.WorkDays
+	basicSalary := 0.0
+	allowance := 0.0
+	proration := prorationSummary{}
 
 	if entity.IsFreelanceEmployeeType(employeeType) {
 		if employee.DailyRate <= 0 {
@@ -238,16 +262,65 @@ func (u *payrollUseCase) Create(ctx context.Context, request *CreatePayrollReque
 		if workDays <= 0 {
 			return nil, errors.New("workDays is required for freelance employee payroll")
 		}
-		basicSalary = float64(workDays) * employee.DailyRate
+		periodStart, periodEnd, periodErr := getPeriodRange(request.Period)
+		if periodErr != nil {
+			return nil, periodErr
+		}
+		periodDays := int(periodEnd.Sub(periodStart).Hours()/24) + 1
+		basicSalary = roundCurrency(float64(workDays) * employee.DailyRate)
 		allowance = 0
+		presentDays = workDays
+		proration = prorationSummary{
+			IsProrated:    false,
+			ProrateFactor: 1,
+			ProrateDays:   periodDays,
+			PeriodDays:    periodDays,
+			WorkDays:      workDays,
+		}
 	} else {
-		workDays = 22
-		presentDays = 22
+		proration, err = buildProrationSummary(employee.JoinDate, request.Period)
+		if err != nil {
+			return nil, err
+		}
+		basicSalary = roundCurrency(employee.BasicSalary * proration.ProrateFactor)
+		allowance = roundCurrency(employee.Allowance * proration.ProrateFactor)
+		if workDays <= 0 {
+			workDays = proration.WorkDays
+			presentDays = proration.WorkDays
+		}
 	}
 
-	totalIncome := basicSalary + allowance + request.Bonus + request.Commission + request.Overtime
-	totalDeduction := request.LateDeduction + request.AbsentDeduction + request.BPJS + request.THT + request.Tax + request.OtherDeduction
-	netSalary := totalIncome - totalDeduction
+	bonus := roundCurrency(request.Bonus)
+	commission := roundCurrency(request.Commission)
+	overtime := roundCurrency(request.Overtime)
+	lateDeduction := roundCurrency(request.LateDeduction)
+	absentDeduction := roundCurrency(request.AbsentDeduction)
+	otherDeduction := roundCurrency(request.OtherDeduction)
+
+	totalIncome := roundCurrency(basicSalary + allowance + bonus + commission + overtime)
+
+	autoBPJSEmployee, autoBPJSEmployer := calculateBPJSSplit(basicSalary + allowance)
+	bpjsEmployee := autoBPJSEmployee
+	if request.BPJS > 0 {
+		bpjsEmployee = roundCurrency(request.BPJS)
+	}
+	bpjsEmployer := autoBPJSEmployer
+	if request.BPJSEmployer > 0 {
+		bpjsEmployer = roundCurrency(request.BPJSEmployer)
+	}
+
+	tht := calculateTHTEmployee(basicSalary)
+	if request.THT > 0 {
+		tht = roundCurrency(request.THT)
+	}
+
+	tax := calculateMonthlyPPh21(totalIncome, bpjsEmployee, tht)
+	if request.Tax > 0 {
+		tax = roundCurrency(request.Tax)
+	}
+
+	totalDeduction := roundCurrency(lateDeduction + absentDeduction + bpjsEmployee + tht + tax + otherDeduction)
+	netSalary := roundCurrency(totalIncome - totalDeduction)
 
 	payroll := &entity.Payroll{
 		EmployeeID:      request.EmployeeID,
@@ -255,20 +328,26 @@ func (u *payrollUseCase) Create(ctx context.Context, request *CreatePayrollReque
 		EmployeeType:    string(employeeType),
 		BasicSalary:     basicSalary,
 		Allowance:       allowance,
-		Bonus:           request.Bonus,
-		Commission:      request.Commission,
-		Overtime:        request.Overtime,
-		LateDeduction:   request.LateDeduction,
-		AbsentDeduction: request.AbsentDeduction,
-		BPJS:            request.BPJS,
-		THT:             request.THT,
-		Tax:             request.Tax,
-		OtherDeduction:  request.OtherDeduction,
+		Bonus:           bonus,
+		Commission:      commission,
+		Overtime:        overtime,
+		LateDeduction:   lateDeduction,
+		AbsentDeduction: absentDeduction,
+		BPJS:            bpjsEmployee,
+		BPJSEmployee:    bpjsEmployee,
+		BPJSEmployer:    bpjsEmployer,
+		THT:             tht,
+		Tax:             tax,
+		OtherDeduction:  otherDeduction,
 		TotalIncome:     totalIncome,
 		TotalDeduction:  totalDeduction,
 		NetSalary:       netSalary,
 		WorkDays:        workDays,
 		PresentDays:     presentDays,
+		IsProrated:      proration.IsProrated,
+		ProrateDays:     proration.ProrateDays,
+		PeriodDays:      proration.PeriodDays,
+		ProrateFactor:   proration.ProrateFactor,
 		Notes:           request.Notes,
 	}
 
@@ -282,6 +361,10 @@ func (u *payrollUseCase) Create(ctx context.Context, request *CreatePayrollReque
 }
 
 func (u *payrollUseCase) CalculatePayroll(ctx context.Context, employeeID, period string) (*PayrollResponse, error) {
+	if err := validatePeriod(period); err != nil {
+		return nil, err
+	}
+
 	existing, _ := u.Repository.GetByEmployeeAndPeriod(ctx, employeeID, period)
 	if existing != nil {
 		return u.toResponse(existing), nil
@@ -298,35 +381,49 @@ func (u *payrollUseCase) CalculatePayroll(ctx context.Context, employeeID, perio
 		return nil, errors.New("freelance payroll requires manual input workDays and should be created via create payroll endpoint")
 	}
 
-	bpjs := employee.BasicSalary * 0.01
-	tht := employee.BasicSalary * 0.02
-	totalIncome := employee.BasicSalary + employee.Allowance
-	totalDeduction := bpjs + tht
-	netSalary := totalIncome - totalDeduction
+	proration, err := buildProrationSummary(employee.JoinDate, period)
+	if err != nil {
+		return nil, err
+	}
+
+	basicSalary := roundCurrency(employee.BasicSalary * proration.ProrateFactor)
+	allowance := roundCurrency(employee.Allowance * proration.ProrateFactor)
+	totalIncome := roundCurrency(basicSalary + allowance)
+	bpjsEmployee, bpjsEmployer := calculateBPJSSplit(basicSalary + allowance)
+	tht := calculateTHTEmployee(basicSalary)
+	tax := calculateMonthlyPPh21(totalIncome, bpjsEmployee, tht)
+	totalDeduction := roundCurrency(bpjsEmployee + tht + tax)
+	netSalary := roundCurrency(totalIncome - totalDeduction)
 
 	payroll := &entity.Payroll{
 		EmployeeID:      employeeID,
 		Period:          period,
 		EmployeeType:    string(employeeType),
-		BasicSalary:     employee.BasicSalary,
-		Allowance:       employee.Allowance,
+		BasicSalary:     basicSalary,
+		Allowance:       allowance,
 		Bonus:           0,
 		Commission:      0,
 		Overtime:        0,
 		LateDeduction:   0,
 		AbsentDeduction: 0,
-		BPJS:            bpjs,
+		BPJS:            bpjsEmployee,
+		BPJSEmployee:    bpjsEmployee,
+		BPJSEmployer:    bpjsEmployer,
 		THT:             tht,
-		Tax:             0,
+		Tax:             tax,
 		OtherDeduction:  0,
 		TotalIncome:     totalIncome,
 		TotalDeduction:  totalDeduction,
 		NetSalary:       netSalary,
-		WorkDays:        22,
-		PresentDays:     22,
+		WorkDays:        proration.WorkDays,
+		PresentDays:     proration.WorkDays,
 		LateDays:        0,
 		AbsentDays:      0,
 		LeaveDays:       0,
+		IsProrated:      proration.IsProrated,
+		ProrateDays:     proration.ProrateDays,
+		PeriodDays:      proration.PeriodDays,
+		ProrateFactor:   proration.ProrateFactor,
 	}
 
 	err = u.Repository.Create(ctx, payroll)
@@ -338,6 +435,19 @@ func (u *payrollUseCase) CalculatePayroll(ctx context.Context, employeeID, perio
 	return u.toResponse(payroll), nil
 }
 
+func (u *payrollUseCase) GenerateSlipPDF(ctx context.Context, id string) ([]byte, string, error) {
+	payroll, err := u.GetByID(ctx, id)
+	if err != nil {
+		return nil, "", err
+	}
+
+	pdfBytes, filename, err := generatePayslipPDF(payroll)
+	if err != nil {
+		return nil, "", err
+	}
+	return pdfBytes, filename, nil
+}
+
 func (u *payrollUseCase) MarkAsPaid(ctx context.Context, id string) error {
 	return u.Repository.MarkAsPaid(ctx, id)
 }
@@ -347,7 +457,10 @@ func (u *payrollUseCase) CalculateAllPayroll(ctx context.Context, period string)
 		period = time.Now().Format("2006-01")
 	}
 
-	// Get all employees
+	if err := validatePeriod(period); err != nil {
+		return nil, err
+	}
+
 	var employees []entity.User
 	err := u.DB.WithContext(ctx).Where("status = ?", "ACTIVE").Find(&employees).Error
 	if err != nil {
@@ -358,7 +471,7 @@ func (u *payrollUseCase) CalculateAllPayroll(ctx context.Context, period string)
 	for _, emp := range employees {
 		payroll, err := u.CalculatePayroll(ctx, emp.ID, period)
 		if err != nil {
-			continue // Skip failed calculations
+			continue
 		}
 		results = append(results, *payroll)
 	}
@@ -367,6 +480,11 @@ func (u *payrollUseCase) CalculateAllPayroll(ctx context.Context, period string)
 }
 
 func (u *payrollUseCase) toResponse(payroll *entity.Payroll) *PayrollResponse {
+	bpjsEmployee := payroll.BPJSEmployee
+	if bpjsEmployee <= 0 {
+		bpjsEmployee = payroll.BPJS
+	}
+
 	resp := &PayrollResponse{
 		ID:              payroll.ID,
 		EmployeeID:      payroll.EmployeeID,
@@ -379,7 +497,9 @@ func (u *payrollUseCase) toResponse(payroll *entity.Payroll) *PayrollResponse {
 		Overtime:        payroll.Overtime,
 		LateDeduction:   payroll.LateDeduction,
 		AbsentDeduction: payroll.AbsentDeduction,
-		BPJS:            payroll.BPJS,
+		BPJS:            bpjsEmployee,
+		BPJSEmployee:    bpjsEmployee,
+		BPJSEmployer:    payroll.BPJSEmployer,
 		THT:             payroll.THT,
 		Tax:             payroll.Tax,
 		OtherDeduction:  payroll.OtherDeduction,
@@ -391,6 +511,10 @@ func (u *payrollUseCase) toResponse(payroll *entity.Payroll) *PayrollResponse {
 		LateDays:        payroll.LateDays,
 		AbsentDays:      payroll.AbsentDays,
 		LeaveDays:       payroll.LeaveDays,
+		IsProrated:      payroll.IsProrated,
+		ProrateDays:     payroll.ProrateDays,
+		PeriodDays:      payroll.PeriodDays,
+		ProrateFactor:   payroll.ProrateFactor,
 		IsPaid:          payroll.IsPaid,
 		CreatedAt:       payroll.CreatedAt.Format("2006-01-02 15:04:05"),
 	}
@@ -416,6 +540,19 @@ func (u *payrollUseCase) toResponse(payroll *entity.Payroll) *PayrollResponse {
 		resp.PaidAt = &paidAt
 	}
 
+	if resp.ProrateFactor <= 0 {
+		resp.ProrateFactor = 1
+	}
+	if resp.PeriodDays <= 0 {
+		_, periodEnd, err := getPeriodRange(resp.Period)
+		if err == nil {
+			resp.PeriodDays = int(periodEnd.Sub(time.Date(periodEnd.Year(), periodEnd.Month(), 1, 0, 0, 0, 0, time.UTC)).Hours()/24) + 1
+		}
+	}
+	if resp.ProrateDays <= 0 {
+		resp.ProrateDays = resp.PeriodDays
+	}
+
 	return resp
 }
 
@@ -427,6 +564,7 @@ type PayrollHandler interface {
 	Create(ctx *fiber.Ctx) error
 	Calculate(ctx *fiber.Ctx) error
 	CalculateAll(ctx *fiber.Ctx) error
+	DownloadSlipPDF(ctx *fiber.Ctx) error
 	MarkAsPaid(ctx *fiber.Ctx) error
 }
 
@@ -530,6 +668,18 @@ func (h *payrollHandler) CalculateAll(ctx *fiber.Ctx) error {
 	return helper.SuccessResponse(ctx, payrolls)
 }
 
+func (h *payrollHandler) DownloadSlipPDF(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	pdfBytes, filename, err := h.UseCase.GenerateSlipPDF(ctx.Context(), id)
+	if err != nil {
+		return helper.BadRequestResponse(ctx, err.Error())
+	}
+
+	ctx.Set("Content-Type", "application/pdf")
+	ctx.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	return ctx.Send(pdfBytes)
+}
+
 func (h *payrollHandler) MarkAsPaid(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	err := h.UseCase.MarkAsPaid(ctx.Context(), id)
@@ -537,4 +687,146 @@ func (h *payrollHandler) MarkAsPaid(ctx *fiber.Ctx) error {
 		return helper.BadRequestResponse(ctx, err.Error())
 	}
 	return helper.SuccessResponseWithMessage(ctx, "Marked as paid", nil)
+}
+
+type prorationSummary struct {
+	IsProrated    bool
+	ProrateFactor float64
+	ProrateDays   int
+	PeriodDays    int
+	WorkDays      int
+}
+
+func validatePeriod(period string) error {
+	if strings.TrimSpace(period) == "" {
+		return errors.New("period is required")
+	}
+	if _, err := time.Parse("2006-01", period); err != nil {
+		return errors.New("period must use format YYYY-MM")
+	}
+	return nil
+}
+
+func getPeriodRange(period string) (time.Time, time.Time, error) {
+	parsed, err := time.Parse("2006-01", period)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("period must use format YYYY-MM")
+	}
+	start := time.Date(parsed.Year(), parsed.Month(), 1, 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(0, 1, -1)
+	return start, end, nil
+}
+
+func buildProrationSummary(joinDate *time.Time, period string) (prorationSummary, error) {
+	start, end, err := getPeriodRange(period)
+	if err != nil {
+		return prorationSummary{}, err
+	}
+
+	periodDays := int(end.Sub(start).Hours()/24) + 1
+	summary := prorationSummary{
+		IsProrated:    false,
+		ProrateFactor: 1,
+		ProrateDays:   periodDays,
+		PeriodDays:    periodDays,
+		WorkDays:      defaultMonthlyWorkDays,
+	}
+
+	if joinDate == nil {
+		return summary, nil
+	}
+
+	join := time.Date(joinDate.Year(), joinDate.Month(), joinDate.Day(), 0, 0, 0, 0, time.UTC)
+	if join.After(end) {
+		return summary, errors.New("employee join date is after selected payroll period")
+	}
+
+	if join.After(start) {
+		prorateDays := int(end.Sub(join).Hours()/24) + 1
+		prorateFactor := float64(prorateDays) / float64(periodDays)
+		workDays := int(math.Round(float64(defaultMonthlyWorkDays) * prorateFactor))
+		if workDays < 1 {
+			workDays = 1
+		}
+
+		summary.IsProrated = true
+		summary.ProrateFactor = roundTo(prorateFactor, 6)
+		summary.ProrateDays = prorateDays
+		summary.WorkDays = workDays
+	}
+
+	return summary, nil
+}
+
+func calculateBPJSSplit(monthlyWage float64) (float64, float64) {
+	contributionBase := monthlyWage
+	if contributionBase < 0 {
+		contributionBase = 0
+	}
+	if contributionBase > bpjsHealthSalaryCap {
+		contributionBase = bpjsHealthSalaryCap
+	}
+
+	employee := roundCurrency(contributionBase * 0.01)
+	employer := roundCurrency(contributionBase * 0.04)
+	return employee, employer
+}
+
+func calculateTHTEmployee(basicSalary float64) float64 {
+	if basicSalary <= 0 {
+		return 0
+	}
+	return roundCurrency(basicSalary * 0.02)
+}
+
+func calculateMonthlyPPh21(totalIncome, bpjsEmployee, tht float64) float64 {
+	taxableMonthlyIncome := totalIncome - bpjsEmployee - tht
+	if taxableMonthlyIncome <= 0 {
+		return 0
+	}
+
+	annualTaxableIncome := (taxableMonthlyIncome * 12) - annualPTKPDefault
+	if annualTaxableIncome <= 0 {
+		return 0
+	}
+
+	annualPKP := math.Floor(annualTaxableIncome/1000) * 1000
+	annualTax := calculateProgressivePPh21(annualPKP)
+	return roundCurrency(annualTax / 12)
+}
+
+func calculateProgressivePPh21(annualPKP float64) float64 {
+	remaining := annualPKP
+	if remaining <= 0 {
+		return 0
+	}
+
+	totalTax := 0.0
+	consume := func(limit, rate float64) {
+		if remaining <= 0 {
+			return
+		}
+		taxable := math.Min(remaining, limit)
+		totalTax += taxable * rate
+		remaining -= taxable
+	}
+
+	consume(60000000, 0.05)
+	consume(190000000, 0.15)
+	consume(250000000, 0.25)
+	consume(4500000000, 0.30)
+	if remaining > 0 {
+		totalTax += remaining * 0.35
+	}
+
+	return totalTax
+}
+
+func roundCurrency(value float64) float64 {
+	return roundTo(value, 2)
+}
+
+func roundTo(value float64, precision int) float64 {
+	factor := math.Pow(10, float64(precision))
+	return math.Round(value*factor) / factor
 }

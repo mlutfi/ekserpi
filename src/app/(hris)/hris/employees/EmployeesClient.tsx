@@ -264,7 +264,7 @@ export default function EmployeesClient() {
     }
 
     if (loading) {
-      return <PageLoading />
+        return <PageLoading />
     }
 
     return (
@@ -281,8 +281,8 @@ export default function EmployeesClient() {
                             Tambah Pegawai
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md">
-                        <DialogHeader>
+                    <DialogContent className="max-w-3xl">
+                        <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
                             <DialogTitle>
                                 {editingEmployee ? "Edit Pegawai" : "Tambah Pegawai Baru"}
                             </DialogTitle>
