@@ -3,8 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 
 // Change this to your server IP for physical devices
 // For Android emulator: 10.0.2.2
-// For physical device on same WiFi: use your machine's local IP
-const BASE_URL = 'http://10.0.2.2:4001/api';
+// For physical device on same WiFi: use your machine's local IP (e.g., 192.168.1.5)
+const BASE_URL = 'http://192.168.1.5:4001/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -36,7 +36,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token expired - will be handled by AuthContext
-      await SecureStore.deleteItemAsync('auth_token').catch(() => {});
+      await SecureStore.deleteItemAsync('auth_token').catch(() => { });
     }
     return Promise.reject(error);
   }

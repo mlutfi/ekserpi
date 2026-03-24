@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 type JWTClaims struct {
@@ -20,7 +21,7 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func AuthMiddleware(config *viper.Viper) fiber.Handler {
+func AuthMiddleware(config *viper.Viper, db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
@@ -46,6 +47,11 @@ func AuthMiddleware(config *viper.Viper) fiber.Handler {
 		if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
 			if claims.IsRefreshToken {
 				return helper.UnauthorizedResponse(c, "Refresh token cannot be used as an access token")
+			}
+
+			var userCount int64
+			if err := db.Table("users").Where("id = ? AND deleted_at IS NULL", claims.UserID).Count(&userCount).Error; err != nil || userCount == 0 {
+				return helper.UnauthorizedResponse(c, "User no longer exists or is inactive")
 			}
 
 			c.Locals("userId", claims.UserID)

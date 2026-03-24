@@ -121,7 +121,7 @@ func Bootstrap(config *BootstrapConfig) {
 	positionHandler := position.NewPositionHandler(positionUseCase)
 
 	// Middleware
-	authMiddleware := middleware.AuthMiddleware(config.Config)
+	authMiddleware := middleware.AuthMiddleware(config.Config, config.DB)
 
 	// Routes
 	routeConfig := route.RouteConfig{
