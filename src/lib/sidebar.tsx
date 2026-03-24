@@ -153,12 +153,12 @@ export const adminNavItems: NavItem[] = [
         subItems: [
             {
                 href: "/admin/inventory/items",
-                label: "Items",
+                label: "Produk Item",
                 icon: Box,
             },
             {
                 href: "/admin/inventory/categories",
-                label: "Categories",
+                label: "Kategori Produk",
                 icon: Layers,
             },
             {

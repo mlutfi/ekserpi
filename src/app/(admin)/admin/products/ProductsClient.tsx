@@ -365,7 +365,7 @@ export default function ProductsAdminPage() {
 
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-w-[900px]">
           <DialogHeader className="mb-2 pb-3 border-b border-zinc-200">
             <DialogTitle>
               {editingProduct ? "Edit Produk" : "Tambah Produk"}
@@ -438,7 +438,7 @@ export default function ProductsAdminPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="mb-1 block text-sm font-medium text-zinc-700">
-                      Harga *
+                      Harga Jual *
                     </label>
                     <input
                       type="number"
