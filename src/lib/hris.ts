@@ -135,6 +135,8 @@ export interface Payroll {
     absentDeduction: number
     lateDeduction: number
     bpjs: number
+    bpjsEmployee?: number
+    bpjsEmployer?: number
     tht: number
     tax: number
     otherDeduction: number
@@ -146,6 +148,10 @@ export interface Payroll {
     lateDays: number
     absentDays: number
     leaveDays: number
+    isProrated?: boolean
+    prorateDays?: number
+    periodDays?: number
+    prorateFactor?: number
     isPaid: boolean
     paidAt?: string
     status: 'draft' | 'calculated' | 'paid'
@@ -510,6 +516,12 @@ export const payrollApi = {
     markAsPaid: async (id: string): Promise<Payroll> => {
         const response = await api.post(`/payroll/${id}/mark-paid`)
         return response.data.data
+    },
+    downloadSlipPdf: async (id: string): Promise<Blob> => {
+        const response = await api.get(`/payroll/${id}/pdf`, {
+            responseType: 'blob'
+        })
+        return response.data
     },
 }
 
