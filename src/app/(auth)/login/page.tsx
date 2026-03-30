@@ -94,7 +94,7 @@ export default function LoginPage() {
             <div className="mx-auto w-full max-w-[400px]">
                 <section className="flex flex-col gap-6 rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
                     <div className="flex flex-col items-center justify-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm">
+                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden ">
                             <Image
                                 src="/xrp_logo.png"
                                 alt="Logo"
