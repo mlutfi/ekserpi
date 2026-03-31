@@ -30,5 +30,7 @@ jobs:
 
             # --- DEPLOY FRONTEND (NEXT.JS) ---
             cd ..
-            npm install
+
+            # npm install pakai npm ci, lebih cepat sesuai package-lock.json
+            npm ci
             npm run build && pm2 restart xrp-app || echo "Frontend build failed!"
