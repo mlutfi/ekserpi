@@ -16,23 +16,19 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEYS }}
           port: ${{ secrets.VPS_SSH_PORT }}
+
           script: |
-            export PATH=$PATH:/usr/local/go/bin:$(go env GOPATH)/bin:/usr/bin
+            # 1. Set PATH secara manual tanpa memanggil perintah 'go' di dalamnya
+            export PATH=$PATH:/usr/local/go/bin:$(echo $HOME/go/bin)
 
             cd /www/wwwroot/xrp.gdv.my.id/ekserpi
-
-            # Tarik kode terbaru
             git pull origin main
 
             # --- DEPLOY BACKEND (GOLANG) ---
             cd backend
-            # Build file binary golang
-            /usr/local/go/bin/go build -o main .
-            pm2 restart xrp-api
+            /usr/local/go/bin/go build -o main . && pm2 restart xrp-api || echo "Backend build failed!"
 
             # --- DEPLOY FRONTEND (NEXT.JS) ---
             cd ..
             npm install
-            npm run build
-            # Restart frontend di PM2
-            pm2 restart xrp-app
+            npm run build && pm2 restart xrp-app || echo "Frontend build failed!"
