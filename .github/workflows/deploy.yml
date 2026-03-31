@@ -27,7 +27,7 @@ jobs:
             # --- DEPLOY BACKEND (GOLANG) ---
             cd backend
             # Build file binary golang
-            go build -o main .
+            /usr/local/go/bin/go build -o main .
             pm2 restart xrp-api
 
             # --- DEPLOY FRONTEND (NEXT.JS) ---
