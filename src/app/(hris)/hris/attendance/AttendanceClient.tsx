@@ -431,7 +431,7 @@ export default function AttendanceClient() {
             </div>
 
             {/* â”€â”€ Main Content â”€â”€ */}
-            <div className="px-4 md:px-8 py-6 max-w-2xl mx-auto space-y-6 pb-8">
+            <div className="py-6 max-w-2xl mx-auto space-y-6 pb-8">
 
                 {/* â”€â”€ Today Status Card â”€â”€ */}
                 <Card className="border border-zinc-200 shadow-sm rounded-lg overflow-hidden bg-white">

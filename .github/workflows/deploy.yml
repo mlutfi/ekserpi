@@ -1,0 +1,36 @@
+name: XRP CI/CD Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Eksekusi script deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          script: |
+            cd /www/wwwroot/xrp.gdv.my.id/ekserpi
+
+            # Tarik kode terbaru
+            git pull origin main
+
+            # --- DEPLOY BACKEND (GOLANG) ---
+            cd backend
+            # Build file binary golang
+            go build -o main .
+            pm2 restart xrp-api
+
+            # --- DEPLOY FRONTEND (NEXT.JS) ---
+            cd ..
+            npm update
+            npm run build
+            # Restart frontend di PM2
+            pm2 restart xrp-app
